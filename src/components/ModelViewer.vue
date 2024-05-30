@@ -5,6 +5,19 @@
       <button @click="setSideView">侧视图</button>
       <button @click="lookCameraPosition">查看相机位置</button>
     </div>
+
+    <div class="menu">
+      <div class="menu-item" style="--i:0;">1</div>
+      <div class="menu-item" style="--i:1;">2</div>
+      <div class="menu-item" style="--i:2;">3</div>
+      <div class="menu-item" style="--i:3;">4</div>
+      <div class="menu-item" style="--i:4;">5</div>
+      <div class="menu-item" style="--i:5;">6</div>
+      <div class="menu-item" style="--i:6;">7</div>
+      <div class="menu-item" style="--i:7;">8</div>
+    </div>
+
+
   </div>
 </template>
 
@@ -14,29 +27,29 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from '@tweenjs/tween.js';
 
+
+
 export default {
-  name: 'ModelViewer1',
+  name: 'ModelViewer',
   components: {
-    
+
   },
+
   data() {
     return {
+      topValue: 0, // 初始值
+      leftValue: 0, // 初始值
+      isOpen: false,
+      menuLeft: 0,
+      menuTop: 0,
       scene: null,
       camera: null,
-      perspectiveCamera: null,
       renderer: null,
       controls: null,
       student: null,
       raycaster: new THREE.Raycaster(),
       mouse: new THREE.Vector2(),
-      viewMode: 'ortho',
-      showMenu: false,
-      menuItems: [
-        { label: 'Home', value: 'home' },
-        { label: 'About', value: 'about' },
-        { label: 'Services', value: 'services' },
-        { label: 'Contact', value: 'contact' }
-      ]
+
     };
   },
   mounted() {
@@ -92,7 +105,7 @@ export default {
     },
     loadModel() {
       const loader = new GLTFLoader();
-      loader.load('/models/student101_2.glb', (gltf) => {
+      loader.load('/models/student101_3.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.set(1.5, 1.5, 1.5);
         this.scene.add(model);
@@ -152,114 +165,115 @@ export default {
     lookCameraPosition() {
       console.log(this.camera.position.clone());
     },
+    calculateItemPosition(index) {
+      const angleStep = (2 * Math.PI) / this.items.length;
+      const radius = 80;
+      const angle = index * angleStep;
+      const x = Math.cos(angle) * radius + 100; // 100 是环形菜单中心点的 x 坐标
+      const y = Math.sin(angle) * radius + 100; // 100 是环形菜单中心点的 y 坐标
+      return {
+        left: `${x}px`,
+        top: `${y}px`,
+      };
+    },
     onClick(event) {
       const rect = this.$refs.sceneContainer.getBoundingClientRect();
+
       this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-      console.log('Mouse coordinates:', this.mouse.x, this.mouse.y);
 
       this.raycaster.setFromCamera(this.mouse, this.camera);
       const intersects = this.raycaster.intersectObjects(this.scene.children, true);
 
       if (intersects.length > 0) {
+
         this.student = intersects[0].object;
+        this.student.material.color.set(0xff0000);
         const targetPosition = new THREE.Vector3().copy(this.student.position);
-
-        console.log('Target position:', targetPosition);
-
-        // 取消之前的动画
-        TWEEN.removeAll();
+        console.log(targetPosition);
 
         new TWEEN.Tween(this.camera.position)
           .to({
-            x: targetPosition.x + 40,
-            y: targetPosition.y + 40,
-            z: targetPosition.z + 80
+            x: targetPosition.x + 80,
+            y: targetPosition.y + 80,
+            z: targetPosition.z + 70
           }, 1000)
           .easing(TWEEN.Easing.Quadratic.Out)
-          .onStart(() => {
-            console.log('Animation started');
-          })
-          .onComplete(() => {
-            console.log('Animation completed');
-          })
           .start();
 
-        console.log('Moving camera to:', {
-          x: targetPosition.x ,
-          y: targetPosition.y ,
-          z: targetPosition.z ,
-        });
+        let isAnimating = false;
+
+        var halfWidth = window.innerWidth / 2;
+        var halfHeight = window.innerHeight / 2;
+        var vec3 = new THREE.Vector3(x, y, z);
+        var posi = vec3.project(camera);
+
+        const isOpen = menu.classList.contains('open');
+
+        if (isOpen) {
+          menu.classList.remove('open');
+          isAnimating = true;
+
+          setTimeout(() => {
+            menu.style.left = `${posi.x*halfWidth+halfWidth}px`;
+            menu.style.top = `${-posi.y*halfHeight+halfHeight}px`;
+            menu.classList.add('open');
+            isAnimating = false;
+          }, 500);
+        } else {
+          menu.style.left = `${newLeft}px`;
+          menu.style.top = `${newTop}px`;
+          menu.classList.add('open');
+        }
+
+        // this.showMenu(event);
+      }
+    },
+    showMenu(event) {
+      let isAnimating = false;
+
+      const menu = document.querySelector('.menu');
+
+      const newLeft = event.clientX - menu.offsetWidth / 2 - 290;
+      const newTop = event.clientY - menu.offsetHeight / 2 + 80;
+      console.log(newLeft, newTop)
+      const isOpen = menu.classList.contains('open');
+
+      if (isOpen) {
+        menu.classList.remove('open');
+        isAnimating = true;
+
+        setTimeout(() => {
+          menu.style.left = `${newLeft}px`;
+          menu.style.top = `${newTop}px`;
+          menu.classList.add('open');
+          isAnimating = false;
+        }, 500);
       } else {
-        console.log('No intersected objects');
+        menu.style.left = `${newLeft}px`;
+        menu.style.top = `${newTop}px`;
+        menu.classList.add('open');
       }
     },
-    focusOnObject(object) {
-      const point3d = getPointRay(this.sence, this.camera).point;
-      const time = 5000;
-      // 克隆相机用户计算点击后相机聚焦的位置
-      const cloneCamera = this.camera.clone();
-      // this.camera.lookAt(point3d);
-      cloneCamera.lookAt(point3d);
 
-      new TWEEN.Tween(this.camera.position)
-        .to({ x: cloneCamera.position.x, y: cloneCamera.position.y, z: cloneCamera.position.z }, 1000)
-        .easing(TWEEN.Easing.Back.Out).start();
+  },
 
-      new TWEEN.Tween(this.camera.rotation)
-        .to({ x: cloneCamera.rotation.x, y: cloneCamera.rotation.y, z: cloneCamera.rotation.z }, 1000)
-        .easing(TWEEN.Easing.Back.Out).start();
-    },
-
-    showRadialMenu(x, y) {
-      const menu = document.createElement('div');
-      menu.className = 'radial-menu';
-      menu.style.position = 'absolute';
-      menu.style.left = `${x}px`;
-      menu.style.top = `${y}px`;
-
-      // 创建环形菜单的选项
-      const options = ['Option 1', 'Option 2', 'Option 3'];
-      options.forEach(option => {
-        const menuItem = document.createElement('div');
-        menuItem.className = 'menu-item';
-        menuItem.innerText = option;
-        menuItem.onclick = () => {
-          console.log(`${option} clicked`);
-          document.body.removeChild(menu);
-        };
-        menu.appendChild(menuItem);
-      });
-
-      document.body.appendChild(menu);
-
-      // 设置环形菜单样式
-      const radius = 50; // 半径
-      const angleStep = (2 * Math.PI) / options.length;
-      for (let i = 0; i < options.length; i++) {
-        const angle = i * angleStep;
-        const item = menu.children[i];
-        item.style.position = 'absolute';
-        item.style.transform = `translate(${radius * Math.cos(angle)}px, ${radius * Math.sin(angle)}px)`;
-      }
-    }
-
-  }
-};
+}
 </script>
 
 <style scoped>
 .scene-container {
-  width: 45%;
-  height: 50vh;
-  background-color: white;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 0;
-  position: absolute;
-  top: 0;
+  position: relative;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
 }
 
 .view-controls {
@@ -281,5 +295,41 @@ export default {
 
 .view-controls button:hover {
   background-color: #45a049;
+}
+
+.menu {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  transform: scale(0);
+  transition: transform 0.5s;
+}
+
+.menu.open {
+  transform: scale(1);
+}
+
+.menu-item {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: #ff6347;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.5s, opacity 0.5s;
+  transform-origin: 100px 100px;
+  opacity: 0;
+  transform: rotate(calc(var(--i) * 45deg)) translate(0) rotate(calc(var(--i) * -45deg));
+}
+
+.menu.open .menu-item {
+  opacity: 1;
+  transform: rotate(calc(var(--i) * 45deg)) translate(100px) rotate(calc(var(--i) * -45deg));
+}
+
+.menu-item:hover {
+  background-color: #ff4500;
 }
 </style>

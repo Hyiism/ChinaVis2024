@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旋转菜单</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="menu">
+        <div class="menu-item" style="--i:0;">1</div>
+        <div class="menu-item" style="--i:1;">2</div>
+        <div class="menu-item" style="--i:2;">3</div>
+        <div class="menu-item" style="--i:3;">4</div>
+        <div class="menu-item" style="--i:4;">5</div>
+        <div class="menu-item" style="--i:5;">6</div>
+        <div class="menu-item" style="--i:6;">7</div>
+        <div class="menu-item" style="--i:7;">8</div>
+    </div>
+    <!-- <script src="script.js"></script> -->
+</body>
+
+</html>
+
+
+
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #333;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    .menu {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        transform: scale(0);
+        transition: transform 0.5s;
+    }
+
+    .menu.open {
+        transform: scale(1);
+    }
+
+    .menu-item {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background-color: #ff6347;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.5s, opacity 0.5s;
+        transform-origin: 100px 100px;
+        opacity: 0;
+        transform: rotate(calc(var(--i) * 45deg)) translate(0) rotate(calc(var(--i) * -45deg));
+    }
+
+    .menu.open .menu-item {
+        opacity: 1;
+        transform: rotate(calc(var(--i) * 45deg)) translate(100px) rotate(calc(var(--i) * -45deg));
+    }
+
+    .menu-item:hover {
+        background-color: #ff4500;
+    }
+</style>
+<script>
+
+    let isAnimating = false;
+
+    document.addEventListener('click', function (event) {
+        if (isAnimating) return;
+
+        const menu = document.querySelector('.menu');
+
+        // Calculate the new position of the menu
+        const newLeft = event.clientX - menu.offsetWidth / 2;
+        const newTop = event.clientY - menu.offsetHeight / 2;
+
+        // Check if the menu is currently open
+        const isOpen = menu.classList.contains('open');
+
+        if (isOpen) {
+            // If the menu is open, close it and then move it
+            menu.classList.remove('open');
+            isAnimating = true;
+
+            setTimeout(() => {
+                menu.style.left = `${newLeft}px`;
+                menu.style.top = `${newTop}px`;
+                menu.classList.add('open');
+                isAnimating = false;
+            }, 500); // Match this timeout to the CSS transition duration
+        } else {
+            // If the menu is closed, move it and then open it
+            menu.style.left = `${newLeft}px`;
+            menu.style.top = `${newTop}px`;
+            menu.classList.add('open');
+        }
+    });
+
+
+
+</script>
