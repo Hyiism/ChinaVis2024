@@ -58,44 +58,60 @@ export default {
 
 #ModelViewer {
   width: 50%;
-  height: 60%;
+  height: calc(60% - 4px);
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 0px; /* Adjust this value to control the space below */
+  margin-top: 0px; 
+  /* 添加阴影效果 */
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  border-radius: 10px; 
+  background-color: #fff; /* 背景颜色为白色 */
 }
 
 #LeftViewer {
-  width: 25%;
-  height: 60%;
+  width: calc(25% - 4px);
+  height: calc(60% - 4px);
   position: absolute;
   top: 0;
   left: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* background-color: #26595f;  */
+  /* 添加阴影效果 */
+  box-shadow: 2px 0px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  border-radius: 10px; 
+  background-color: #fff; /* 背景颜色为白色 */
 }
 
 #RightViewer {
-  width: 25%;
-  height: 60%;
+  width: calc(25% - 4px); /* Adjust this value to control the space between the two viewers */
+  height: calc(60% - 4px);
   position: absolute;
   top: 0;
   right: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* background-color: #26595f; 可以根据需要设置背景颜色 */
+  /* 添加阴影效果 */
+  box-shadow: -2px 0px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  border-radius: 10px; 
 }
 
 #BottomViewer {
-  width: 100%;
-  height: 40%;
+  width: calc(100% - 4px);
+  height: calc(40% - 4px);
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #07ab8d; /* Adjust as needed */
+
+  /* 添加阴影效果 */
+  box-shadow: 0px -2px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  border-radius: 10px; 
+  position: absolute;
+  bottom: 0; /* Stick to the bottom */
 }
+
+
 
 </style>
