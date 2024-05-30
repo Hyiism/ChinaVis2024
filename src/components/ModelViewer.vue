@@ -200,43 +200,22 @@ export default {
           }, 1000)
           .easing(TWEEN.Easing.Quadratic.Out)
           .start();
-
-        let isAnimating = false;
-
-        var halfWidth = window.innerWidth / 2;
-        var halfHeight = window.innerHeight / 2;
-        var vec3 = new THREE.Vector3(x, y, z);
-        var posi = vec3.project(camera);
-
-        const isOpen = menu.classList.contains('open');
-
-        if (isOpen) {
-          menu.classList.remove('open');
-          isAnimating = true;
-
-          setTimeout(() => {
-            menu.style.left = `${posi.x*halfWidth+halfWidth}px`;
-            menu.style.top = `${-posi.y*halfHeight+halfHeight}px`;
-            menu.classList.add('open');
-            isAnimating = false;
-          }, 500);
-        } else {
-          menu.style.left = `${newLeft}px`;
-          menu.style.top = `${newTop}px`;
-          menu.classList.add('open');
-        }
-
-        // this.showMenu(event);
+        this.onCameraMoveComplete(targetPosition)
       }
     },
-    showMenu(event) {
+    onCameraMoveComplete(targetPosition) {
+      const rect = this.renderer.domElement.getBoundingClientRect(); // 获取渲染器容器的位置信息
+      const halfWidth = rect.width / 2; // 容器宽度的一半
+      const halfHeight = rect.height / 2; // 容器高度的一半
+      const vec2 = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z).project(this.camera); // 获取相机坐标投影到屏幕坐标系中的位置
+      const menuX = vec2.x * halfWidth + halfWidth; // 计算菜单应该显示的x坐标
+      const menuY = -vec2.y * halfHeight + halfHeight; // 计算菜单应该显示的y坐标
+      // this.showMenu(menuX, menuY); // 调用显示菜单的函数，并传入计算得到的菜单位置信息
+    },
+    showMenu(x, y) {
       let isAnimating = false;
 
       const menu = document.querySelector('.menu');
-
-      const newLeft = event.clientX - menu.offsetWidth / 2 - 290;
-      const newTop = event.clientY - menu.offsetHeight / 2 + 80;
-      console.log(newLeft, newTop)
       const isOpen = menu.classList.contains('open');
 
       if (isOpen) {
@@ -244,14 +223,14 @@ export default {
         isAnimating = true;
 
         setTimeout(() => {
-          menu.style.left = `${newLeft}px`;
-          menu.style.top = `${newTop}px`;
+          menu.style.left = `${x}px`;
+          menu.style.top = `${y}px`;
           menu.classList.add('open');
           isAnimating = false;
         }, 500);
       } else {
-        menu.style.left = `${newLeft}px`;
-        menu.style.top = `${newTop}px`;
+        menu.style.left = `${x}px`;
+        menu.style.top = `${y}px`;
         menu.classList.add('open');
       }
     },
