@@ -3,7 +3,7 @@
       <div id="main"> </div>
     </div>
   </template>
-  <!-- 全部推 -->
+
   <script>
   import * as echarts from 'echarts';
   

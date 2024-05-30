@@ -86,7 +86,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #26595f; /* 可以根据需要设置背景颜色 */
+  /* background-color: #26595f; 可以根据需要设置背景颜色 */
 }
 
 #BottomViewer {
