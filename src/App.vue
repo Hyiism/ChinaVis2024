@@ -17,7 +17,25 @@
       <BottomViewer/>
     </div>
 
+
+    <div id="LeftViewer">
+      <LeftViewer/>
+    </div>
+
+    <div id="ModelViewer">
+      <ModelViewer/>
+    </div>
+
+    <div id="RightViewer">
+      <RightViewer/>
+    </div>
+
+    <div id="BottomViewer">
+      <BottomViewer/>
+    </div>
+
   </div>
+
 
 </template>
 
@@ -26,11 +44,17 @@ import ModelViewer from './components/ModelViewer.vue';
 import LeftViewer from './components/LeftViewer.vue';
 import RightViewer from './components/RightViewer.vue';
 import BottomViewer from './components/BottomViewer.vue';
+import LeftViewer from './components/LeftViewer.vue';
+import RightViewer from './components/RightViewer.vue';
+import BottomViewer from './components/BottomViewer.vue';
 
 export default {
   name: 'App',
   components: {
     ModelViewer,
+    LeftViewer,
+    RightViewer,
+    BottomViewer
     LeftViewer,
     RightViewer,
     BottomViewer
@@ -47,7 +71,17 @@ export default {
   box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
 
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+}
+
 #app {
+  display: flex;
+  flex-direction: column; /* Arrange children in a column */
+  align-items: center; /* Center align horizontally */
   display: flex;
   flex-direction: column; /* Arrange children in a column */
   align-items: center; /* Center align horizontally */
@@ -95,6 +129,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #07ab8d; /* Adjust as needed */
   background-color: #07ab8d; /* Adjust as needed */
 }
 

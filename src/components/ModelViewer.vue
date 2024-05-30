@@ -5,6 +5,19 @@
       <button @click="setSideView">侧视图</button>
       <button @click="lookCameraPosition">查看相机位置</button>
     </div>
+
+    <div class="menu">
+      <div class="menu-item" style="--i:0;">1</div>
+      <div class="menu-item" style="--i:1;">2</div>
+      <div class="menu-item" style="--i:2;">3</div>
+      <div class="menu-item" style="--i:3;">4</div>
+      <div class="menu-item" style="--i:4;">5</div>
+      <div class="menu-item" style="--i:5;">6</div>
+      <div class="menu-item" style="--i:6;">7</div>
+      <div class="menu-item" style="--i:7;">8</div>
+    </div>
+
+
   </div>
 </template>
 
@@ -14,16 +27,28 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from '@tweenjs/tween.js';
 
+
+
 export default {
   name: 'ModelViewer',
+  components: {
+
+  },
+
   data() {
     return {
+      topValue: 0, // 初始值
+      leftValue: 0, // 初始值
+      isOpen: false,
+      menuLeft: 0,
+      menuTop: 0,
       scene: null,
       camera: null,
       renderer: null,
       controls: null,
       raycaster: new THREE.Raycaster(),
       mouse: new THREE.Vector2(),
+
     };
   },
   mounted() {
@@ -80,7 +105,7 @@ export default {
     },
     loadModel() {
       const loader = new GLTFLoader();
-      loader.load('/models/student101_2.glb', (gltf) => {
+      loader.load('/models/student101_3.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.set(1.5, 1.5, 1.5);
         this.scene.add(model);
@@ -136,8 +161,20 @@ export default {
     lookCameraPosition() {
       console.log(this.camera.position.clone());
     },
+    calculateItemPosition(index) {
+      const angleStep = (2 * Math.PI) / this.items.length;
+      const radius = 80;
+      const angle = index * angleStep;
+      const x = Math.cos(angle) * radius + 100; // 100 是环形菜单中心点的 x 坐标
+      const y = Math.sin(angle) * radius + 100; // 100 是环形菜单中心点的 y 坐标
+      return {
+        left: `${x}px`,
+        top: `${y}px`,
+      };
+    },
     onClick(event) {
       const rect = this.$refs.sceneContainer.getBoundingClientRect();
+
       this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
@@ -145,25 +182,58 @@ export default {
       const intersects = this.raycaster.intersectObjects(this.scene.children, true);
 
       if (intersects.length > 0) {
-        const target = intersects[0].object;
-        const targetPosition = target.position.clone();
+
+        this.student = intersects[0].object;
+        this.student.material.color.set(0xff0000);
+        const targetPosition = new THREE.Vector3().copy(this.student.position);
+        console.log(targetPosition);
 
         new TWEEN.Tween(this.camera.position)
           .to({
-            x: targetPosition.x + 40,
-            y: targetPosition.y + 40,
-            z: targetPosition.z + 80
+            x: targetPosition.x + 80,
+            y: targetPosition.y + 80,
+            z: targetPosition.z + 70
           }, 1000)
           .easing(TWEEN.Easing.Quadratic.Out)
-          .onStart(() => console.log('Animation started'))
-          .onComplete(() => console.log('Animation completed'))
           .start();
-      } else {
-        console.log('No intersected objects');
+        this.onCameraMoveComplete(targetPosition)
       }
     },
+    onCameraMoveComplete(targetPosition) {
+      const rect = this.renderer.domElement.getBoundingClientRect(); // 获取渲染器容器的位置信息
+      const halfWidth = rect.width / 2; // 容器宽度的一半
+      const halfHeight = rect.height / 2; // 容器高度的一半
+      const vec2 = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z).project(this.camera); // 获取相机坐标投影到屏幕坐标系中的位置
+      const menuX = vec2.x * halfWidth + halfWidth; // 计算菜单应该显示的x坐标
+      const menuY = -vec2.y * halfHeight + halfHeight; // 计算菜单应该显示的y坐标
+      // this.showMenu(menuX, menuY); // 调用显示菜单的函数，并传入计算得到的菜单位置信息
+    },
+    showMenu(x, y) {
+      let isAnimating = false;
+
+      const menu = document.querySelector('.menu');
+      const isOpen = menu.classList.contains('open');
+
+      if (isOpen) {
+        menu.classList.remove('open');
+        isAnimating = true;
+
+        setTimeout(() => {
+          menu.style.left = `${x}px`;
+          menu.style.top = `${y}px`;
+          menu.classList.add('open');
+          isAnimating = false;
+        }, 500);
+      } else {
+        menu.style.left = `${x}px`;
+        menu.style.top = `${y}px`;
+        menu.classList.add('open');
+      }
+    },
+
   },
-};
+
+}
 </script>
 
 <style scoped>
@@ -200,5 +270,41 @@ canvas {
 
 .view-controls button:hover {
   background-color: #45a049;
+}
+
+.menu {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  transform: scale(0);
+  transition: transform 0.5s;
+}
+
+.menu.open {
+  transform: scale(1);
+}
+
+.menu-item {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: #ff6347;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.5s, opacity 0.5s;
+  transform-origin: 100px 100px;
+  opacity: 0;
+  transform: rotate(calc(var(--i) * 45deg)) translate(0) rotate(calc(var(--i) * -45deg));
+}
+
+.menu.open .menu-item {
+  opacity: 1;
+  transform: rotate(calc(var(--i) * 45deg)) translate(100px) rotate(calc(var(--i) * -45deg));
+}
+
+.menu-item:hover {
+  background-color: #ff4500;
 }
 </style>
