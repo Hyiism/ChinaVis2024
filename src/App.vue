@@ -19,7 +19,6 @@
 
   </div>
 
-
 </template>
 
 <script>
@@ -35,7 +34,6 @@ export default {
     LeftViewer,
     RightViewer,
     BottomViewer
-
   }
 };
 </script>
@@ -49,17 +47,7 @@ export default {
   box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
 
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
-}
-
 #app {
-  display: flex;
-  flex-direction: column; /* Arrange children in a column */
-  align-items: center; /* Center align horizontally */
   display: flex;
   flex-direction: column; /* Arrange children in a column */
   align-items: center; /* Center align horizontally */
@@ -69,7 +57,7 @@ export default {
 }
 
 #ModelViewer {
-  width: 50%;
+  width: 60%;
   height: 60%;
   display: flex;
   justify-content: center;
@@ -78,7 +66,7 @@ export default {
 }
 
 #LeftViewer {
-  width: 25%;
+  width: 20%;
   height: 60%;
   position: absolute;
   top: 0;
@@ -86,11 +74,11 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* background-color: #26595f;  */
+  background-color: #26595f; /* 可以根据需要设置背景颜色 */
 }
 
 #RightViewer {
-  width: 25%;
+  width: 20%;
   height: 60%;
   position: absolute;
   top: 0;
@@ -107,7 +95,6 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #07ab8d; /* Adjust as needed */
   background-color: #07ab8d; /* Adjust as needed */
 }
 

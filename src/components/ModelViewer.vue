@@ -16,7 +16,7 @@
       <div class="menu-item" style="--i:6;">7</div>
       <div class="menu-item" style="--i:7;">8</div>
     </div>
-
+<!-- ceshi -->
 
   </div>
 </template>
@@ -46,6 +46,7 @@ export default {
       camera: null,
       renderer: null,
       controls: null,
+      student: null,
       raycaster: new THREE.Raycaster(),
       mouse: new THREE.Vector2(),
 
@@ -53,10 +54,6 @@ export default {
   },
   mounted() {
     this.initThreeJS();
-    window.addEventListener('resize', this.onWindowResize);
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.onWindowResize);
   },
   methods: {
     initThreeJS() {
@@ -64,16 +61,19 @@ export default {
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xffffff);
 
-      // 初始化透视相机
       const aspect = this.$refs.sceneContainer.clientWidth / this.$refs.sceneContainer.clientHeight;
+
+      // 初始化透视相机
       this.camera = new THREE.PerspectiveCamera(80, aspect, 0.1, 1000);
-      this.camera.position.set(0, 400, 0);
-      this.camera.lookAt(0, 0, 0);
 
       // 创建渲染器
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(this.$refs.sceneContainer.clientWidth, this.$refs.sceneContainer.clientHeight);
+      this.renderer.setClearColor(0xffffff);
       this.$refs.sceneContainer.appendChild(this.renderer.domElement);
+
+      // 窗口调整大小处理
+      window.addEventListener('resize', this.onWindowResize);
 
       // 添加光源
       this.addLights();
@@ -87,9 +87,9 @@ export default {
 
       // 加载模型
       this.loadModel();
-
       // 动画循环
       this.animate();
+      this.initialView();
     },
     addLights() {
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -119,18 +119,22 @@ export default {
       });
     },
     onWindowResize() {
-      if (this.$refs.sceneContainer) {
-        const aspect = this.$refs.sceneContainer.clientWidth / this.$refs.sceneContainer.clientHeight;
-        this.camera.aspect = aspect;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(this.$refs.sceneContainer.clientWidth, this.$refs.sceneContainer.clientHeight);
-      }
+      const aspect = this.$refs.sceneContainer.clientWidth / this.$refs.sceneContainer.clientHeight;
+      this.camera.aspect = aspect;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(this.$refs.sceneContainer.clientWidth, this.$refs.sceneContainer.clientHeight);
+      this.camera.aspect = aspect;
+      this.camera.updateProjectionMatrix();
     },
     animate() {
       requestAnimationFrame(this.animate);
       TWEEN.update();
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
+    },
+    initialView() {
+      this.camera.position.set(0, 400, 0);
+      this.camera.lookAt(0, 0, 0);
     },
     setTopView() {
       const currentPosition = this.camera.position.clone();
