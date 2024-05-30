@@ -17,23 +17,6 @@
       <BottomViewer/>
     </div>
 
-
-    <div id="LeftViewer">
-      <LeftViewer/>
-    </div>
-
-    <div id="ModelViewer">
-      <ModelViewer/>
-    </div>
-
-    <div id="RightViewer">
-      <RightViewer/>
-    </div>
-
-    <div id="BottomViewer">
-      <BottomViewer/>
-    </div>
-
   </div>
 
 
@@ -41,9 +24,6 @@
 
 <script>
 import ModelViewer from './components/ModelViewer.vue';
-import LeftViewer from './components/LeftViewer.vue';
-import RightViewer from './components/RightViewer.vue';
-import BottomViewer from './components/BottomViewer.vue';
 import LeftViewer from './components/LeftViewer.vue';
 import RightViewer from './components/RightViewer.vue';
 import BottomViewer from './components/BottomViewer.vue';
@@ -55,9 +35,7 @@ export default {
     LeftViewer,
     RightViewer,
     BottomViewer
-    LeftViewer,
-    RightViewer,
-    BottomViewer
+
   }
 };
 </script>
