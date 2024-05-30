@@ -66,7 +66,6 @@ export default {
   /* 添加阴影效果 */
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
   border-radius: 10px; 
-  background-color: #fff; /* 背景颜色为白色 */
 }
 
 #LeftViewer {
@@ -79,9 +78,8 @@ export default {
   justify-content: center;
   align-items: center;
   /* 添加阴影效果 */
-  box-shadow: 2px 0px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.1); 
   border-radius: 10px; 
-  background-color: #fff; /* 背景颜色为白色 */
 }
 
 #RightViewer {
@@ -94,19 +92,19 @@ export default {
   justify-content: center;
   align-items: center;
   /* 添加阴影效果 */
-  box-shadow: -2px 0px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  box-shadow: -2px 0px 8px rgba(0, 0, 0, 0.1); 
   border-radius: 10px; 
 }
 
 #BottomViewer {
   width: calc(100% - 4px);
-  height: calc(40% - 4px);
+  height: calc(40% - 1px);
   display: flex;
   justify-content: center;
   align-items: center;
 
   /* 添加阴影效果 */
-  box-shadow: 0px -2px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); 
   border-radius: 10px; 
   position: absolute;
   bottom: 0; /* Stick to the bottom */
