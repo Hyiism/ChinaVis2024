@@ -3,7 +3,7 @@
       <div id="main-right"> </div>
     </div>
   </template>
-  <!-- 这是一个雷达图 -->
+  <!-- 这是一个雷达图 测试-->
   <script>
   import * as echarts from 'echarts';
   
