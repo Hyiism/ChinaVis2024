@@ -104,7 +104,7 @@ export default {
             nameLocation: 'end',
             nameGap: 20,
             nameTextStyle: {
-              color: '#fff',
+              color: '#000',
               fontSize: 12
             },
             axisLine: {
@@ -121,7 +121,7 @@ export default {
               show: false
             },
             axisLabel: {
-              color: '#fff'
+              color: '#000'
             }
           }
         },
