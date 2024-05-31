@@ -31,7 +31,7 @@ export default {
   methods: {
     // 向后端请求top15的详细成绩数据
     fetchStudentScores() {
-      this.$axios.get('http://127.0.0.1:8000/topstudents') // 替换为实际的API端点
+      this.$axios.get('http://10.12.44.190:8000/topstudents') // 替换为实际的API端点
         .then(response => {
           this.top_students_scores = JSON.parse(response.data);
           // 数据获取成功后再初始化图表，不然图表获取不到数据
@@ -100,14 +100,24 @@ export default {
       };
 
       var option = {
+        title:{
+          text: '异常题目检测表',
+          left: 'center',
+          textStyle: {
+            color: '#000',
+            fontSize: 20
+        },
+        // top: '5%'
+        },
+
         backgroundColor: '#fff',
         legend: {
-          bottom: 10,
+          bottom: "0.5%",
           data: ['0-5', '5-10', '10-15'],
           itemGap: 30,
           textStyle: {
             color: '#000',
-            fontSize: 14
+            fontSize: 15
           }
         },
         tooltip: {
@@ -172,7 +182,7 @@ export default {
         parallel: {
           left: '5%',
           right: '5%',
-          bottom: '12%',
+          bottom: '8%',
           parallelAxisDefault: {
             type: 'value',
             name: 'AQI指数',
