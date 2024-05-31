@@ -193,14 +193,14 @@ export default {
     setSideView() {
       const currentPosition = this.camera.position.clone();
       // const targetPosition = new THREE.Vector3(200, 200, 400);
-      const targetPosition = new THREE.Vector3(currentPosition.x - 20, currentPosition.y, currentPosition.z);
+      const targetPosition = new THREE.Vector3(178.434532168853, 113.66997527109939, 164.5923843414466);
 
       new TWEEN.Tween(currentPosition)
         .to(targetPosition, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .onUpdate(() => {
           this.camera.position.copy(currentPosition);
-          // this.camera.lookAt(0, 0, 0);
+          this.camera.lookAt(97.55521392822266, 32.887508392333984, 75.55369567871094);
         })
         .start();
     },
