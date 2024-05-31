@@ -17,6 +17,10 @@
       <BottomViewer/>
     </div>
 
+    <div id="BottomRightViewer">
+      <BottomRightViewer/>
+    </div>
+
   </div>
 
 </template>
@@ -26,6 +30,7 @@ import ModelViewer from './components/ModelViewer.vue';
 import LeftViewer from './components/LeftViewer.vue';
 import RightViewer from './components/RightViewer.vue';
 import BottomViewer from './components/BottomViewer.vue';
+import BottomRightViewer from './components/BottomRightViewer.vue';
 
 export default {
   name: 'App',
@@ -33,7 +38,8 @@ export default {
     ModelViewer,
     LeftViewer,
     RightViewer,
-    BottomViewer
+    BottomViewer,
+    BottomRightViewer
   }
 };
 </script>
@@ -97,7 +103,7 @@ export default {
 }
 
 #BottomViewer {
-  width: calc(100% - 4px);
+  width: calc(75% - 4px);
   height: calc(40% - 1px);
   display: flex;
   justify-content: center;
@@ -108,6 +114,21 @@ export default {
   border-radius: 10px; 
   position: absolute;
   bottom: 0; /* Stick to the bottom */
+  left: 0;
+}
+#BottomRightViewer {
+  width: calc(25% - 4px);
+  height: calc(40% - 1px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* 添加阴影效果 */
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); 
+  border-radius: 5px; 
+  position: absolute;
+  bottom: 0; /* Stick to the bottom */
+  right: 0;
 }
 
 
