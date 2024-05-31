@@ -16,7 +16,7 @@
       <div class="menu-item" style="--i:6;">7</div>
       <div class="menu-item" style="--i:7;">8</div>
     </div>
-<!-- ceshi -->
+    <!-- ceshi -->
 
   </div>
 </template>
@@ -27,8 +27,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from '@tweenjs/tween.js';
 
-
-
 export default {
   name: 'ModelViewer',
   components: {
@@ -36,6 +34,42 @@ export default {
   },
 
   data() {
+
+    // 初始化student001的坐标
+    const basePosition = {
+      x: 178.434532168853,
+      y: 113.66997527109939,
+      z: 164.5923843414466
+    };
+
+    // z轴上的间隔
+    const zdistances = [
+      19.03868865966796,
+      35.97814559936524
+    ];
+    const xdistances = 30.7353286743164
+    const studentsPositions = {};
+    let xOffsetCounter = 0; // 记录x轴偏移次数
+    for (let i = 1; i <= 100; i++) {
+      const studentId = `student${String(i).padStart(3, '0')}`;
+      let zOffset = 0; // 计算z轴的偏移量
+      let xOffset = xOffsetCounter * xdistances; // 计算x轴的偏移量
+      if (i % 10 === 0) {
+        xOffsetCounter++; // 每加10个学生，xOffsetCounter加1
+      }
+      for (let j = 1; j < i; j++) {
+        if (j % 10 === 0) {
+          zOffset = 0;
+        } else {
+          zOffset += zdistances[(j - 1) % zdistances.length];
+        }
+      }
+      studentsPositions[studentId] = {
+        x: basePosition.x - xOffset,
+        y: basePosition.y,
+        z: basePosition.z - zOffset
+      };
+    }
     return {
       topValue: 0, // 初始值
       leftValue: 0, // 初始值
@@ -45,11 +79,11 @@ export default {
       scene: null,
       camera: null,
       renderer: null,
-      controls: null,
+      // controls: null,
       student: null,
       raycaster: new THREE.Raycaster(),
       mouse: new THREE.Vector2(),
-
+      studentsPositions
     };
   },
   mounted() {
@@ -66,6 +100,10 @@ export default {
       // 初始化透视相机
       this.camera = new THREE.PerspectiveCamera(80, aspect, 0.1, 1000);
 
+      const axesHelper = new THREE.AxesHelper(20000);
+      this.scene.add(axesHelper);
+
+
       // 创建渲染器
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(this.$refs.sceneContainer.clientWidth, this.$refs.sceneContainer.clientHeight);
@@ -78,12 +116,12 @@ export default {
       // 添加光源
       this.addLights();
 
-      // 添加OrbitControls
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.25;
-      this.controls.screenSpacePanning = false;
-      this.controls.maxPolarAngle = Math.PI / 2;
+      // // 添加OrbitControls
+      // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      // this.controls.enableDamping = true;
+      // this.controls.dampingFactor = 0.25;
+      // this.controls.screenSpacePanning = false;
+      // this.controls.maxPolarAngle = Math.PI / 2;
 
       // 加载模型
       this.loadModel();
@@ -105,7 +143,7 @@ export default {
     },
     loadModel() {
       const loader = new GLTFLoader();
-      loader.load('/models/student101_3.glb', (gltf) => {
+      loader.load('/models/student101_4.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.set(1.5, 1.5, 1.5);
         this.scene.add(model);
@@ -129,12 +167,15 @@ export default {
     animate() {
       requestAnimationFrame(this.animate);
       TWEEN.update();
-      this.controls.update();
+      // this.controls.update();
       this.renderer.render(this.scene, this.camera);
     },
     initialView() {
-      this.camera.position.set(0, 400, 0);
-      this.camera.lookAt(0, 0, 0);
+      //原方案
+      // this.camera.position.set(0, 400, 0);
+      //初始相机看第一个学生
+      this.camera.position.set(178.434532168853, 113.66997527109939, 164.5923843414466)
+      this.camera.lookAt(97.55521392822266, 32.887508392333984, 75.55369567871094);
     },
     setTopView() {
       const currentPosition = this.camera.position.clone();
@@ -145,20 +186,21 @@ export default {
         .easing(TWEEN.Easing.Quadratic.Out)
         .onUpdate(() => {
           this.camera.position.copy(currentPosition);
-          this.camera.lookAt(0, 0, 0);
+          // this.camera.lookAt(0, 0, 0);
         })
         .start();
     },
     setSideView() {
       const currentPosition = this.camera.position.clone();
-      const targetPosition = new THREE.Vector3(200, 200, 400);
+      // const targetPosition = new THREE.Vector3(200, 200, 400);
+      const targetPosition = new THREE.Vector3(currentPosition.x - 20, currentPosition.y, currentPosition.z);
 
       new TWEEN.Tween(currentPosition)
         .to(targetPosition, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .onUpdate(() => {
           this.camera.position.copy(currentPosition);
-          this.camera.lookAt(0, 0, 0);
+          // this.camera.lookAt(0, 0, 0);
         })
         .start();
     },
@@ -184,23 +226,33 @@ export default {
 
       this.raycaster.setFromCamera(this.mouse, this.camera);
       const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-
+      console.log(intersects);
       if (intersects.length > 0) {
 
         this.student = intersects[0].object;
         this.student.material.color.set(0xff0000);
-        const targetPosition = new THREE.Vector3().copy(this.student.position);
-        console.log(targetPosition);
+        // 获取学生的ID
+        const studentName = this.student.name;
+
+        // 从studentsPositions中获取位置信息
+        const targetPosition = new THREE.Vector3(
+          this.studentsPositions[studentName].x,
+          this.studentsPositions[studentName].y,
+          this.studentsPositions[studentName].z
+        );
+
+        // const targetPosition = new THREE.Vector3().copy(this.student.position);
+        console.log(targetPosition, this.student);
 
         new TWEEN.Tween(this.camera.position)
           .to({
-            x: targetPosition.x + 80,
-            y: targetPosition.y + 80,
-            z: targetPosition.z + 70
+            x: targetPosition.x,
+            y: targetPosition.y,
+            z: targetPosition.z
           }, 1000)
           .easing(TWEEN.Easing.Quadratic.Out)
           .start();
-        this.onCameraMoveComplete(targetPosition)
+        // this.onCameraMoveComplete(targetPosition)
       }
     },
     onCameraMoveComplete(targetPosition) {
