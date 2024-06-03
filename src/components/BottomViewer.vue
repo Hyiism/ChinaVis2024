@@ -31,7 +31,7 @@ export default {
   methods: {
     // 向后端请求top15的详细成绩数据
     fetchStudentScores() {
-      this.$axios.get('http://127.0.0.1:8000/topstudents') // 替换为实际的API端点
+      this.$axios.get('http://10.12.44.190:8000/topstudents') // 替换为实际的API端点
         .then(response => {
           this.top_students_scores = JSON.parse(response.data);
           // 数据获取成功后再初始化图表，不然图表获取不到数据
