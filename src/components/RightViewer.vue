@@ -31,6 +31,7 @@ export default {
         cluster_label: 4,
         total_score: 5
       },
+
       labels: [0, 1, 2, 3 ],
       labelColors: ['#00fea8', '#000', '#fe0300', '#ffbd67']
     };
@@ -71,6 +72,10 @@ export default {
         title: {
           text: '学生做题情况嵌入展示',
           left: 'center',
+          textStyle: {
+            color: '#000',
+            fontSize: 20
+        },
           top: 40
         },
 
@@ -88,11 +93,11 @@ export default {
           type: 'value',
           axisLine: {
             lineStyle: {
-              color: '#000' // 坐标轴线颜色
+              color: '#c0c0c0' // 坐标轴线颜色
             }
           },
           axisLabel: {
-            color: '#000' // 坐标轴标签颜色
+            color: '#c0c0c0' // 坐标轴标签颜色
           }
         },
         yAxis3D: {
@@ -100,11 +105,11 @@ export default {
           type: 'value',
           axisLine: {
             lineStyle: {
-              color: '#000' // 坐标轴线颜色
+              color: '#c0c0c0' // 坐标轴线颜色
             }
           },
           axisLabel: {
-            color: '#000' // 坐标轴标签颜色
+            color: '#c0c0c0' // 坐标轴标签颜色
           }
         },
         zAxis3D: {
@@ -114,7 +119,7 @@ export default {
           max: 12,  // 指定 z 轴的最大值
           axisLine: {
             lineStyle: {
-              color: '#000' // 坐标轴线颜色
+              color: '#c0c0c0' // 坐标轴线颜色
             }
           },
           axisLabel: {
@@ -137,7 +142,7 @@ export default {
         series: [
           {
             type: 'scatter3D',
-            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score'],
+            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score', 'student_id'],
             data: this.data.map(item => {
               return {
                 value: [
@@ -145,7 +150,8 @@ export default {
                   item[this.fieldIndices.y],
                   item[this.fieldIndices.z],
                   item[this.fieldIndices.cluster_label],
-                  item[this.fieldIndices.total_score]
+                  item[this.fieldIndices.total_score],
+                  item[this.fieldIndices.student_id],
                 ],
                 itemStyle: {
                   color: this.labelColors[labelIndexMap[item[this.fieldIndices.cluster_label]]]
