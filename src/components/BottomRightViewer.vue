@@ -10,83 +10,69 @@ import * as echarts from 'echarts';
 export default {
   name: 'EChartsComponent',
   mounted() {
-    this.initChart();
+    this.fetchStudentScores()
+    // this.initChart();
     window.addEventListener('resize', this.resizeChart);
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeChart);
   },
   methods: {
+
+    // 向后端请求t数据
+    fetchStudentScores() {
+      this.$axios.get('http://10.12.44.205:8000/radarchart/?student_ID=8b6d1125760bd3939b6e') // 替换为实际的API端点
+        .then(response => {
+          this.know_scores = JSON.parse(response.data);
+
+          console.log("#########################################!!!!")
+          console.log(this.know_scores)
+          console.log(this.know_scores['know_IDs'])
+          // 数据获取成功后再初始化图表，不然图表获取不到数据
+          this.initChart();
+        })
+        .catch(error => {
+          console.error("There was an error!", error);
+        });
+    },
+
+
     initChart() {
       var chartDom = document.getElementById('main-bottomright');
       var myChart = echarts.init(chartDom);
+      // 包含名称的数组
+      var know_IDs = this.know_scores['know_IDs'];
+      // 创建一个空数组，用于存储生成的对象
+      var indicator = [];
+      // 循环遍历namelist数组
+      for (var i = 0; i < know_IDs.length; i++) {
+        // 创建一个包含名称和最大值的对象，并添加到indicator数组中
+        var obj = { name: know_IDs[i], max:4 };
+        indicator.push(obj);
+      }
+
       var option = {
-title: {
-  text: 'Proportion of Browsers',
-  subtext: 'Fake Data',
-  top: 10,
-  left: 10
-},
-tooltip: {
-  trigger: 'item'
-},
-legend: {
-  type: 'scroll',
-  bottom: 10,
-  data: (function () {
-    var list = [];
-    for (var i = 1; i <= 28; i++) {
-      list.push(i + 2000 + '');
-    }
-    return list;
-  })()
-},
-visualMap: {
-  top: 'middle',
-  right: 10,
-  color: ['red', 'yellow'],
-  calculable: true
-},
-radar: {
-  indicator: [
-    { text: 'IE8-', max: 400 },
-    { text: 'IE9+', max: 400 },
-    { text: 'Safari', max: 400 },
-    { text: 'Firefox', max: 400 },
-    { text: 'Chrome', max: 400 }
-  ]
-},
-series: (function () {
-  var series = [];
-  for (var i = 1; i <= 28; i++) {
-    series.push({
-      type: 'radar',
-      symbol: 'none',
-      lineStyle: {
-        width: 1
-      },
-      emphasis: {
-        areaStyle: {
-          color: 'rgba(0,250,0,0.3)'
-        }
-      },
-      data: [
-        {
-          value: [
-            (40 - i) * 10,
-            (38 - i) * 4 + 60,
-            i * 5 + 10,
-            i * 9,
-            (i * i) / 2
-          ],
-          name: i + 2000 + ''
-        }
-      ]
-    });
-  }
-  return series;
-})()
-};
+        title: {
+          text: 'XX学生知识点掌握情况'
+        },
+
+        radar: {
+          // shape: 'circle',
+          indicator: indicator
+        },
+        series: [
+          {
+            name: 'Budget vs spending',
+            type: 'radar',
+            data: [
+              {
+                value: [2, 1, 2, 2, 2, 2, 2, 2],
+              }
+            ]
+          }
+        ]
+      };
+
       option && myChart.setOption(option);
       this.myChart = myChart;
     },
