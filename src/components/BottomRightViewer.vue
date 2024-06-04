@@ -33,7 +33,7 @@ export default {
       },
 
       labels: [0, 1, 2, 3 ],
-      labelColors: ['#00fea8', '#000', '#fe0300', '#ffbd67']
+      labelColors: ['#9A60B4', '#FB8351', '#3BA272', '#73C0DE']
     };
   },
   mounted() {
