@@ -19,7 +19,7 @@ export default {
   },
   methods: {
 
-    // 向后端请求t数据
+    // 向后端请求数据
     fetchStudentScores() {
       this.$axios.get('http://10.12.44.205:8000/radarchart/?student_ID=8b6d1125760bd3939b6e') // 替换为实际的API端点
         .then(response => {
