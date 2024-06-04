@@ -97,23 +97,27 @@ export default {
 
 #ModelViewer {
   width: 50%;
-  height: calc(60% - 58px);
+  height: 55%;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 0px; 
   /* 添加阴影效果 */
-  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+  /* box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);  */
   border-radius: 10px; 
+  top: 3%;
 }
 
+/*  */
 #TimeLine {
   width: 50%;
-  height: 6%;
+  height: 5%;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 0px; 
+  top: 58%;
+  left: 25%;
 }
 
 #LeftViewer {

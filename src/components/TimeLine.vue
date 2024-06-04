@@ -126,7 +126,7 @@ export default {
 </style> -->
 
 <template>
-    <div ref="chartContainer" style="width: 100%">
+    <div ref="chartContainer" style="width: 100%; height: 100%;">
       <div class="tooltip" v-show="tooltipVisible" :style="tooltipStyle">{{ tooltipText }}</div>
     </div>
   </template>
@@ -143,8 +143,11 @@ export default {
         tooltipStyle: {
           position: 'absolute',
           textAlign: 'center',
-          width: '60px',
-          height: '18px',
+          // width: '100%',
+          // height: '100%',
+          // padding: '0',
+          width: '50px',
+          height: '27px',
           padding: '2px',
           font: '12px sans-serif',
           background: 'white',
@@ -162,10 +165,13 @@ export default {
     },
     methods: {
       drawChart() {
-        const margin = { top: 28, right: 30, bottom: 30, left: 0 };
+        // const margin = { top: 28, right: 30, bottom: 30, left: 0 };
+        const margin = { top: 0, right: 0, bottom: 0, left: 0 };
         const chartContainerWidth = this.$refs.chartContainer.clientWidth;
-        const width = chartContainerWidth - margin.left - margin.right;
-        const height = 100 - margin.top - margin.bottom;
+        // const width = chartContainerWidth - margin.left - margin.right;
+        // const height = 100 - margin.top - margin.bottom;
+        const width = chartContainerWidth;
+        const height = 65;
         // console.log(this.$refs.chartContainer.clientWidth)
   
         const svg = d3.select(this.$refs.chartContainer)
@@ -251,6 +257,9 @@ export default {
 }
 
   .tooltip {
+    width: 100%;
+    height: 100%;
+    display: flex;
     opacity: 0;
   }
   
