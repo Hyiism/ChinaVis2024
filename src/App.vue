@@ -102,7 +102,7 @@ export default {
 
 #LeftViewer {
   width: calc(25% - 4px);
-  height: calc(25% - 4px);
+  height: calc(30% - 4px);
   position: absolute;
   top: 3%;
   left: 0;
@@ -116,9 +116,9 @@ export default {
 
 #LeftBottomViewer {
   width: calc(25% - 4px);
-  height: calc(35% - 4px);
+  height: calc(30% - 4px);
   position: absolute;
-  top: 28%;
+  top: 33%;
   left: 0;
   display: flex;
   justify-content: center;
