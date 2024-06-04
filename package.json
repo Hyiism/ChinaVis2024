@@ -11,6 +11,7 @@
     "@tweenjs/tween.js": "^23.1.2",
     "axios": "^1.7.2",
     "core-js": "^3.8.3",
+    "d3": "^7.9.0",
     "echarts": "^5.5.0",
     "echarts-gl": "^2.0.9",
     "element-ui": "^2.15.14",
