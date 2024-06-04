@@ -1,213 +1,159 @@
 <template>
-  <div class="chart-container-leftbottom">
-    <div id="main-leftbottom"> </div>
+  <div id="table">
+    <div class="search-container">
+      <el-input 
+        v-model="searchValue" size="mini" clearable
+        placeholder="Search" style="width: 90%;"></el-input>
+      <el-button type="primary" size="mini" @click="doFilter">搜索</el-button>
+    </div>
+    <el-table :data="tableData" border @sort-change="handleSortChange">
+      <el-table-column prop="student_ID" label="编号" align="center"></el-table-column>
+      <el-table-column prop="sex" label="性别" align="center"></el-table-column>
+      <el-table-column prop="age" label="年龄" align="center"></el-table-column>
+      <el-table-column prop="major" label="专业" align="center"></el-table-column>
+      <el-table-column prop="class" label="班级" align="center"></el-table-column>
+      <el-table-column prop="total_score" label="总分" align="center" sortable="custom">
+        <template slot="header" slot-scope="scope">
+          <span>总分</span>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div class="pagination-container">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[1, 3, 5]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalItems"
+        :pager-count="5"
+      ></el-pagination>
+    </div>
   </div>
 </template>
 
 <script>
-import * as echarts from 'echarts';
-
 export default {
-  name: 'EChartsComponent',
-
   data() {
     return {
-      top_students: {}
+      resData: [],
+      searchValue: "",
+      tableData: [],
+      currentPage: 1,
+      pageSize: 4,
+      totalItems: 0,
+      filterTableData: [],
+      flag: false,
+      sortField: '',
+      sortOrder: '',
     };
   },
   mounted() {
     this.fetchStudentScores();
-    // this.initChart();
-    window.addEventListener('resize', this.resizeChart);
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.resizeChart);
   },
   methods: {
-    // 向后端请求top15的详细成绩数据
+    mockRequset() {
+      this.totalItems = this.resData.length; 
+      this.updateTableData();
+    },
     fetchStudentScores() {
-      this.$axios.get('http://10.12.44.190:8000/classranking') // 替换为实际的API端点
+      this.$axios.get('http://10.12.44.190:8000/table')
         .then(response => {
-          this.top_students = JSON.parse(response.data);
-          console.log("###leftbottom start###")
-          console.log(this.top_students)
-          console.log("###leftbottom start###")
-          // 数据获取成功后再初始化图表，不然图表获取不到数据
-          this.initChart();
+          this.resData = JSON.parse(response.data).data;
+          this.mockRequset();
+          console.log("###table start###");
+          console.log(this.resData);
         })
         .catch(error => {
           console.error("There was an error!", error);
         });
     },
-    initChart() {
-      var chartDom = document.getElementById('main-leftbottom');
-      var myChart = echarts.init(chartDom);
-      var option = {
-          title: {
-              text: '班级综合成绩排行榜',
-              left: 'center',
-          },
-
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
+    doFilter() {
+      this.filterTableData = [];
+      this.resData.filter((item) => {
+        if (item.student_ID && item.class && item.total_score && item.major && item.sex && item.age) {
+          if (
+            item.student_ID.toString().toUpperCase().indexOf(this.searchValue.toUpperCase()) > -1 ||
+            item.class.toString().toUpperCase().indexOf(this.searchValue.toUpperCase()) > -1 ||
+            item.total_score.toString().toUpperCase().indexOf(this.searchValue.toUpperCase()) > -1 ||
+            item.major.toString().toUpperCase().indexOf(this.searchValue.toUpperCase()) > -1 ||
+            item.sex.toString().toUpperCase().indexOf(this.searchValue.toUpperCase()) > -1 ||
+            item.age.toString().toUpperCase().indexOf(this.searchValue.toUpperCase()) > -1
+          ) {
+            this.filterTableData.push(item);
           }
-        },
-        legend: {
-          // top: '15%',
-          show: false
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          // top: '35%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value',
-          min: 0,
-          max: 134
-        },
-        yAxis: {
-          type: 'category',
-          // data: ['1', '2', '3', '4', '5', '6', '7']
-          data: this.top_students.class_id.reverse()
-        },
-        series: [
-          {
-            name: 'subject_1',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            barWidth: 15, // 调整柱状图的宽度
-            barGap: '30%', // 调整柱状图之间的间隔
-            // data: [320, 302, 301, 334, 390, 330, 320]
-            data: this.top_students.subject_3.reverse()
-          },
-          {
-            name: 'subject_2',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            // data: [120, 132, 101, 134, 90, 230, 210]
-            data: this.top_students.subject_6.reverse()
-          },
-          {
-            name: 'subject_3',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            // data: [220, 182, 191, 234, 290, 330, 310]
-            data: this.top_students.subject_1.reverse()
-          },
-          {
-            name: 'subject_4',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            // data: [150, 212, 201, 154, 190, 330, 410]
-            data: this.top_students.subject_5.reverse()
-          },
-          {
-            name: 'subject_5',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            // data: [820, 832, 901, 934, 1290, 1330, 1320]
-            data: this.top_students.subject_7.reverse()
-          },
-          {
-            name: 'subject_6',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            // data: [820, 832, 901, 934, 1290, 1330, 1320]
-            data: this.top_students.subject_2.reverse()
-          },
-          {
-            name: 'subject_7',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            // data: [820, 832, 901, 934, 1290, 1330, 1320]
-            data: this.top_students.subject_8.reverse()
-          },
-          {
-            name: 'subject_8',
-            type: 'bar',
-            stack: 'total',
-            label: {
-              show: false
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            // data: [820, 832, 901, 934, 1290, 1330, 1320]
-            data: this.top_students.subject_4.reverse()
-          }
-        ]
-      };
-      option && myChart.setOption(option);
-      this.myChart = myChart;
+        }
+      });
+      this.currentPage = 1;
+      this.totalItems = this.filterTableData.length;
+      this.flag = true;
+      this.updateTableData();
     },
-    resizeChart() {
-      if (this.myChart) {
-        this.myChart.resize();
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+      this.pageSize = val;
+      this.handleCurrentChange(1);
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`);
+      this.currentPage = val;
+      this.updateTableData();
+    },
+    updateTableData() {
+      const list = this.flag ? this.filterTableData : this.resData;
+      let fromNum = (this.currentPage - 1) * this.pageSize;
+      let toNum = this.currentPage * this.pageSize;
+      this.tableData = list.slice(fromNum, toNum);
+    },
+    handleSortChange({ prop, order }) {
+      this.sortField = prop;
+      this.sortOrder = order;
+      const list = this.flag ? this.filterTableData : this.resData;
+      if (order === 'ascending') {
+        list.sort((a, b) => a[prop] - b[prop]);
+      } else if (order === 'descending') {
+        list.sort((a, b) => b[prop] - a[prop]);
       }
+      this.updateTableData();
     }
   }
 };
 </script>
 
-<style scoped>
-.chart-container-leftbottom {
-  position: relative;
-  width: 100%;
+<style>
+#table {
+  width: 90%;
+  margin: 0 auto;
   height: 90%;
 }
 
-#main-leftbottom {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* 调整这个值来增加与表格的距离 */
+}
+
+.el-input {
+  margin-right: 10px; /* 调整这个值来增加搜索框和按钮之间的距离 */
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; /* 调整这个值来增加与表格的距离 */
+}
+
+.el-icon-arrow-up,
+.el-icon-arrow-down {
+  cursor: pointer;
+  margin-left: 5px;
+  color: #909399;
+}
+
+.el-icon-arrow-up.active,
+.el-icon-arrow-down.active {
+  color: #409EFF;
 }
 </style>
