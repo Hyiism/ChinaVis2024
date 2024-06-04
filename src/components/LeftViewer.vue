@@ -54,13 +54,14 @@
             }
           },
           legend: {
-            top: '7%'
+            // top: '15%',
+            show: false
           },
           grid: {
             left: '3%',
             right: '4%',
-            // bottom: '3%',
-            top: '15%',
+            bottom: '3%',
+            // top: '35%',
             containLabel: true
           },
           xAxis: {
@@ -79,85 +80,61 @@
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
+              barWidth: 15, // 调整柱状图的宽度
+              barGap: '30%', // 调整柱状图之间的间隔
               // data: [320, 302, 301, 334, 390, 330, 320]
-              data: this.top_students.subject_1.reverse()
+              data: this.top_students.subject_3.reverse()
             },
             {
               name: 'subject_2',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [120, 132, 101, 134, 90, 230, 210]
-              data: this.top_students.subject_2.reverse()
+              data: this.top_students.subject_6.reverse()
             },
             {
               name: 'subject_3',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [220, 182, 191, 234, 290, 330, 310]
-              data: this.top_students.subject_3.reverse()
+              data: this.top_students.subject_1.reverse()
             },
             {
               name: 'subject_4',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [150, 212, 201, 154, 190, 330, 410]
-              data: this.top_students.subject_4.reverse()
+              data: this.top_students.subject_5.reverse()
             },
             {
               name: 'subject_5',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
-              },
-              emphasis: {
-                focus: 'series'
-              },
-              // data: [820, 832, 901, 934, 1290, 1330, 1320]
-              data: this.top_students.subject_5.reverse()
-            },
-            {
-              name: 'subject_6',
-              type: 'bar',
-              stack: 'total',
-              label: {
-                show: true
-              },
-              emphasis: {
-                focus: 'series'
-              },
-              // data: [820, 832, 901, 934, 1290, 1330, 1320]
-              data: this.top_students.subject_6.reverse()
-            },
-            {
-              name: 'subject_7',
-              type: 'bar',
-              stack: 'total',
-              label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
@@ -166,17 +143,43 @@
               data: this.top_students.subject_7.reverse()
             },
             {
-              name: 'subject_8',
+              name: 'subject_6',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
+              },
+              emphasis: {
+                focus: 'series'
+              },
+              // data: [820, 832, 901, 934, 1290, 1330, 1320]
+              data: this.top_students.subject_2.reverse()
+            },
+            {
+              name: 'subject_7',
+              type: 'bar',
+              stack: 'total',
+              label: {
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [820, 832, 901, 934, 1290, 1330, 1320]
               data: this.top_students.subject_8.reverse()
+            },
+            {
+              name: 'subject_8',
+              type: 'bar',
+              stack: 'total',
+              label: {
+                show: false
+              },
+              emphasis: {
+                focus: 'series'
+              },
+              // data: [820, 832, 901, 934, 1290, 1330, 1320]
+              data: this.top_students.subject_4.reverse()
             }
           ]
         };

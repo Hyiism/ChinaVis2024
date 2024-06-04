@@ -53,44 +53,44 @@ export default {
       const top15 = this.top_students_scores.top15;
 
       var schema = [
-        { name: 'title_1', index: 0, text: 'title1' },
-        { name: 'title_2', index: 1, text: 'title2' },
-        { name: 'title_3', index: 2, text: 'title3' },
-        { name: 'title_4', index: 3, text: 'title4' },
-        { name: 'title_5', index: 4, text: ' title5' },
-        { name: 'title_6', index: 5, text: 'title6' },
-        { name: 'title_7', index: 6, text: 'title7' },
-        { name: 'title_8', index: 7, text: 'title8' },
-        { name: 'title_9', index: 8, text: 'title9' },
-        { name: 'title_10', index: 9, text: 'title10' },
-        { name: 'title_11', index: 10, text: 'title11' },
-        { name: 'title_12', index: 11, text: 'title12' },
-        { name: 'title_13', index: 12, text: ' title13' },
-        { name: 'title_14', index: 13, text: 'title14' },
-        { name: 'title_15', index: 14, text: 'title15' },
-        { name: 'title_16', index: 15, text: 'title16' },
-        { name: 'title_17', index: 16, text: 'title17' },
-        { name: 'title_18', index: 17, text: 'title18' },
-        { name: 'title_19', index: 18, text: 'title19' },
-        { name: 'title_20', index: 19, text: 'title20' },
-        { name: 'title_21', index: 20, text: ' title21' },
-        { name: 'title_22', index: 21, text: 'title22' },
-        { name: 'title_23', index: 22, text: 'title23' },
-        { name: 'title_24', index: 23, text: 'title24' },
-        { name: 'title_25', index: 24, text: 'title25' },
-        { name: 'title_26', index: 25, text: 'title26' },
-        { name: 'title_27', index: 26, text: 'title27' },
-        { name: 'title_28', index: 27, text: 'title28' },
-        { name: 'title_29', index: 28, text: ' title29' },
-        { name: 'title_30', index: 29, text: 'title30' },
-        { name: 'title_31', index: 30, text: 'title31' },
-        { name: 'title_32', index: 31, text: 'title32' },
-        { name: 'title_33', index: 32, text: 'title33' },
-        { name: 'title_34', index: 33, text: 'title34' },
-        { name: 'title_35', index: 34, text: 'title35' },
-        { name: 'title_36', index: 35, text: 'title36' },
-        { name: 'title_37', index: 36, text: ' title37' },
-        { name: 'title_38', index: 37, text: ' title38' },
+        { name: 'title_1', index: 0, text: 't1' },
+        { name: 'title_2', index: 1, text: 't2' },
+        { name: 'title_3', index: 2, text: 't3' },
+        { name: 'title_4', index: 3, text: 't4' },
+        { name: 'title_5', index: 4, text: 't5' },
+        { name: 'title_6', index: 5, text: 't6' },
+        { name: 'title_7', index: 6, text: 't7' },
+        { name: 'title_8', index: 7, text: 't8' },
+        { name: 'title_9', index: 8, text: 't9' },
+        { name: 'title_10', index: 9, text: 't10' },
+        { name: 'title_11', index: 10, text: 't11' },
+        { name: 'title_12', index: 11, text: 't12' },
+        { name: 'title_13', index: 12, text: 't13' },
+        { name: 'title_14', index: 13, text: 't14' },
+        { name: 'title_15', index: 14, text: 't15' },
+        { name: 'title_16', index: 15, text: 't16' },
+        { name: 'title_17', index: 16, text: 't17' },
+        { name: 'title_18', index: 17, text: 't18' },
+        { name: 'title_19', index: 18, text: 't19' },
+        { name: 'title_20', index: 19, text: 't20' },
+        { name: 'title_21', index: 20, text: ' t21' },
+        { name: 'title_22', index: 21, text: 't22' },
+        { name: 'title_23', index: 22, text: 't23' },
+        { name: 'title_24', index: 23, text: 't24' },
+        { name: 'title_25', index: 24, text: 't25' },
+        { name: 'title_26', index: 25, text: 't26' },
+        { name: 'title_27', index: 26, text: 't27' },
+        { name: 'title_28', index: 27, text: 't28' },
+        { name: 'title_29', index: 28, text: 't29' },
+        { name: 'title_30', index: 29, text: 't30' },
+        { name: 'title_31', index: 30, text: 't31' },
+        { name: 'title_32', index: 31, text: 't32' },
+        { name: 'title_33', index: 32, text: 't33' },
+        { name: 'title_34', index: 33, text: 't34' },
+        { name: 'title_35', index: 34, text: 't35' },
+        { name: 'title_36', index: 35, text: 't36' },
+        { name: 'title_37', index: 36, text: 't37' },
+        { name: 'title_38', index: 37, text: 't38' },
         { name: 'score', index: 38, text: 'Score' },
 
       ];
@@ -107,7 +107,7 @@ export default {
             color: '#000',
             fontSize: 20
         },
-        // top: '5%'
+        top: '2%'
         },
 
         backgroundColor: '#fff',
@@ -169,8 +169,9 @@ export default {
           { dim: 38, name: schema[38].text, min: 130, max: 137},
           
         ],
+
         visualMap: {
-          show: true,
+          show: false,
           min: 134,
           max: 136.3,
           dimension: 38,
@@ -182,15 +183,15 @@ export default {
         parallel: {
           left: '5%',
           right: '5%',
-          bottom: '8%',
+          bottom: '6%',
           parallelAxisDefault: {
             type: 'value',
             name: 'AQI指数',
             nameLocation: 'end',
-            nameGap: 20,
+            nameGap: 5,
             nameTextStyle: {
               color: '#000',
-              fontSize: 12
+              fontSize: 11
             },
             axisLine: {
               lineStyle: {
@@ -198,15 +199,18 @@ export default {
               }
             },
             axisTick: {
+              // 坐标轴上横线，同样设为白色为不显示
               lineStyle: {
-                color: '#777'
+                color: '#000'
               }
             },
             splitLine: {
-              show: true
+              show: false
             },
+            // 坐标轴数字颜色配置，show配置无效，这里颜色设为白色代替
             axisLabel: {
-              color: '#000'
+              color: '#fff'
+              // show: false
             }
           }
         },
@@ -215,7 +219,14 @@ export default {
           {
             name: '0-5',
             type: 'parallel',
-            lineStyle: lineStyle,
+            // lineStyle: lineStyle,
+            // 针对top5 的第6条平均数据加粗显示
+            // lineStyle: (params) => {
+            //   return {
+            //     color: params.data[0] === top5[0][0] ? '#000' : lineStyle.color,
+            //     width: params.data[0] === top5[0][0] ? 10 : lineStyle.width, // 加粗
+            //   };
+            // },
             data: top5
           },
           {
