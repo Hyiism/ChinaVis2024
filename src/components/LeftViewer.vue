@@ -12,7 +12,9 @@
 
     data() {
       return {
-        top_students: {}
+        top_students: {},
+        namenum: 100, // 根据你的数据设置
+        showEchart: true // 是否展示滚动条
       };
     },
     mounted() {
@@ -54,13 +56,14 @@
             }
           },
           legend: {
-            top: '7%'
+            // top: '15%',
+            show: false
           },
           grid: {
             left: '3%',
             right: '4%',
-            // bottom: '3%',
-            top: '15%',
+            bottom: '3%',
+            // top: '35%',
             containLabel: true
           },
           xAxis: {
@@ -79,85 +82,61 @@
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
+              barWidth: 15, // 调整柱状图的宽度
+              barGap: '30%', // 调整柱状图之间的间隔
               // data: [320, 302, 301, 334, 390, 330, 320]
-              data: this.top_students.subject_1.reverse()
+              data: this.top_students.subject_3.reverse()
             },
             {
               name: 'subject_2',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [120, 132, 101, 134, 90, 230, 210]
-              data: this.top_students.subject_2.reverse()
+              data: this.top_students.subject_6.reverse()
             },
             {
               name: 'subject_3',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [220, 182, 191, 234, 290, 330, 310]
-              data: this.top_students.subject_3.reverse()
+              data: this.top_students.subject_1.reverse()
             },
             {
               name: 'subject_4',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [150, 212, 201, 154, 190, 330, 410]
-              data: this.top_students.subject_4.reverse()
+              data: this.top_students.subject_5.reverse()
             },
             {
               name: 'subject_5',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
-              },
-              emphasis: {
-                focus: 'series'
-              },
-              // data: [820, 832, 901, 934, 1290, 1330, 1320]
-              data: this.top_students.subject_5.reverse()
-            },
-            {
-              name: 'subject_6',
-              type: 'bar',
-              stack: 'total',
-              label: {
-                show: true
-              },
-              emphasis: {
-                focus: 'series'
-              },
-              // data: [820, 832, 901, 934, 1290, 1330, 1320]
-              data: this.top_students.subject_6.reverse()
-            },
-            {
-              name: 'subject_7',
-              type: 'bar',
-              stack: 'total',
-              label: {
-                show: true
+                show: false
               },
               emphasis: {
                 focus: 'series'
@@ -166,23 +145,82 @@
               data: this.top_students.subject_7.reverse()
             },
             {
-              name: 'subject_8',
+              name: 'subject_6',
               type: 'bar',
               stack: 'total',
               label: {
-                show: true
+                show: false
+              },
+              emphasis: {
+                focus: 'series'
+              },
+              // data: [820, 832, 901, 934, 1290, 1330, 1320]
+              data: this.top_students.subject_2.reverse()
+            },
+            {
+              name: 'subject_7',
+              type: 'bar',
+              stack: 'total',
+              label: {
+                show: false
               },
               emphasis: {
                 focus: 'series'
               },
               // data: [820, 832, 901, 934, 1290, 1330, 1320]
               data: this.top_students.subject_8.reverse()
+            },
+            {
+              name: 'subject_8',
+              type: 'bar',
+              stack: 'total',
+              label: {
+                show: false
+              },
+              emphasis: {
+                focus: 'series'
+              },
+              // data: [820, 832, 901, 934, 1290, 1330, 1320]
+              data: this.top_students.subject_4.reverse()
             }
-          ]
+          ],
+          dataZoom: [
+          {
+            type: 'slider',
+            orient: 'vertical', // 纵向滚动条
+            realtime: true,
+            start: 0,
+            end: this.namenum, // 数据窗口范围的结束百分比。范围是：0 ~ 100。
+            width: 5, // 组件宽度
+            left: '95%', // 左边的距离
+            right: '3%', // 右边的距离
+            show: this.showEchart, // 是否展示
+            fillerColor: "rgba(17, 100, 210, 0.42)", // 滚动条颜色
+            borderColor: "rgba(17, 100, 210, 0.12)",
+            handleSize: 0, // 两边手柄尺寸
+            showDetail: false, // 拖拽时是否展示滚动条两侧的文字
+            zoomLock: true, // 是否只平移不缩放
+            moveOnMouseMove: false, // 鼠标移动能触发数据窗口平移
+            startValue: 0, // 从头开始。
+            endValue: 6, // 最多六个
+            minValueSpan: 6, // 放大到最少几个
+            maxValueSpan: 6, // 缩小到最多几个
+          },
+          {
+            type: 'inside', // 支持内部鼠标滚动平移
+            orient: 'vertical', // 纵向滚动条
+            start: 0,
+            end: this.namenum,
+            zoomOnMouseWheel: false, // 关闭滚轮缩放
+            moveOnMouseWheel: true, // 开启滚轮平移
+            moveOnMouseMove: true // 鼠标移动能触发数据窗口平移 
+          }
+        ]
         };
         option && myChart.setOption(option);
         this.myChart = myChart;
       },
+
       resizeChart() {
         if (this.myChart) {
           this.myChart.resize();
