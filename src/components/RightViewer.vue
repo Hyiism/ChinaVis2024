@@ -49,6 +49,7 @@ export default {
         .then(response => {
           this.data = JSON.parse(response.data).data;
           console.log("###scater start###")
+          console.log(this.data)
           // 数据获取成功后再初始化图表，不然图表获取不到数据
           this.myChart = echarts.init(this.$refs.chart);
           this.updateChart();

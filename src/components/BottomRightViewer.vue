@@ -47,9 +47,11 @@ export default {
       // 循环遍历namelist数组
       for (var i = 0; i < know_IDs.length; i++) {
         // 创建一个包含名称和最大值的对象，并添加到indicator数组中
-        var obj = { name: know_IDs[i], max:4 };
+        var obj = { name: know_IDs[i], max: 4 };
         indicator.push(obj);
       }
+
+      var student_scores = this.know_scores['scores']
 
       var option = {
         title: {
@@ -66,7 +68,7 @@ export default {
             type: 'radar',
             data: [
               {
-                value: [2, 1, 2, 2, 2, 2, 2, 2],
+                value: student_scores,
               }
             ]
           }
