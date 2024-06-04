@@ -17,7 +17,7 @@
         }
 
         .area {
-            fill: lightsteelblue;
+            fill: rgb(0, 1, 6);
             opacity: 0.5;
         }
 
@@ -25,13 +25,14 @@
             position: absolute;
             text-align: center;
             width: 60px;
-            height: 28px;
+            height: 18px;
             padding: 2px;
             font: 12px sans-serif;
-            background: lightsteelblue;
+            background: white;
             border: 0px;
             border-radius: 8px;
             pointer-events: none;
+            opacity: 1;
         }
 
         .border {
@@ -47,8 +48,10 @@
 </head>
 
 <body>
-    <svg></svg>
-    <div class="tooltip" style="opacity:0;"></div>
+    <svg>
+        <div class="tooltip" style="opacity:0;"></div>
+    </svg>
+    <!-- <div class="tooltip" style="opacity:0;"></div> -->
 </body>
 
 <script>
@@ -101,6 +104,7 @@
         .attr("y", d => y(d.value))
         .attr("height", d => height - y(d.value))
         .on("mouseover", function (event, d) {
+            // console.log("Mouse over bar:", d);
             tooltip.transition()
                 .duration(200)
                 .style("opacity", .9);
@@ -114,23 +118,23 @@
                 .style("opacity", 0);
         });
 
-    // Add the area above the bars
-    const area = d3.area()
-        .x(d => x(d.date))
-        .y0(y(0))
-        .y1(d => y(d.value));
+    // // Add the area above the bars
+    // const area = d3.area()
+    //     .x(d => x(d.date))
+    //     .y0(y(0))
+    //     .y1(d => y(d.value));
 
-    svg.append("path")
-        .datum(data)
-        .attr("class", "area")
-        .attr("d", area);
+    // svg.append("path")
+    //     .datum(data)
+    //     .attr("class", "area")
+    //     .attr("d", area);
 
     // Add brushing
-    svg.append("g")
-        .attr("class", "brush")
-        .call(d3.brushX()
-            .extent([[0, 0], [width, height]])
-            .on("end", updateChart));
+    // svg.append("g")
+    //     .attr("class", "brush")
+    //     .call(d3.brushX()
+    //         .extent([[0, 0], [width, height]])
+    //         .on("end", updateChart));
 
     // Function that will be called when brushing is performed
     function updateChart(event) {

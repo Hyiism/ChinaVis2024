@@ -33,6 +33,10 @@
       <BottomRightViewer/>
     </div>
 
+    <div id="TimeLine">
+      <TimeLine/>
+    </div>
+
   </div>
 
 </template>
@@ -45,6 +49,8 @@ import RightViewer from './components/RightViewer.vue';
 import BottomViewer from './components/BottomViewer.vue';
 import BottomCenterViewer from './components/BottomCenterViewer.vue';
 import BottomRightViewer from './components/BottomRightViewer.vue';
+import TimeLine from './components/TimeLine.vue';
+
 
 export default {
   name: 'App',
@@ -55,7 +61,8 @@ export default {
     RightViewer,
     BottomViewer,
     BottomCenterViewer,
-    BottomRightViewer
+    BottomRightViewer,
+    TimeLine
   }
 };
 </script>
@@ -90,7 +97,7 @@ export default {
 
 #ModelViewer {
   width: 50%;
-  height: calc(60% - 4px);
+  height: calc(60% - 58px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,6 +105,15 @@ export default {
   /* 添加阴影效果 */
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
   border-radius: 10px; 
+}
+
+#TimeLine {
+  width: 50%;
+  height: 6%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0px; 
 }
 
 #LeftViewer {
