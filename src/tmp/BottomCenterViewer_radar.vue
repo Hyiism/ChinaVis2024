@@ -1,4 +1,5 @@
 <template>
+  <!-- 个人知识点雷达图 -->
   <div class="chart-container-bottomcenter">
     <div id="main-bottomcenter"> </div>
   </div>

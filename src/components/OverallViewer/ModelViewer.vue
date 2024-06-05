@@ -4,6 +4,7 @@
       <button @click="setTopView">俯视图</button>
       <button @click="setSideView">侧视图</button>
       <button @click="lookCameraPosition">查看相机位置</button>
+      <button @click="changeState">Change State</button>
     </div>
 
     <div class="menu">
@@ -69,6 +70,8 @@ export default {
       };
     }
     return {
+      // 状态码
+      stateCode: this.getSavedState(),
       topValue: 0, // 初始值
       leftValue: 0, // 初始值
       isOpen: false,
@@ -88,6 +91,19 @@ export default {
     this.initThreeJS();
   },
   methods: {
+    getSavedState() {
+      const savedState = localStorage.getItem('modelViewerStateCode');
+      return savedState ? parseInt(savedState) : 0;
+    },
+    saveState(stateCode) {
+      localStorage.setItem('modelViewerStateCode', stateCode);
+    },
+    changeState() {
+      this.stateCode = (this.stateCode + 1) % 3; // Change the stateCode for demonstration
+      this.saveState(this.stateCode);
+      this.$emit('stateChanged', this.stateCode);
+    },
+    
     initThreeJS() {
       // 创建场景
       this.scene = new THREE.Scene();

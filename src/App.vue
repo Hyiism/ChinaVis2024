@@ -1,35 +1,36 @@
 <template>
   <div id="app">
-
     <div id="titleAll">
       <h2>XXX可视化系统</h2>
     </div>
 
-    <div id="LeftViewer">
-      <LeftViewer/>
+
+    <!--                       整体视图组件                            -->
+    <div id="LeftViewer" v-if="currentView.LeftViewer">
+      <LeftViewer />
     </div>
 
-    <div id="LeftBottomViewer">
+    <div id="LeftBottomViewer" v-if="currentView.LeftBottomViewer">
       <LeftBottomViewer/>
     </div>
 
     <div id="ModelViewer">
-      <ModelViewer/>
+      <ModelViewer @stateChanged="handleStateChange" :stateCode="initialStateCode""/>
     </div>
 
-    <div id="RightViewer">
+    <div id="RightViewer" v-if="currentView.RightViewer">
       <RightViewer/>
     </div>
 
-    <div id="BottomViewer">
+    <div id="BottomViewer" v-if="currentView.BottomViewer">
       <BottomViewer/>
     </div>
 
-    <div id="BottomCenterViewer">
+    <div id="BottomCenterViewer" v-if="currentView.BottomCenterViewer">
       <BottomCenterViewer/>
     </div>
 
-    <div id="BottomRightViewer">
+    <div id="BottomRightViewer" v-if="currentView.BottomRightViewer">
       <BottomRightViewer/>
     </div>
 
@@ -37,24 +38,55 @@
       <TimeLine/>
     </div>
 
-  </div>
+        <!--                       班级视图组件                            -->
+    <div id="LeftViewerClass" v-if="currentView.LeftViewerClass">
+      <LeftViewerClass/>
+    </div>
 
+    <div id="LeftBottomViewerClass" v-if="currentView.LeftBottomViewerClass">
+      <LeftBottomViewerClass/>
+    </div>
+
+    <div id="RightViewerClass" v-if="currentView.RightViewerClass">
+      <RightViewerClass/>
+    </div>
+
+    <div id="BottomViewerClass" v-if="currentView.BottomViewerClass">
+      <BottomViewerClass/>
+    </div>
+
+    <div id="BottomCenterViewerClass" v-if="currentView.BottomCenterViewerClass">
+      <BottomCenterViewerClass/>
+    </div>
+
+    <div id="BottomRightViewerClass" v-if="currentView.BottomRightViewerClass">
+      <BottomRightViewerClass/>
+    </div>
+  </div>
 </template>
 
 <script>
-import ModelViewer from './components/ModelViewer.vue';
-import LeftViewer from './components/LeftViewer.vue';
-import LeftBottomViewer from './components/LeftBottomViewer.vue';
-import RightViewer from './components/RightViewer.vue';
-import BottomViewer from './components/BottomViewer.vue';
-import BottomCenterViewer from './components/BottomCenterViewer.vue';
-import BottomRightViewer from './components/BottomRightViewer.vue';
-import TimeLine from './components/TimeLine.vue';
+import ModelViewer from './components/OverallViewer/ModelViewer.vue';
+import LeftViewer from './components/OverallViewer/LeftViewer.vue';
+import LeftBottomViewer from './components/OverallViewer/LeftBottomViewer.vue';
+import RightViewer from './components/OverallViewer/RightViewer.vue';
+import BottomViewer from './components/OverallViewer/BottomViewer.vue';
+import BottomCenterViewer from './components/OverallViewer/BottomCenterViewer.vue';
+import BottomRightViewer from './components/OverallViewer/BottomRightViewer.vue';
+import TimeLine from './components/OverallViewer/TimeLine.vue';
+
+import LeftViewerClass from './components/ClassViewer/LeftViewerClass.vue';
+import LeftBottomViewerClass from './components/ClassViewer/LeftBottomViewerClass.vue';
+import RightViewerClass from './components/ClassViewer/RightViewerClass.vue';
+import BottomViewerClass from './components/ClassViewer/BottomViewerClass.vue';
+import BottomCenterViewerClass from './components/ClassViewer/BottomCenterViewerClass.vue';
+import BottomRightViewerClass from './components/ClassViewer/BottomRightViewerClass.vue';
 
 
 export default {
   name: 'App',
   components: {
+    // 整体视图组件
     ModelViewer,
     LeftViewer,
     LeftBottomViewer,
@@ -62,9 +94,115 @@ export default {
     BottomViewer,
     BottomCenterViewer,
     BottomRightViewer,
-    TimeLine
+    TimeLine,
+    // 班级视图组件
+    LeftViewerClass,
+    LeftBottomViewerClass,
+    RightViewerClass,
+    BottomViewerClass,
+    BottomCenterViewerClass,
+    BottomRightViewerClass
+
+  },
+  data() {
+    return {
+      initialStateCode: this.getInitialStateCode(),
+      currentView: this.getViewState(this.getInitialStateCode())
+      // currentView: {
+      //   // 整体视图组件显示控制
+      //   LeftViewer: true,
+      //   LeftBottomViewer: true,
+      //   RightViewer: true,
+      //   BottomViewer: true,
+      //   BottomCenterViewer: true,
+      //   BottomRightViewer: true,
+      //   TimeLine: true,
+      //   // 班级视图组件显示控制
+      //   LeftViewerClass: false,
+      //   LeftBottomViewerClass: false,
+      //   RightViewerClass: false,
+      //   BottomViewerClass: false,
+      //   BottomCenterViewerClass: false,
+      //   BottomRightViewerClass: false
+      // }
+    }
+  },
+  methods: {
+    getInitialStateCode() {
+      const savedState = localStorage.getItem('modelViewerStateCode');
+      return savedState ? parseInt(savedState) : 0;
+    },
+    getViewState(stateCode) {
+      console.log(stateCode);
+      // stateCode === 0，整体视图
+      if (stateCode === 0) {
+        alert("To 整体视图");
+        return{
+          // 整体视图组件显示控制
+          LeftViewer: true,
+          LeftBottomViewer: true,
+          RightViewer: true,
+          BottomViewer: true,
+          BottomCenterViewer: true,
+          BottomRightViewer: true,
+          TimeLine: true,
+          // 班级视图组件显示控制
+          LeftViewerClass: false,
+          LeftBottomViewerClass: false,
+          RightViewerClass: false,
+          BottomViewerClass: false,
+          BottomCenterViewerClass: false,
+          BottomRightViewerClass: false
+        };
+        // stateCode === 1，class视图
+      } else if (stateCode === 1) {
+        alert("To 班级视图");
+        return{
+          // 整体视图组件显示控制
+          LeftViewer: false,
+          LeftBottomViewer: false,
+          RightViewer: false,
+          BottomViewer: false,
+          BottomCenterViewer: false,
+          BottomRightViewer: false,
+          TimeLine: false,
+          // 班级视图组件显示控制
+          LeftViewerClass: true,
+          LeftBottomViewerClass: true,
+          RightViewerClass: true,
+          BottomViewerClass: true,
+          BottomCenterViewerClass: true,
+          BottomRightViewerClass: true
+        };
+        // stateCode === 2，student视图
+      } else if (stateCode === 2) {
+          alert("To 学生视图");
+          return{
+          // 整体视图组件显示控制
+          LeftViewer: true,
+          LeftBottomViewer: true,
+          RightViewer: true,
+          BottomViewer: true,
+          BottomCenterViewer: true,
+          BottomRightViewer: true,
+          TimeLine: true,
+          // 班级视图组件显示控制
+          LeftViewerClass: false,
+          LeftBottomViewerClass: false,
+          RightViewerClass: false,
+          BottomViewerClass: false,
+          BottomCenterViewerClass: false,
+          BottomRightViewerClass: false
+        };
+      }else{
+        console.error("stateCode error!", error);
+      }
+    },
+    handleStateChange(stateCode) {
+      this.currentView = this.getViewState(stateCode);
+    }
   }
-};
+}
 </script>
 
 
@@ -94,6 +232,7 @@ export default {
   background-color: #f0f0f0;
   border-bottom: 1px solid #e0e0e0;
 }
+                                                 /*                     整体视图样式控制         */
 
 #ModelViewer {
   width: 50%;
@@ -207,6 +346,92 @@ export default {
   right: 0;
 }
 
+                                                         /*                     班级视图样式控制         */
+#LeftViewerClass {
+  width: calc(25% - 4px);
+  height: calc(30% - 4px);
+  position: absolute;
+  top: 3%;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 添加阴影效果 */
+  box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.1); 
+  border-radius: 10px; 
+}
 
+#LeftBottomViewerClass {
+  width: calc(25% - 4px);
+  height: calc(30% - 4px);
+  position: absolute;
+  top: 33%;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 添加阴影效果 */
+  box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.1); 
+  border-radius: 10px; 
+}
+
+#RightViewerClass {
+  width: calc(25% - 4px); /* Adjust this value to control the space between the two viewers */
+  height: calc(60% - 4px);
+  position: absolute;
+  top: 3%;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 添加阴影效果 */
+  box-shadow: -2px 0px 8px rgba(0, 0, 0, 0.1); 
+  border-radius: 10px; 
+}
+
+#BottomViewerClass {
+  width: calc(55% - 4px);
+  height: calc(37% - 1px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* 添加阴影效果 */
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); 
+  border-radius: 10px; 
+  position: absolute;
+  bottom: 0; /* Stick to the bottom */
+  left: 0;
+}
+
+#BottomCenterViewerClass {
+  width: calc(20% - 4px);
+  height: calc(37% - 1px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* 添加阴影效果 */
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); 
+  border-radius: 10px; 
+  position: absolute;
+  bottom: 0; /* Stick to the bottom */
+  left: 55%;
+}
+
+#BottomRightViewerClass {
+  width: calc(25% - 4px);
+  height: calc(37% - 1px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* 添加阴影效果 */
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); 
+  border-radius: 5px; 
+  position: absolute;
+  bottom: 0; /* Stick to the bottom */
+  right: 0;
+}
 
 </style>

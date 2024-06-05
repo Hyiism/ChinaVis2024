@@ -3,7 +3,8 @@
     <div class="search-container">
       <el-input 
         v-model="searchValue" size="mini" clearable
-        placeholder="Search" style="width: 90%;"></el-input>
+        placeholder="Search" style="width: 90%;" @keyup.enter="doFilter">
+      </el-input>
       <el-button type="primary" size="mini" @click="doFilter">搜索</el-button>
     </div>
     <el-table :data="tableData" border @sort-change="handleSortChange">
@@ -23,7 +24,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="currentPage"
-        :page-sizes="[1, 3, 5]"
+        :page-sizes="[1, 3, 4]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="totalItems"
