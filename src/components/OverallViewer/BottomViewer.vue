@@ -112,7 +112,7 @@ export default {
 
         backgroundColor: '#fff',
         legend: {
-          bottom: "0.5%",
+          bottom: "1",
           data: ['0-5', '5-10', '10-15'],
           itemGap: 30,
           textStyle: {
@@ -261,7 +261,7 @@ export default {
 <style scoped>
 .bottom-chart {
   width: 100%;
-  height: 100%;
+  height: 90%;
   display: flex;
   justify-content: center;
   align-items: center;

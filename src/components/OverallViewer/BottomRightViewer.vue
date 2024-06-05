@@ -1,5 +1,5 @@
 <template>
-  <!-- 桑葚图 展示总体知识点和题目情况 -->
+  <!-- 变换图 展示总体知识点和题目情况 -->
   <div class="chart-container-right">
     <div id="main-right"> </div>
   </div>
