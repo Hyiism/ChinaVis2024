@@ -9,6 +9,7 @@
 <script>
 import * as d3 from 'd3';
 import axios from 'axios';
+import PubSub from 'pubsub-js';
 
 export default {
     name: 'TimeSelectionChart',
@@ -59,11 +60,18 @@ export default {
                 border: '0px',
                 borderRadius: '8px',
                 zIndex: 1
-            }
+            },
+            selectedDate: "Thu Aug 31 2023",
+            className : 'Class1'
         };
     },
     mounted() {
         this.drawChart();
+        this.token = PubSub.subscribe('dateSelected', (msg, value) => {
+            this.selectedDate = value;
+            console.log(this.selectedDate);
+            this.redrawChart();
+        });
     },
     methods: {
         drawChart() {
@@ -86,8 +94,9 @@ export default {
                 .attr('width', chartContainerWidth)
                 .attr('height', height);
 
-            const data = d3.range(500).map((d, i) => ({
-                date: new Date(2023, 3, 13, 0, i * 1, 0),
+            const baseDate = new Date(this.selectedDate);
+            const data = d3.range(1440).map((d, i) => ({
+                date: new Date(baseDate.getTime() + i * 60000), // 每分钟增加一次
                 value: Math.random()
             }));
 
@@ -126,10 +135,8 @@ export default {
                 .on('start', (event) => {
                     // 获取刷子的起始位置
                     const [mouseXStart, mouseYStart] = d3.pointer(event, window);
-                    console.log('Brush start position:', mouseXStart, mouseYStart);
                     startXPosition = mouseXStart;
                     startYPosition = mouseYStart;
-                    console.log('Brush start position:', startXPosition, startYPosition);
                 })
                 .on('brush', (event) => {
                     const selection = event.selection;
@@ -152,31 +159,50 @@ export default {
                     const selection = event.selection;
                     if (selection) {
                         const [x0, x1] = selection.map(x.invert);
-                        console.log('Brush ended:', x0, x1);
+                        const start = this.selectedDate + ' ' + x0.toLocaleTimeString();
+                        const end = this.selectedDate + ' ' + x1.toLocaleTimeString();
                         // 调用发送数据到后端的方法
-                        this.sendDataToBackend(x0, x1);
+                        this.sendDataToBackend(start,end,this.className);
+                        console.log("发送",x0, x1)
                         this.tooltipVisibleStart = false;
                         this.tooltipVisibleEnd = false;
                     }
                 });
-
-            svg.append('g')
+            const brushGroup = svg.append('g')
                 .attr('class', 'brush')
                 .call(brush);
+
+            // 添加全局点击事件监听器，点击时清除刷子
+            d3.select('body').on('click', (event) => {
+                const isClickInsideBrush = event.target.closest('.brush');
+                if (!isClickInsideBrush) {
+                    brushGroup.call(brush.move, null);
+                }
+            });
         },
-        sendDataToBackend(startTime, endTime) {
+        redrawChart() {
+            // 在这里重新绘制图表
+            d3.select(this.$refs.chartContainer).select('svg').remove(); // 移除旧的图表
+            this.drawChart(); // 重新调用绘图方法
+        },
+        sendDataToBackend(startTime, endTime, className) {
             // 使用axios发送数据到后端
-            axios.post('', {
-                startTime: startTime.toLocaleTimeString(),
-                endTime: endTime.toLocaleTimeString()
+            this.$axios.get('http://10.12.44.205:8000/getStudent', {
+                params: {
+                    startTime: startTime, // 使用toISOString()将日期转换为ISO格式
+                    endTime: endTime,
+                    className: className
+                }
             })
                 .then(response => {
-                    console.log('Data sent successfully:', response.data);
+                    PubSub.publish('studentAppear', JSON.parse(response.data));
+
                 })
                 .catch(error => {
                     console.error('Error sending data:', error);
                 });
         }
+
 
     }
 };
