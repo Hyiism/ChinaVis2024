@@ -91,6 +91,8 @@ export default {
         xAxis3D: {
           name: 'x',
           type: 'value',
+          min: -7,  // 指定 y 轴的最小值
+          max: 13,  // 指定 y 轴的最大值
           axisLine: {
             lineStyle: {
               color: '#c0c0c0' // 坐标轴线颜色
@@ -103,6 +105,8 @@ export default {
         yAxis3D: {
           name: 'y',
           type: 'value',
+          min: -7,  // 指定 y 轴的最小值
+          max: 13,  // 指定 y 轴的最大值
           axisLine: {
             lineStyle: {
               color: '#c0c0c0' // 坐标轴线颜色
@@ -115,8 +119,8 @@ export default {
         zAxis3D: {
           name: 'z',
           type: 'value',
-          min: 6,  // 指定 z 轴的最小值
-          max: 12,  // 指定 z 轴的最大值
+          min: 4,  // 指定 z 轴的最小值
+          max: 14,  // 指定 z 轴的最大值
           axisLine: {
             lineStyle: {
               color: '#c0c0c0' // 坐标轴线颜色

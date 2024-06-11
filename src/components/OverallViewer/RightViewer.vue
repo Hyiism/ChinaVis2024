@@ -29,7 +29,22 @@ export default {
         y: 2,
         z: 3,
         cluster_label: 4,
-        total_score: 5
+        total_score: 5,
+
+        title_counts: 6,
+        time_difference_mean: 7,
+        time_split_0_percentage: 8,
+        time_split_1_percentage: 9,
+        time_split_2_percentage: 10,
+        submit_times_avg: 11,
+        submit_times_max: 12,
+        total_syth_score_avg: 13,
+        all_memory_avg: 14,
+        all_timeconsume_avg: 15,
+        state_ae_percentage: 16,
+        state_e_percentage: 17,
+        state_pc_percentage: 18,
+        state_ac_percentage: 19
       },
 
       labels: [0, 1, 2, 3 ],
@@ -49,6 +64,7 @@ export default {
         .then(response => {
           this.data = JSON.parse(response.data).data;
           console.log("###scater start###")
+          console.log(this.data)
           // 数据获取成功后再初始化图表，不然图表获取不到数据
           this.myChart = echarts.init(this.$refs.chart);
           this.updateChart();
@@ -91,6 +107,8 @@ export default {
         xAxis3D: {
           name: 'x',
           type: 'value',
+          min: -7,  // 指定 y 轴的最小值
+          max: 13,  // 指定 y 轴的最大值
           axisLine: {
             lineStyle: {
               color: '#c0c0c0' // 坐标轴线颜色
@@ -103,6 +121,8 @@ export default {
         yAxis3D: {
           name: 'y',
           type: 'value',
+          min: -7,  // 指定 y 轴的最小值
+          max: 13,  // 指定 y 轴的最大值
           axisLine: {
             lineStyle: {
               color: '#c0c0c0' // 坐标轴线颜色
@@ -115,8 +135,8 @@ export default {
         zAxis3D: {
           name: 'z',
           type: 'value',
-          min: 6,  // 指定 z 轴的最小值
-          max: 12,  // 指定 z 轴的最大值
+          min: 4,  // 指定 z 轴的最小值
+          max: 14,  // 指定 z 轴的最大值
           axisLine: {
             lineStyle: {
               color: '#c0c0c0' // 坐标轴线颜色
@@ -142,7 +162,7 @@ export default {
         series: [
           {
             type: 'scatter3D',
-            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score', 'student_id'],
+            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score', 'student_id', 'title_counts', 'time_difference_mean', 'time_split_0_percentage', 'time_split_1_percentage', 'time_split_2_percentage', 'submit_times_avg', 'submit_times_max', 'total_syth_score_avg', 'all_memory_avg', 'all_timeconsume_avg', 'state_ae_percentage', 'state_e_percentage', 'state_pc_percentage', 'state_ac_percentage'],
             data: this.data.map(item => {
               return {
                 value: [
@@ -152,6 +172,21 @@ export default {
                   item[this.fieldIndices.cluster_label],
                   item[this.fieldIndices.total_score],
                   item[this.fieldIndices.student_id],
+
+                  item[this.fieldIndices.title_counts],
+                  item[this.fieldIndices.time_difference_mean],
+                  item[this.fieldIndices.time_split_0_percentage],
+                  item[this.fieldIndices.time_split_1_percentage],
+                  item[this.fieldIndices.time_split_2_percentage],
+                  item[this.fieldIndices.submit_times_avg],
+                  item[this.fieldIndices.submit_times_max],
+                  item[this.fieldIndices.total_syth_score_avg],
+                  item[this.fieldIndices.all_memory_avg],
+                  item[this.fieldIndices.all_timeconsume_avg],
+                  item[this.fieldIndices.state_ae_percentage],
+                  item[this.fieldIndices.state_e_percentage],
+                  item[this.fieldIndices.state_pc_percentage],
+                  item[this.fieldIndices.state_ac_percentage]
                 ],
                 itemStyle: {
                   color: this.labelColors[labelIndexMap[item[this.fieldIndices.cluster_label]]]
