@@ -16,6 +16,7 @@
     "d3": "^7.9.0",
     "echarts": "^5.5.0",
     "echarts-gl": "^2.0.9",
+    "echarts-stat": "^1.2.0",
     "element-ui": "^2.15.14",
     "jquery": "^1.9.1",
     "moment": "^2.30.1",
