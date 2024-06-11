@@ -12,6 +12,7 @@
 <script>
 import * as echarts from 'echarts';
 import ecStat from 'echarts-stat'; // 正确引入 echarts-stat
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default {
   name: 'ScatterChart',
@@ -21,9 +22,11 @@ export default {
       rawData: [],
       data: [],
       clusterLabels: [],
+      studentId: [],
       clusterMethod: 'pca',
       CLUSTER_COUNT: 4,
-      DIENSIION_CLUSTER_INDEX: 2,
+      // 颜色指向数组data中的data[3]，即cluster_label
+      DIENSIION_CLUSTER_INDEX: 3,
       COLOR_ALL: [
         '#37A2DA',
         '#e06343',
@@ -56,8 +59,9 @@ export default {
         });
     },
     processData() {
-      this.data = this.rawData.map(item => [item[1], item[2]]); // 提取 x 和 y
+      this.data = this.rawData.map(item => [item[1], item[2], item[0]]); // 现在data为[x,y,student_id]
       this.clusterLabels = this.rawData.map(item => item[3]); // 提取 cluster_label
+      this.studentIds = this.rawData.map(item => item[0]); // 提取 student_id
     },
     initChart() {
       this.$nextTick(() => {
@@ -68,8 +72,14 @@ export default {
         this.generatePieces();
         echarts.registerTransform(ecStat.transform.clustering);
         this.updateChart();
+
+        this.myChart.on('click', (params) => {
+        const studentId = params.data[2]; // 获取 student_id
+        EventBus.$emit('studentSelected', studentId); // 触发事件，传递 student_id
+      });
       });
     },
+
     generatePieces() {
       this.pieces = [];
       for (let i = 0; i < this.CLUSTER_COUNT; i++) {
@@ -107,7 +117,7 @@ export default {
         yAxis: {},
         series: {
           type: 'scatter',
-          encode: { tooltip: [0, 1] },
+          encode: { tooltip: [2]},
           symbolSize: 10, // 调整点的大小
           itemStyle: {
             borderColor: '#555'
