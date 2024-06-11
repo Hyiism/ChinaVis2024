@@ -86,7 +86,7 @@ export default {
 
           },
           textStyle: {
-            fontSize: 20 // 设置字体大小
+            fontSize: 15 // 设置字体大小zcg
           },
         },
         series: [
