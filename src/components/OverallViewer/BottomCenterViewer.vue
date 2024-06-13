@@ -1,15 +1,39 @@
 <template>
   <div class="chart-container-bottomcenter">
-    <p> 知识点角度雷达图: </p>
-    <p>算出各个知识点的平均提交次数 平均做题时间 平均时间复杂度 平均空间复杂度 平均得分情况</p>
-    <p> 将八个知识点的线画进雷达图</p>
+    <!-- 使用 radio 组件 -->
+    <radio :options="options" v-model="selectedOption" />
+    <p>Selected Option: {{ selectedOption }}</p>
   </div>
 </template>
 
 <script>
+import { radio } from "@jashkenas/inputs"
+
+export default {
+  components: {
+    radio
+  },
+  data() {
+    return {
+      // 定义选项
+      options: ["Lust", "Gluttony", "Greed", "Sloth", "Wrath", "Envy", "Pride"],
+      // 绑定选择的值
+      selectedOption: null
+    };
+  },
+
+}
 
 </script>
 
 <style scoped>
+.chart-container-bottomcenter {
+  width: 100%;
+  height: 100%;
+}
+.radio input[type=radio] {
+  width: 100%;
+  height: 100%;
+}
 
 </style>

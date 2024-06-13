@@ -32,6 +32,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from '@tweenjs/tween.js';
 import PubSub from 'pubsub-js';
 import moment from 'moment';
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default {
   name: 'ModelViewer',
@@ -108,7 +109,21 @@ export default {
     });
 
   },
+  created() {
+    EventBus.$on('studentSelected', this.handleStudentSelected);
+  },
+  beforeDestroy() {
+    EventBus.$off('studentSelected', this.handleStudentSelected);
+  },
   methods: {
+    // TODO: 处理在嵌入中选择学生点的操作
+    handleStudentSelected(studentId){
+      this.selectedStudentId = studentId;
+      // 模拟点击此studentId对应的学生
+      console.log("studentId-modelview", studentId);
+      
+    },
+
     getSavedState() {
       const savedState = localStorage.getItem('modelViewerStateCode');
       return savedState ? parseInt(savedState) : 0;
