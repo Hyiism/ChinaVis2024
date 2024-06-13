@@ -3,6 +3,8 @@
   <div>
     <!-- <p>班级视图BottomLeft test</p> -->
     <div ref="chart" class="chart-container"></div>
+    <!-- <p>班级视图BottomLeft test</p> -->
+    <div ref="chart" class="chart-container"></div>
   </div>
 </template>
 
@@ -261,6 +263,11 @@ export default {
 };
 </script>
 
+<style>
+.chart-container {
+  width: 100%;
+  height: 100%;
+}
 <style>
 .chart-container {
   width: 100%;

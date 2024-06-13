@@ -1,188 +1,168 @@
 <template>
-  <div ref="chart" id="scater"></div>
+  <div id="scatter-all">
+    <div id="scatter-button">
+      <button @click="setClusterMethod('pca')" class="cluster-button" :class="{ 'active': clusterMethod === 'pca' }">PCA</button>
+      <button @click="setClusterMethod('tsne')" class="cluster-button" :class="{ 'active': clusterMethod === 'tsne' }">T-SNE</button>
+      <button @click="setClusterMethod('umap')" class="cluster-button" :class="{ 'active': clusterMethod === 'umap' }">UMAP</button>
+    </div>
+    <div ref="chart" id="scatter-chart"></div>
+  </div>
 </template>
 
 <script>
 import * as echarts from 'echarts';
-import 'echarts-gl';  // 引入 ECharts 3D 扩展
+import ecStat from 'echarts-stat'; // 正确引入 echarts-stat
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default {
-  name: 'ChartViewer',
+  name: 'ScatterChart',
   data() {
     return {
       myChart: null,
-      // data: [
-      //   [1, 10, 20, 30, 85, 'A'],
-      //   [2, 20, 30, 40, 90, 'B'],
-      //   [3, 30, 40, 50, 95, 'A'],
-      //   [4, 40, 50, 60, 80, 'C'],
-      //   [5, 50, 60, 70, 70, 'B']
-      // ],
-
-      // 这个用来接受后段传来的json数据
+      rawData: [],
       data: [],
-
-      
-      fieldIndices: {
-        student_id: 0,
-        x: 1,
-        y: 2,
-        z: 3,
-        cluster_label: 4,
-        total_score: 5
-      },
-
-      labels: [0, 1, 2, 3 ],
-      labelColors: ['#9A60B4', '#FB8351', '#3BA272', '#73C0DE']
+      clusterLabels: [],
+      studentId: [],
+      clusterMethod: 'pca',
+      CLUSTER_COUNT: 4,
+      // 颜色指向数组data中的data[3]，即cluster_label
+      DIENSIION_CLUSTER_INDEX: 3,
+      COLOR_ALL: [
+        '#37A2DA',
+        '#e06343',
+        '#37a354',
+        '#b55dba',
+        '#b5bd48'
+      ],
+      pieces: []
     };
   },
   mounted() {
-    this.fetchScaterData();
-    // this.myChart = echarts.init(this.$refs.chart);
-    // this.updateChart();
+    this.fetchScatterData();
   },
-
   methods: {
-    // 向后端请求top15的详细成绩数据
-    fetchScaterData() {
-      this.$axios.get('http://10.12.44.190:8000/scaterVis') // 替换为实际的API端点
+    setClusterMethod(method) {
+      this.clusterMethod = method;
+      this.fetchScatterData();
+    },
+    fetchScatterData() {
+      this.$axios.get(`http://10.12.44.190:8000/scaterVis_2d/?class_id=Class2&method=${this.clusterMethod}`) // 替换为实际的API端点
         .then(response => {
-          this.data = JSON.parse(response.data).data;
-          console.log("###scater start###")
-          // 数据获取成功后再初始化图表，不然图表获取不到数据
-          this.myChart = echarts.init(this.$refs.chart);
-          this.updateChart();
+          this.rawData = JSON.parse(response.data).data;
+          console.log("###2d scatter start###");
+          console.log(this.rawData);
+          this.processData();
+          this.initChart();
         })
         .catch(error => {
           console.error("There was an error!", error);
         });
     },
+    processData() {
+      this.data = this.rawData.map(item => [item[1], item[2], item[0]]); // 现在data为[x,y,student_id]
+      this.clusterLabels = this.rawData.map(item => item[3]); // 提取 cluster_label
+      this.studentIds = this.rawData.map(item => item[0]); // 提取 student_id
+    },
+    initChart() {
+      this.$nextTick(() => {
+        if (this.myChart) {
+          this.myChart.dispose();
+        }
+        this.myChart = echarts.init(this.$refs.chart);
+        this.generatePieces();
+        echarts.registerTransform(ecStat.transform.clustering);
+        this.updateChart();
 
-    getMaxScore(data) {
-      return Math.max(...data.map(item => item[this.fieldIndices.total_score]));
+        this.myChart.on('click', (params) => {
+        const studentId = params.data[2]; // 获取 student_id
+        EventBus.$emit('studentSelected', studentId); // 触发事件，传递 student_id
+      });
+      });
+    },
+
+    generatePieces() {
+      this.pieces = [];
+      for (let i = 0; i < this.CLUSTER_COUNT; i++) {
+        this.pieces.push({
+          value: i,
+          label: 'cluster ' + i,
+          color: this.COLOR_ALL[i]
+        });
+      }
     },
     updateChart() {
-      const maxScore = this.getMaxScore(this.data);
-      const labelIndexMap = this.labels.reduce((obj, label, index) => {
-        obj[label] = index;
-        return obj;
-      }, {});
-
-      this.myChart.setOption({
-        title: {
-          text: '学生做题情况嵌入展示',
-          left: 'center',
-          textStyle: {
-            color: '#000',
-            fontSize: 20
-        },
-          top: 40
-        },
-
-        tooltip: {},
-        visualMap: {
-          show: true, // 不显示视觉映射控件
-          dimension: this.fieldIndices.cluster_label,
-          categories: this.labels,
-          inRange: {
-            color: this.labelColors
-          }
-        },
-        xAxis3D: {
-          name: 'x',
-          type: 'value',
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#c0c0c0' // 坐标轴标签颜色
-          }
-        },
-        yAxis3D: {
-          name: 'y',
-          type: 'value',
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#c0c0c0' // 坐标轴标签颜色
-          }
-        },
-        zAxis3D: {
-          name: 'z',
-          type: 'value',
-          min: 6,  // 指定 z 轴的最小值
-          max: 12,  // 指定 z 轴的最大值
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#000' // 坐标轴标签颜色
-          }
-        },
-        grid3D: {
-          axisLine: {
-            lineStyle: {
-              color: '#000' // 三维网格轴线颜色
-            }
-          },
-          axisPointer: {
-            lineStyle: {
-              color: '#ffbd67'
-            }
-          },
-          viewControl: {}
-        },
-        series: [
+      const option = {
+        dataset: [
           {
-            type: 'scatter3D',
-            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score', 'student_id'],
-            data: this.data.map(item => {
-              return {
-                value: [
-                  item[this.fieldIndices.x],
-                  item[this.fieldIndices.y],
-                  item[this.fieldIndices.z],
-                  item[this.fieldIndices.cluster_label],
-                  item[this.fieldIndices.total_score],
-                  item[this.fieldIndices.student_id],
-                ],
-                itemStyle: {
-                  color: this.labelColors[labelIndexMap[item[this.fieldIndices.cluster_label]]]
-                }
-              };
-            }),
-            symbolSize: val => {
-              // 根据total_score的值来调整点的大小
-              // return (val[4] / (maxScore)) * 10; // Scale symbol size based on score
-              return ((val[4] - 30) / (maxScore - 30)) * 8 + 5
-            },
-            itemStyle: {
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.8)'
-            },
-            emphasis: {
-              itemStyle: {
-                color: '#fff'
-              }
-            }
+            source: this.data.map((item, index) => [...item, this.clusterLabels[index]])
           }
-        ]
-      });
+        ],
+        tooltip: {
+          position: 'top'
+        },
+        visualMap: {
+          type: 'piecewise',
+          top: 'middle',
+          min: 0,
+          max: this.CLUSTER_COUNT,
+          left: 10,
+          splitNumber: this.CLUSTER_COUNT,
+          dimension: this.DIENSIION_CLUSTER_INDEX,
+          pieces: this.pieces
+        },
+        grid: {
+          left: 120
+        },
+        xAxis: {},
+        yAxis: {},
+        series: {
+          type: 'scatter',
+          encode: { tooltip: [2]},
+          symbolSize: 10, // 调整点的大小
+          itemStyle: {
+            borderColor: '#555'
+          }
+        }
+      };
+
+      this.myChart.setOption(option);
     }
   }
 };
 </script>
 
 <style scoped>
-#scater{
+
+#scatter-all {
   width: 100%;
   height: 100%;
+}
+#scatter-button {
+  /* margin-top: 10px; */
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#scatter-chart {
+  width: 100%;
+  height: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cluster-button {
+  margin-right: 10px;
+  width: 100px;
+  height: 30px;
+  font-size: 16px;
+  background-color: #409EFF;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+.active {
+  background-color: #45a049 !important;
 }
 </style>

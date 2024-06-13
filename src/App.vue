@@ -108,23 +108,6 @@ export default {
     return {
       initialStateCode: this.getInitialStateCode(),
       currentView: this.getViewState(this.getInitialStateCode())
-      // currentView: {
-      //   // 整体视图组件显示控制
-      //   LeftViewer: true,
-      //   LeftBottomViewer: true,
-      //   RightViewer: true,
-      //   BottomViewer: true,
-      //   BottomCenterViewer: true,
-      //   BottomRightViewer: true,
-      //   TimeLine: true,
-      //   // 班级视图组件显示控制
-      //   LeftViewerClass: false,
-      //   LeftBottomViewerClass: false,
-      //   RightViewerClass: false,
-      //   BottomViewerClass: false,
-      //   BottomCenterViewerClass: false,
-      //   BottomRightViewerClass: false
-      // }
     }
   },
   methods: {
@@ -136,7 +119,7 @@ export default {
       console.log(stateCode);
       // stateCode === 0，整体视图
       if (stateCode === 0) {
-        alert("To 整体视图");
+        // alert("To 整体视图");
         return{
           // 整体视图组件显示控制
           LeftViewer: true,
@@ -156,7 +139,7 @@ export default {
         };
         // stateCode === 1，class视图
       } else if (stateCode === 1) {
-        alert("To 班级视图");
+        // alert("To 班级视图");
         return{
           // 整体视图组件显示控制
           LeftViewer: false,
@@ -176,7 +159,7 @@ export default {
         };
         // stateCode === 2，student视图
       } else if (stateCode === 2) {
-          alert("To 学生视图");
+          // alert("To 学生视图");
           return{
           // 整体视图组件显示控制
           LeftViewer: true,

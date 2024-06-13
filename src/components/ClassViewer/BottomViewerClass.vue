@@ -2,6 +2,8 @@
   <div class="bottom-chart">
     <!-- <p>班级视图BottomViewer test</p> -->
     <div ref="chart" class="bottom-chart"></div>
+    <!-- <p>班级视图BottomViewer test</p> -->
+    <div ref="chart" class="bottom-chart"></div>
   </div>
 </template>
 
@@ -248,12 +250,10 @@ export default {
 </script>
 
 <style scoped>
-.bottom-chart {
-  width: 100%;
-  height: 100%;
-  overflow: visible; /* 确保容器能显示超出的部分 */
-  /* position: relative; */
-}
+
 </style>
+
+
+
 
 
