@@ -33,20 +33,20 @@ export default {
     processData(data) {
       const formattedData = [];
       data.forEach(row => {
-        formattedData.push({ group: row.class_id, variable: 'b3C9s_score', value: row.b3C9s_score });
-        formattedData.push({ group: row.class_id, variable: 'g7R2j_score', value: row.g7R2j_score });
-        formattedData.push({ group: row.class_id, variable: 'k4W1c_score', value: row.k4W1c_score });
-        formattedData.push({ group: row.class_id, variable: 'm3D1v_score', value: row.m3D1v_score });
-        formattedData.push({ group: row.class_id, variable: 'r8S3g_score', value: row.r8S3g_score });
-        formattedData.push({ group: row.class_id, variable: 's8Y2f_score', value: row.s8Y2f_score });
-        formattedData.push({ group: row.class_id, variable: 't5V9e_score', value: row.t5V9e_score });
-        formattedData.push({ group: row.class_id, variable: 'y9W5d_score', value: row.y9W5d_score });
+        formattedData.push({ group: row.student_id, variable: 'b3C9s_score', value: row.b3C9s_score });
+        formattedData.push({ group: row.student_id, variable: 'g7R2j_score', value: row.g7R2j_score });
+        formattedData.push({ group: row.student_id, variable: 'k4W1c_score', value: row.k4W1c_score });
+        formattedData.push({ group: row.student_id, variable: 'm3D1v_score', value: row.m3D1v_score });
+        formattedData.push({ group: row.student_id, variable: 'r8S3g_score', value: row.r8S3g_score });
+        formattedData.push({ group: row.student_id, variable: 's8Y2f_score', value: row.s8Y2f_score });
+        formattedData.push({ group: row.student_id, variable: 't5V9e_score', value: row.t5V9e_score });
+        formattedData.push({ group: row.student_id, variable: 'y9W5d_score', value: row.y9W5d_score });
         // formattedData.push({ group: row.class_id, variable: 'class_average_score', value: row.class_average_score });
       });
       this.heatmapData = formattedData;
     },
     createChart() {
-      const margin = {top: 60, right: 50, bottom: 30, left: 100};
+      const margin = {top: 60, right: 60, bottom: 30, left: 105};
       // const width = 1050 - margin.left - margin.right;
       // const height = 300 - margin.top - margin.bottom;
       const width = this.$refs.chart.clientWidth - margin.left - margin.right - 0;
@@ -87,11 +87,11 @@ export default {
         .range([0, width])
         .domain(myGroups)
         .padding(0.05);
-      svg.append("g")
-        .style("font-size", 15)
-        .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x).tickSize(0))
-        .select(".domain").remove();
+      // svg.append("g")
+      //   .style("font-size", 15)
+      //   .attr("transform", `translate(0, ${height})`)
+      //   .call(d3.axisBottom(x).tickSize(0))
+      //   .select(".domain").remove();
 
       // Build Y scales and axis
       const y = d3.scaleBand()
@@ -110,7 +110,24 @@ export default {
       // Compute color scale domain
       const valueExtent = d3.extent(this.heatmapData, d => d.value);
       const myColor = d3.scaleSequential()
-        .interpolator(d3.interpolateInferno)
+        // .interpolator(d3.interpolateInferno) //颜色从黄到紫
+        // .interpolator(d3.interpolateViridis) //颜色从深紫色到黄绿色
+        .interpolator(d3.interpolateMagma)  //颜色从深紫色到黄色
+        // .interpolator(d3.interpolatePlasma) //颜色从紫色到黄色，过渡较为平滑
+        // .interpolator(d3.interpolateCividis) //颜色从蓝色到黄色，适合色盲人士
+        // .interpolator(d3.interpolateWarm) //颜色从红色到黄色，模拟温暖的颜色渐变
+        // .interpolator(d3.interpolateCool) //颜色从蓝色到红色，模拟凉爽的颜色渐变
+        // .interpolator(d3.interpolateCubehelixDefault) //基于立方螺旋算法的颜色渐变，默认从黑色到白色
+        // .interpolator(d3.interpolateRainbow) //颜色从红色到紫色的彩虹渐变
+        // .interpolator(d3.interpolateSinebow) //类似于d3.interpolateRainbow，但使用正弦波生成渐变
+        // .interpolator(d3.interpolateBlues) //颜色从浅蓝色到深蓝色
+        // .interpolator(d3.interpolateGreens) //颜色从浅绿色到深绿色
+        // .interpolator(d3.interpolateGreys) //颜色从白色到黑色
+        // .interpolator(d3.interpolateBuGn) //颜色从浅蓝绿色到深蓝绿色
+        // .interpolator(d3.interpolateBuPu) //颜色从浅蓝色到深紫色
+        // .interpolator(d3.interpolateOrRd) //颜色从浅橙色到深红色
+        // .interpolator(d3.interpolatePuRd) //颜色从浅紫色到深红色
+        // .interpolator(d3.interpolateYlOrBr) //颜色从浅黄色到深橙棕色
         .domain([valueExtent[1], valueExtent[0]]); //把颜色反一下，让较深的颜色来代表较大的数据
 
       // Create a tooltip
@@ -206,10 +223,16 @@ export default {
         .attr("y2", "0%");
 
       // Create color stops for the gradient based on the color scale
-      const colorRange = d3.range(1, 101, 1); // Range of values from 1 to 100
-      colorRange.forEach(value => {
+      // const colorRange = d3.range(1, 101, 1); // Range of values from 1 to 100
+      // colorRange.forEach(value => {
+      //   gradient.append("stop")
+      //     .attr("offset", `${(value - 1) / 99 * 100}%`)
+      //     .attr("stop-color", myColor(value));
+      // });
+      const colorRange = d3.range(valueExtent[0], valueExtent[1], (valueExtent[1] - valueExtent[0]) / 100);
+      colorRange.forEach((value, index) => {
         gradient.append("stop")
-          .attr("offset", `${(value - 1) / 99 * 100}%`)
+          .attr("offset", `${index / (colorRange.length - 1) * 100}%`)
           .attr("stop-color", myColor(value));
       });
 
