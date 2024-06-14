@@ -138,10 +138,10 @@ export default {
         .domain([0, series.length - 1])
         .interpolator(d3.interpolateMagma);
 
-            const area = d3.area()
-              .x(d => x(d.data[0]))
-              .y0(d => y(d[0]))
-              .y1(d => y(d[1]));
+      const area = d3.area()
+        .x(d => x(d.data[0]))
+        .y0(d => y(d[0]))
+        .y1(d => y(d[1]));
 
       const svg = d3.select(this.$refs.chart)
         .append("svg")
