@@ -99,7 +99,8 @@ export default {
       allStudent: [],
       appearStudent: [],
       mappedStudents: [],
-      receivedStudent: []
+      receivedStudent: [],
+      className: 'Class1'
     };
   },
   mounted() {
@@ -117,11 +118,37 @@ export default {
   },
   methods: {
     // TODO: 处理在嵌入中选择学生点的操作
-    handleStudentSelected(studentId){
+    handleStudentSelected(studentId) {
       this.selectedStudentId = studentId;
-      // 模拟点击此studentId对应的学生
+      this.appearStudent = this.mappedStudents.map(student => student.original);
+      const foundStudent = this.mappedStudents.find(student => student.original == this.selectedStudentId);
+      console.log(foundStudent.mapped)
+      this.student = this.allStudent[foundStudent.mapped - 1]
+
+      this.student.material.color.set(0xff0000);
+      // // 获取学生的ID
+      const studentName = this.student.name;
+
+      // 从studentsPositions中获取位置信息
+      const targetPosition = new THREE.Vector3(
+        this.studentsPositions[studentName].x,
+        this.studentsPositions[studentName].y,
+        this.studentsPositions[studentName].z
+      );
+
+      // const targetPosition = new THREE.Vector3().copy(this.student.position);
+      console.log(targetPosition, this.student);
+
+      new TWEEN.Tween(this.camera.position)
+        .to({
+          x: targetPosition.x,
+          y: targetPosition.y,
+          z: targetPosition.z
+        }, 1000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
       console.log("studentId-modelview", studentId);
-      
+
     },
 
     getSavedState() {
@@ -189,36 +216,79 @@ export default {
       this.scene.add(pointLight);
     },
     loadModel() {
-      const loader = new GLTFLoader();
-      loader.load('/models/student101_4.glb', (gltf) => {
-        this.model = gltf.scene;
-        this.model.scale.set(1.5, 1.5, 1.5);
-        // model.scale.set(1, 1, 1);
-        this.scene.add(this.model);
+      const loadModelPromise = () => {
+        return new Promise((resolve, reject) => {
+          const loader = new GLTFLoader();
+          loader.load('/models/student101_4.glb', (gltf) => {
+            this.model = gltf.scene;
+            this.model.scale.set(1.5, 1.5, 1.5);
+            this.scene.add(this.model);
 
-        const objectsToRemove = [];
+            const objectsToRemove = [];
 
-        for (let i = 1; i <= 100; i++) {
-          const studentName = "student" + i.toString().padStart(3, "0"); // 将数字格式化为三位数，例如001
-          this.model.traverse((child) => {
-            if (child.isMesh && child.name.includes(studentName)) {
-              objectsToRemove.push(child);
-              this.allStudent.push(child);
+            for (let i = 1; i <= 100; i++) {
+              const studentName = "student" + i.toString().padStart(3, "0");
+              this.model.traverse((child) => {
+                if (child.isMesh && child.name.includes(studentName)) {
+                  objectsToRemove.push(child);
+                  this.allStudent.push(child);
+                }
+              });
             }
+            console.log("初始化视图allStudent", this.allStudent);
+            objectsToRemove.forEach((child) => {
+              if (child.parent) {
+                child.parent.remove(child);
+              }
+            });
+
+            resolve(); // 模型加载完成后，resolve Promise
+          }, undefined, (error) => {
+            console.error('An error happened while loading the model', error);
+            reject(error); // 如果模型加载失败，reject Promise
           });
-        }
-        // 从场景中移除这些对象
-        objectsToRemove.forEach((child) => {
-          if (child.parent) {
-            child.parent.remove(child);
-          }
         });
-        // const mesh = this.allStudent[5]; // 因为appearStudent中的值是1到100的数，需要减1以匹配allStudent的索引
-        // if (mesh) { // 确保mesh存在
-        //   this.scene.add(mesh);
-        // }
-      }, undefined, (error) => {
-        console.error('An error happened while loading the model', error);
+      };
+
+      loadModelPromise().then(() => {
+        // 模型加载完成后执行axios.get请求
+        this.$axios.get('http://10.12.44.205:8000/getStudent4Class', {
+          params: {
+            className: this.className,
+          }
+        })
+          .then(response => {
+            console.error('success sending data:', JSON.parse(response.data));
+
+            let studentNumbers = [];
+            for (let i = 1; i <= 100; i++) {
+              studentNumbers.push(i);
+            }
+            studentNumbers = this.shuffleArray(studentNumbers);
+            this.receivedStudent = JSON.parse(response.data).students;
+            // 创建映射
+            this.mappedStudents = this.receivedStudent.map((student, index) => {
+              return { original: student, mapped: studentNumbers[index] };
+            });
+            this.appearStudent = this.mappedStudents.map(student => student.mapped);
+            console.log("appearStudent", this.appearStudent);
+
+            this.container = new THREE.Object3D();
+            this.appearStudent.forEach(index => {
+              const mesh = this.allStudent[index - 1];
+              if (mesh) { // 确保mesh存在
+                this.container.add(mesh);
+                // 将容器添加到场景中
+                this.scene.add(this.container);
+                // 对容器进行放大操作，而不是对模型直接进行放大
+                this.container.scale.set(1.5, 1.5, 1.5); // 重新应用缩放设置
+              }
+            });
+            this.animate();
+          })
+          .catch(error => {
+            console.error('Error sending data:', error);
+          });
       });
     },
     // onWindowResize() {
@@ -465,8 +535,7 @@ export default {
           return { original: student, mapped: studentNumbers[index] };
         });
         this.appearStudent = this.mappedStudents.map(student => student.mapped);
-        console.log("allStudent",this.allStudent)
-        console.log("appearStudent",this.appearStudent)
+        // console.log("allStudent", this.allStudent)
         this.container = new THREE.Object3D();
         this.appearStudent.forEach(index => {
           const mesh = this.allStudent[index - 1]; // 因为appearStudent中的值是1到100的数，需要减1以匹配allStudent的索引
@@ -482,6 +551,7 @@ export default {
         this.animate();
       } else {
         console.log(222222222222222222222222)
+        // console.log("allStudent", this.allStudent)
         const changedStudent = data.students
         const newMappedStudents = [];
         console.log("旧的mapped：", this.mappedStudents)

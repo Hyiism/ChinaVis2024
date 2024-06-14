@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 <template>
   <div class="chart-container-bottomcenter">
     <!-- 使用 radio 组件 -->
@@ -15,3 +17,4 @@
 
 
 </style>
+>>>>>>> master
