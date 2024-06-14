@@ -68,7 +68,7 @@ export default {
         xAxis: {
           type: 'value',
           min: 0,
-          max: 134
+          max: 24.1
         },
         yAxis: {
           type: 'category',

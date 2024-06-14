@@ -22,7 +22,7 @@ export default {
   methods: {
     async fetchHeatmapData() {
       try {
-        // const response = await axios.get('http://localhost:5000/get_class_knowledge_data');
+        const response = await axios.get('http://localhost:5000/get_class_knowledge_data');
         const data = response.data;
         this.processData(data);
         this.createChart();
