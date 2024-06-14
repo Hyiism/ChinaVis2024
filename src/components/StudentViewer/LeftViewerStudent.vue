@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import EventBus from '@/eventBus'; // 导入事件总线
+
 export default {
   name: 'CheckChart',
   data() {
@@ -61,7 +63,9 @@ export default {
 
 
     handleClick(item) {
-      console.log(item.year + "1" + item.month + "1" + item.date);
+      // console.log(item.year + "1" + item.month + "1" + item.date);
+      // 点击传数据到modelview执行操作
+      EventBus.$emit('checkSelected', {student_id:'r28s9kyo7knrvytyvmt8', 'year':item.year, 'month':item.month, 'date':item.date}); // 触发事件，传递 student_id
     }
   }
 }

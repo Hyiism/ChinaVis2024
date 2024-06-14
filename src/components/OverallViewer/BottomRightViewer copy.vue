@@ -13,46 +13,31 @@
 
 <script>
 import * as d3 from 'd3';
+import * as aq from 'arquero';
 
 export default {
   name: 'BottomViewer',
   data() {
     return {
       selectedStack: 'stacked', // Initial value for the radio group
-    //   rawData: [
-    //   { "student_ID": "2020-03-01T00:00:00.000", "b3C9s_score": 5, "g7R2j_score": 2, "k4W1c_score": 0, "m3D1v_score": 19, "r8S3g_score": 31, "s8Y2f_score": 1, "t5V9e_score": 33, "y9W5d_score": 14 },
-    //   { "student_ID": "2020-03-02T00:00:00.000", "b3C9s_score": 5, "g7R2j_score": 0, "k4W1c_score": 1, "m3D1v_score": 16, "r8S3g_score": 32, "s8Y2f_score": 0, "t5V9e_score": 18, "y9W5d_score": 17 },
-    //   { "student_ID": "2020-03-03T00:00:00.000", "b3C9s_score": 7, "g7R2j_score": 1, "k4W1c_score": 0, "m3D1v_score": 17, "r8S3g_score": 36, "s8Y2f_score": 1, "t5V9e_score": 0, "y9W5d_score": 20},
-    //   { "student_ID": "2020-03-04T00:00:00.000", "b3C9s_score": 10, "g7R2j_score": 0, "k4W1c_score": 0, "m3D1v_score": 17, "r8S3g_score": 0, "s8Y2f_score": 9, "t5V9e_score": 0, "y9W5d_score": 18 },
-    //   { "student_ID": "2020-03-05T00:00:00.000", "b3C9s_score": 12, "g7R2j_score": 1, "k4W1c_score": 1, "m3D1v_score": 17, "r8S3g_score": 0, "s8Y2f_score": 11, "t5V9e_score": 0, "y9W5d_score": 17 },
-    // ],
-    rawData: [],
-    top_10_states: ["b3C9s_score", "g7R2j_score", "k4W1c_score", "m3D1v_score", "r8S3g_score", "s8Y2f_score", "t5V9e_score", "y9W5d_score"]
-
+      rawData: [
+        { "date": "2020-03-01T00:00:00.000", "California": 5, "Florida": 2, "Illinois": 0, "Michigan": 1938, "New Jersey": 3142, "New York": 1, "North Carolina": 3353, "Ohio": 1452, "Pennsylvania": 2397, "Texas": 0 },
+        { "date": "2020-03-02T00:00:00.000", "California": 5, "Florida": 0, "Illinois": 1, "Michigan": 1617, "New Jersey": 3289, "New York": 0, "North Carolina": 1776, "Ohio": 1709, "Pennsylvania": 2503, "Texas": 0 },
+        { "date": "2020-03-03T00:00:00.000", "California": 7, "Florida": 1, "Illinois": 0, "Michigan": 1789, "New Jersey": 3691, "New York": 1, "North Carolina": 1, "Ohio": 2022, "Pennsylvania": 2637, "Texas": 0 },
+        { "date": "2020-03-04T00:00:00.000", "California": 10, "Florida": 0, "Illinois": 0, "Michigan": 1777, "New Jersey": 1, "New York": 9, "North Carolina": 0, "Ohio": 1875, "Pennsylvania": 3007, "Texas": 1 },
+        { "date": "2020-03-05T00:00:00.000", "California": 12, "Florida": 1, "Illinois": 1, "Michigan": 1762, "New Jersey": 1, "New York": 11, "North Carolina": 0, "Ohio": 1750, "Pennsylvania": 2768, "Texas": 4 }
+        // ... more data here
+      ]
     };
   },
   mounted() {
-
     window.addEventListener('resize', this.drawChart); // Re-draw chart on window resize
-    this.fetchStudentScores();
+    this.drawChart();
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.drawChart);
   },
   methods: {
-
-    fetchStudentScores() {
-      this.$axios.get('http://10.12.44.190:8000/get_stack_data')
-        .then(response => {
-          this.rawData = JSON.parse(response.data).data;
-          // console.log("#####this.rawData#######:", this.rawData)
-          // 请求数据完成后 画图
-          this.drawChart();
-        })
-        .catch(error => {
-          console.error("There was an error!", error);
-        });
-    },
 
     createLegend(svg, color, top_10_states, chartContainerWidth, margin) {
       const legend = svg.append("g")
@@ -85,7 +70,10 @@ export default {
         this.svg.remove(); // Remove previous chart if it exists
       }
 
-      const margin = { top: 10, right: 150, bottom: 20, left: 50 }; // Increase right margin to accommodate legend
+      const rawData = this.rawData;
+      const top_10_states = Object.keys(rawData[0]).filter(key => key !== 'date');
+
+      const margin = { top: 10, right: 150, bottom: 20, left: 45 }; // Increase right margin to accommodate legend
       const chartContainerWidth = this.$refs.chartContainer.clientWidth;
       const chartContainerHeight = this.$refs.chartContainer.clientHeight;
       const width = chartContainerWidth - margin.left - margin.right;
@@ -100,10 +88,6 @@ export default {
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
       this.svg = svg;
-
-      // 不计算而是直接定义数据
-      const by_date = this.rawData;
-      const top_10_states = this.top_10_states;
 
       const xAxis = svg.append("g")
         .attr("transform", `translate(0,${height})`);
@@ -122,18 +106,24 @@ export default {
         .append('text')
         .style("font-size", "12px")
         .style("text-anchor", "middle");
-      
-      this.data = {by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height};
-      // console.log("this.data:", by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height)
 
+      const cases_per_day = rawData.map(d => {
+        const date = new Date(d.date);
+        return { ...d, date };
+      });
+
+      const by_date = aq
+        .from(cases_per_day)
+        .groupby('date')
+        .pivot("state", "new_cases")
+        .objects();
+
+      this.data = { by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height };
       this.updateChart();
     },
 
     updateChart() {
-
-      const {by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height} = this.data;
-      // const { by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height } = this.data;
-      // console.log("this.data:", this.data.by_date)
+      const { by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height } = this.data;
       const svg = this.svg;
 
       const stacks = {
@@ -152,7 +142,7 @@ export default {
 
       const x = d3
         .scaleBand()
-        .domain(by_date.map(d => d.student_ID))
+        .domain(by_date.map(d => d.date))
         .range([0, width])
         .padding(0.1);
 
@@ -179,43 +169,34 @@ export default {
         )
         .transition()
         .duration(1000)
-        .delay((d, i) => x(d.data.student_ID))
-        .attr("x", d => x(d.data.student_ID))
+        .delay((d, i) => x(d.data.date))
+        .attr("x", d => x(d.data.date))
         .attr("y", d => y(d[1]))
         .attr("height", d => y(d[0]) - y(d[1]))
         .attr("width", x.bandwidth());
 
-      // xAxis
-      //   .call(
-      //     d3.axisBottom(x)
-      //       .tickSizeOuter(0)
-      //       .tickFormat(d => d.toLocaleString('default', { month: 'long' }))
-      //       .tickValues(
-      //         x.domain().filter(d =>
-      //           width > 760
-      //             ? d.getDate() === 1
-      //             : d.getDate() === 1 && (d.getMonth() + 1) % 3 === 0
-      //         )
-      //       )
-      //   )
-        // .call(g => g.selectAll(".domain").remove());
       xAxis
         .call(
           d3.axisBottom(x)
             .tickSizeOuter(0)
-            .tickFormat((d, i) => i % 10 === 0 ? d : "") // 每隔10个 student_id 显示一个
+            .tickFormat(d => d.toLocaleString('default', { month: 'long' }))
             .tickValues(
-              x.domain().filter((d, i) => i % 10 === 0) // 选取每隔10个 student_id
+              x.domain().filter(d =>
+                width > 760
+                  ? d.getDate() === 1
+                  : d.getDate() === 1 && (d.getMonth() + 1) % 3 === 0
+              )
             )
-        );
+        )
+        .call(g => g.selectAll(".domain").remove());
 
       yAxis
         .call(d3.axisLeft(y).ticks(null, "s"))
         .call(g => g.selectAll(".domain").remove());
 
-      // axisLabel.text(
-      //   this.selectedStack === "percentage" ? "Proportion of Cases" : "Cases per Day"
-      // );
+      axisLabel.text(
+        this.selectedStack === "percentage" ? "Proportion of Cases" : "Cases per Day"
+      );
     }
   }
 };

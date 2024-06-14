@@ -112,9 +112,11 @@ export default {
   },
   created() {
     EventBus.$on('studentSelected', this.handleStudentSelected);
+    EventBus.$on('checkSelected', this.handleCheckSelected);
   },
   beforeDestroy() {
     EventBus.$off('studentSelected', this.handleStudentSelected);
+    EventBus.$on('checkSelected', this.handleCheckSelected);
   },
   methods: {
     // TODO: 处理在嵌入中选择学生点的操作
@@ -148,6 +150,12 @@ export default {
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
       console.log("studentId-modelview", studentId);
+
+    },
+    // TODO: 点击github打卡图，主视图跳转日期且显示对应学生，由此可以再拖拽查看其他人情况
+    // data:{student_id:" ",year:" ",month:" ",date:" "}
+    handleCheckSelected(data) {
+        console.log('modelview dataselect:', data)
 
     },
 

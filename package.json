@@ -14,6 +14,7 @@
     "@uwdata/arquero": "https://api.observablehq.com/d/79750b3b8e929d9d@240.tgz?v=3",
     "ant-design": "^1.0.0",
     "ant-design-vue": "^1.7.8",
+    "arquero": "^5.4.0",
     "axios": "^1.7.2",
     "core-js": "^3.8.3",
     "d3": "^7.9.0",

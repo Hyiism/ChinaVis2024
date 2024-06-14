@@ -25,6 +25,7 @@ export default {
           "x":3.05165,
           "y":15.4957,
           "cluster_label":0,
+          // 没有使用
           "ring_data":
           {
             "b3C9s_score":0.1255671184572454,
@@ -36,7 +37,9 @@ export default {
             "t5V9e_score":0.11675804797941387,
             "y9W5d_score":0.13052702426931498
           },
+          // 学生综合评分，满分4分，第一个圈
           "total_syth_score_avg":2.56,
+          // 做题状态占比， 第二个圈
           "score_data":
           {
             "state_ae_percentage":0.18627450980392157,
@@ -44,6 +47,7 @@ export default {
             "state_pc_percentage":0.08823529411764706,
             "state_ac_percentage":0.19607843137254902
           },
+          // 最外面柱状图，最大是1（可以计算该时间点所有的平均提交次数）
           "time_data":
           {
             "01:00":0.02,
@@ -179,11 +183,6 @@ export default {
           console.log(studentId);
           EventBus.$emit('studentSelected', studentId); // 触发事件，传递 student_id
         });;
-
-
-
-
-
 
       this.updateRings = () => {
         glyphs.each(function(node) {

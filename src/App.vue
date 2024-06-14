@@ -97,7 +97,7 @@ import LeftViewer from './components/OverallViewer/LeftViewer.vue';
 import LeftBottomViewer from './components/OverallViewer/LeftBottomViewer.vue';
 import RightViewer from './components/OverallViewer/RightViewer.vue';
 import BottomViewer from './components/OverallViewer/BottomViewer.vue';
-import BottomCenterViewer from './components/OverallViewer/BottomCenterViewer.vue';
+// import BottomCenterViewer from './components/OverallViewer/BottomCenterViewer.vue';
 import BottomRightViewer from './components/OverallViewer/BottomRightViewer.vue';
 import TimeLine from './components/OverallViewer/TimeLine.vue';
 
@@ -125,7 +125,7 @@ export default {
     LeftBottomViewer,
     RightViewer,
     BottomViewer,
-    BottomCenterViewer,
+    // BottomCenterViewer,
     BottomRightViewer,
     TimeLine,
     // 班级视图组件
@@ -166,7 +166,7 @@ export default {
           LeftBottomViewer: true,
           RightViewer: true,
           BottomViewer: true,
-          BottomCenterViewer: true,
+          // BottomCenterViewer: true,
           BottomRightViewer: true,
           TimeLine: true,
           // 班级视图组件显示控制
@@ -193,7 +193,7 @@ export default {
           LeftBottomViewer: false,
           RightViewer: false,
           BottomViewer: false,
-          BottomCenterViewer: false,
+          // BottomCenterViewer: false,
           BottomRightViewer: false,
           TimeLine: false,
           // 班级视图组件显示控制
@@ -220,7 +220,7 @@ export default {
           LeftBottomViewer: false,
           RightViewer: false,
           BottomViewer: false,
-          BottomCenterViewer: false,
+          // BottomCenterViewer: false,
           BottomRightViewer: false,
           TimeLine: false,
           // 班级视图组件显示控制
@@ -346,7 +346,7 @@ export default {
 }
 
 #BottomViewer {
-  width: calc(55% - 4px);
+  width: calc(50% - 4px);
   height: calc(37% - 1px);
   display: flex;
   justify-content: center;
@@ -360,23 +360,22 @@ export default {
   left: 0;
 }
 
-#BottomCenterViewer {
+/* #BottomCenterViewer {
   width: calc(20% - 4px);
   height: calc(37% - 1px);
   display: flex;
   justify-content: center;
   align-items: center;
 
-  /* 添加阴影效果 */
   box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); 
   border-radius: 10px; 
   position: absolute;
-  bottom: 0; /* Stick to the bottom */
+  bottom: 0; 
   left: 55%;
-}
+} */
 
 #BottomRightViewer {
-  width: calc(25% - 4px);
+  width: calc(50% - 4px);
   height: calc(37% - 1px);
   display: flex;
   justify-content: center;
