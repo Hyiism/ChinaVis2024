@@ -3,6 +3,8 @@
   <div>
     <!-- <p>班级视图BottomLeft test</p> -->
     <div ref="chart" class="chart-container"></div>
+    <!-- <p>班级视图BottomLeft test</p> -->
+    <div ref="chart" class="chart-container"></div>
   </div>
 </template>
 
@@ -61,7 +63,7 @@ export default {
   methods: {
     async fetchData() {
       try {
-        const response = await axios.get('http://10.12.44.190:8000/get_student_scores_data');
+        const response = await axios.get('http://localhost:5000/get_student_scores_data');
         const data = response.data;
         this.processData(data);
         this.createChart();
@@ -117,14 +119,29 @@ export default {
         .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
         .rangeRound([height - marginBottom, marginTop]);
 
-      const color = d3.scaleOrdinal()
-        .domain(series.map(d => d.key))
-        .range(d3.schemeTableau10);
+      // const color = d3.scaleOrdinal()    //使用分类颜色方案
+      //   .domain(series.map(d => d.key))
+      //   .range(d3.schemeTableau10);
+        // .range(d3.schemeCategory10);
+        // .range(d3.schemeAccent);
+        // .range(d3.schemeDark2);
+        // .range(d3.schemePaired);
+        // .range(d3.schemePastel1);
+        // .range(d3.schemeSet3);
 
-      const area = d3.area()
-        .x(d => x(d.data[0]))
-        .y0(d => y(d[0]))
-        .y1(d => y(d[1]));
+      // 将每个类别映射到一个数值
+      const categoryToNumber = d3.scaleOrdinal()    //使用渐变颜色方案
+        .domain(series.map(d => d.key))
+        .range(d3.range(series.length));
+      // 创建顺序颜色比例
+      const color = d3.scaleSequential()
+        .domain([0, series.length - 1])
+        .interpolator(d3.interpolateMagma);
+
+            const area = d3.area()
+              .x(d => x(d.data[0]))
+              .y0(d => y(d[0]))
+              .y1(d => y(d[1]));
 
       const svg = d3.select(this.$refs.chart)
         .append("svg")
@@ -165,7 +182,8 @@ export default {
         .selectAll("path")
         .data(series)
         .join("path")
-        .attr("fill", d => color(d.key))
+        // .attr("fill", d => color(d.key)) //使用分类颜色方案
+        .attr("fill", d => color(categoryToNumber(d.key))) //使用渐变颜色方案
         .attr("d", area)
         .attr("class", "area");
 
@@ -232,7 +250,8 @@ export default {
         .attr("y", 0)
         .attr("width", 24)
         .attr("height", 24)
-        .attr("fill", d => color(d.key));
+        // .attr("fill", d => color(d.key)); //使用分类颜色方案
+        .attr("fill", d => color(categoryToNumber(d.key))); //使用渐变颜色方案
 
       legendItems.append("text")
         .attr("x", 30)
@@ -249,4 +268,4 @@ export default {
   width: 100%;
   height: 100%;
 }
-</style>
+
