@@ -13,21 +13,22 @@
 
 <script>
 import * as d3 from 'd3';
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default {
   name: 'BottomViewer',
   data() {
     return {
       selectedStack: 'stacked', // Initial value for the radio group
-    //   rawData: [
-    //   { "student_ID": "2020-03-01T00:00:00.000", "b3C9s_score": 5, "g7R2j_score": 2, "k4W1c_score": 0, "m3D1v_score": 19, "r8S3g_score": 31, "s8Y2f_score": 1, "t5V9e_score": 33, "y9W5d_score": 14 },
-    //   { "student_ID": "2020-03-02T00:00:00.000", "b3C9s_score": 5, "g7R2j_score": 0, "k4W1c_score": 1, "m3D1v_score": 16, "r8S3g_score": 32, "s8Y2f_score": 0, "t5V9e_score": 18, "y9W5d_score": 17 },
-    //   { "student_ID": "2020-03-03T00:00:00.000", "b3C9s_score": 7, "g7R2j_score": 1, "k4W1c_score": 0, "m3D1v_score": 17, "r8S3g_score": 36, "s8Y2f_score": 1, "t5V9e_score": 0, "y9W5d_score": 20},
-    //   { "student_ID": "2020-03-04T00:00:00.000", "b3C9s_score": 10, "g7R2j_score": 0, "k4W1c_score": 0, "m3D1v_score": 17, "r8S3g_score": 0, "s8Y2f_score": 9, "t5V9e_score": 0, "y9W5d_score": 18 },
-    //   { "student_ID": "2020-03-05T00:00:00.000", "b3C9s_score": 12, "g7R2j_score": 1, "k4W1c_score": 1, "m3D1v_score": 17, "r8S3g_score": 0, "s8Y2f_score": 11, "t5V9e_score": 0, "y9W5d_score": 17 },
-    // ],
-    rawData: [],
-    top_10_states: ["b3C9s_score", "g7R2j_score", "k4W1c_score", "m3D1v_score", "r8S3g_score", "s8Y2f_score", "t5V9e_score", "y9W5d_score"]
+      //   rawData: [
+      //   { "student_ID": "2020-03-01T00:00:00.000", "b3C9s_score": 5, "g7R2j_score": 2, "k4W1c_score": 0, "m3D1v_score": 19, "r8S3g_score": 31, "s8Y2f_score": 1, "t5V9e_score": 33, "y9W5d_score": 14 },
+      //   { "student_ID": "2020-03-02T00:00:00.000", "b3C9s_score": 5, "g7R2j_score": 0, "k4W1c_score": 1, "m3D1v_score": 16, "r8S3g_score": 32, "s8Y2f_score": 0, "t5V9e_score": 18, "y9W5d_score": 17 },
+      //   { "student_ID": "2020-03-03T00:00:00.000", "b3C9s_score": 7, "g7R2j_score": 1, "k4W1c_score": 0, "m3D1v_score": 17, "r8S3g_score": 36, "s8Y2f_score": 1, "t5V9e_score": 0, "y9W5d_score": 20},
+      //   { "student_ID": "2020-03-04T00:00:00.000", "b3C9s_score": 10, "g7R2j_score": 0, "k4W1c_score": 0, "m3D1v_score": 17, "r8S3g_score": 0, "s8Y2f_score": 9, "t5V9e_score": 0, "y9W5d_score": 18 },
+      //   { "student_ID": "2020-03-05T00:00:00.000", "b3C9s_score": 12, "g7R2j_score": 1, "k4W1c_score": 1, "m3D1v_score": 17, "r8S3g_score": 0, "s8Y2f_score": 11, "t5V9e_score": 0, "y9W5d_score": 17 },
+      // ],
+      rawData: [],
+      top_10_states: ["b3C9s_score", "g7R2j_score", "k4W1c_score", "m3D1v_score", "r8S3g_score", "s8Y2f_score", "t5V9e_score", "y9W5d_score"]
 
     };
   },
@@ -60,7 +61,12 @@ export default {
         .selectAll("g")
         .data(top_10_states)
         .enter().append("g")
-        .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+        .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+        .on("click", (event, d) => {
+          // 点击知识点legend,将知识点id传到知识点视图
+          EventBus.$emit('stackSelected', d); // Emit event
+          // console.log("点击知识点legend:", d)
+        });;
 
       legend.append("rect")
         .attr("width", 12)
@@ -122,8 +128,8 @@ export default {
         .append('text')
         .style("font-size", "12px")
         .style("text-anchor", "middle");
-      
-      this.data = {by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height};
+
+      this.data = { by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height };
       // console.log("this.data:", by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height)
 
       this.updateChart();
@@ -131,7 +137,7 @@ export default {
 
     updateChart() {
 
-      const {by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height} = this.data;
+      const { by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height } = this.data;
       // const { by_date, color, top_10_states, xAxis, yAxis, axisLabel, margin, width, height } = this.data;
       // console.log("this.data:", this.data.by_date)
       const svg = this.svg;
@@ -198,7 +204,7 @@ export default {
       //         )
       //       )
       //   )
-        // .call(g => g.selectAll(".domain").remove());
+      // .call(g => g.selectAll(".domain").remove());
       xAxis
         .call(
           d3.axisBottom(x)
@@ -235,7 +241,6 @@ function offset(series, order) {
 </script>
 
 <style scoped>
-
 .chartContainer-botrig {
   width: 100%;
   height: 100%;
@@ -245,14 +250,17 @@ function offset(series, order) {
   justify-content: center;
   position: relative;
 }
+
 .radio-group {
   width: 100%;
   height: 10%;
   display: flex;
   justify-content: center;
   align-items: center;
-  order: 1; /* Ensure the radio buttons appear at the bottom */
+  order: 1;
+  /* Ensure the radio buttons appear at the bottom */
 }
+
 #chart-borig {
   width: 100%;
   height: 90%;
@@ -260,7 +268,7 @@ function offset(series, order) {
   justify-content: center;
   align-items: center;
   order: 0;
-  margin: 0 auto; /* Ensure the chart is centered */
+  margin: 0 auto;
+  /* Ensure the chart is centered */
 }
-
 </style>

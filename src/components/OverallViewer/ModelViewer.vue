@@ -116,7 +116,7 @@ export default {
   },
   beforeDestroy() {
     EventBus.$off('studentSelected', this.handleStudentSelected);
-    EventBus.$on('checkSelected', this.handleCheckSelected);
+    EventBus.$off('checkSelected', this.handleCheckSelected);
   },
   methods: {
     // TODO: 处理在嵌入中选择学生点的操作

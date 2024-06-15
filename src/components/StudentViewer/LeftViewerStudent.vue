@@ -1,32 +1,38 @@
 <template>
-  <div id="check-card">
-    <div class="grid-container">
-      <ul class="days">
-        <li class="li-day-label">Sun</li>
-        <li class="li-day-label">Mon</li>
-        <li class="li-day-label">Tue</li>
-        <li class="li-day-label">11</li>
-        <li class="li-day-label">Wen</li>
-        <li class="li-day-label">Fri</li>
-        <li class="li-day-label">Sat</li>
-      </ul>
+  <div id="all-card">
+    <div id="check-card">
+      <div class="grid-container">
+        <ul class="days">
+          <li class="li-day-label">Sun.</li>
+          <li class="li-day-label">Mon.</li>
+          <li class="li-day-label">Tue.</li>
+          <li class="li-day-label">Wen.</li>
+          <li class="li-day-label">Thur.</li>
+          <li class="li-day-label">Fri.</li>
+          <li class="li-day-label">Sat.</li>
+        </ul>
 
-      <ul class="graph">
-        <el-tooltip class="item" effect="dark" :content="item.submission_count + ' submits on ' + item.year + '-' + item.month + '-' + item.date"
-            placement="top-start" v-for="(item, index) in infos" :key="index" :open-delay="500">
-          <li :data-level="item.level" class="li-day" :isToday="item.isToday" @click="handleClick(item)"></li>
-        </el-tooltip>
+        <ul class="graph">
+          <el-tooltip class="item" effect="dark" :content="item.submission_count + ' ' +(item.submission_count > 1 ? 'submissions on ' : 'submission on ') + item.year + '-' + item.month + '-' + item.date"
+              placement="top-start" v-for="(item, index) in infos" :key="index" :open-delay="500">
+            <li :data-level="item.level" class="li-day" :isToday="item.isToday" @click="handleClick(item)"></li>
+          </el-tooltip>
+        </ul>
+      </div>
+
+      <ul class="months">
+        <li class="li-month" :style="{ gridColumnStart: '2' }">Aug</li>
+        <li class="li-month" :style="{ gridColumnStart: '3' }">Sep</li>
+        <li class="li-month" :style="{ gridColumnStart: '7' }">Oct</li>
+        <li class="li-month" :style="{ gridColumnStart: '11' }">Nov</li>
+        <li class="li-month" :style="{ gridColumnStart: '15' }">Des</li>
+        <li class="li-month" :style="{ gridColumnStart: '19' }">Jau</li>
       </ul>
     </div>
-
-    <ul class="months">
-      <li class="li-month" :style="{ gridColumnStart: '2' }">Aug</li>
-      <li class="li-month" :style="{ gridColumnStart: '3' }">Sep</li>
-      <li class="li-month" :style="{ gridColumnStart: '7' }">Oct</li>
-      <li class="li-month" :style="{ gridColumnStart: '11' }">Nov</li>
-      <li class="li-month" :style="{ gridColumnStart: '15' }">Des</li>
-      <li class="li-month" :style="{ gridColumnStart: '19' }">Jau</li>
-    </ul>
+    
+    <div id= "detail-card">
+      <p>用来展示所选日期的24小时活跃度情况</p>
+    </div>
   </div>
 </template>
 
@@ -72,13 +78,39 @@ export default {
 </script>
 
 <style>
-#check-card {
-  width: 100%;
-  height: 100%;
+#all-card {
+  width: 90%;
+  height: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+/* 上面的提交次数打卡表 */
+#check-card {
+  width: 100%;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* border: #D0D7DE solid 1px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px; */
+}
+/* 下面的24小时详细活跃度表 */
+#detail-card {
+  width: 100%;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* border-bottom: #D0D7DE solid 1px;
+  border-left: #D0D7DE solid 1px;
+  border-right: #D0D7DE solid 1px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px; */
 }
 .grid-container {
   display: flex;

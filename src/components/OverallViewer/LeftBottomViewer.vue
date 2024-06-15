@@ -7,6 +7,7 @@
 <script>
 import * as echarts from 'echarts';
 import PubSub from 'pubsub-js';
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default {
   name: 'SimpleEChartsComponent',
@@ -121,11 +122,14 @@ export default {
       }
 
     });
-
+    // 监听从stack传来的知识点id
+    EventBus.$on('stackSelected', this.handleStackSelected);
     window.addEventListener('resize', this.resizeChart);
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeChart);
+    // 关闭监听从stack传来的知识点id
+    EventBus.$off('stackSelected', this.handleStackSelected);
   },
   methods: {
     initChart() {
@@ -140,6 +144,14 @@ export default {
       this.chart.on('mouseout', this.handleMouseOut);
     },
 
+    // 处理从stack传来的知识点id,
+    handleStackSelected(knowledge_id) {
+      // console.log("leftbottom: stack传来的知识点id", knowledge_id.substr(0,5));
+      // 通过知识点id找到对应的知识点
+      this.triggerDispatchAction(knowledge_id.substr(0,5));
+    },
+
+    // 处理传来的title_ID
     triggerDispatchAction(nodeName) {
       const path = this.findNodeByName(this.initialData, nodeName);
       console.log("题目的名字！！！！")
