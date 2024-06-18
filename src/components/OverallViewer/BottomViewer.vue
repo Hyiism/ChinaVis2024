@@ -11,6 +11,12 @@ import EventBus from '@/eventBus'; // 导入事件总线
 
 export default {
   name: 'BottomViewer',
+  // props: {
+  //   isVisible: {
+  //     type: Boolean,
+  //     required: true
+  //   },
+  // },
 
   data() {
     return {
@@ -200,7 +206,7 @@ export default {
       this.addOverlayLabels(schema);
     },
 
-    // 添加覆盖层方法
+    // 添加覆盖层方法，bug是切换视图后此html只有刷新才会消失
     addOverlayLabels(schema) {
       const chartDom = document.getElementById('bottom-main');
       const chartRect = chartDom.getBoundingClientRect();
@@ -219,6 +225,7 @@ export default {
         document.body.appendChild(label);
       });
     },
+
 
     // 处理标签点击事件的方法
     handleLabelClick(item) {

@@ -1,24 +1,43 @@
 <template>
-  <div id="bottom-main-right">
-    <p>放箱线图等 展示不同clusterlabel的特征统计情况！</p>
-    <!-- 有待监听 clusterSelected -->
+  <div class="bottomright-chart">
+    <el-select v-model="selectedcolumns" multiple placeholder="请选择y轴" class="feat-select" v-if="state_all"
+      @change="handleSelectChange">
+      <el-option v-for="item in allcolumns" :key="item.value" :label="item.label" :value="item.value">
+      </el-option>
+    </el-select>
+    <el-select v-model="selectedcolumns_detail" multiple placeholder="请选择x y轴" class="feat-select" v-if="state_detail" 
+      @change="handleSelectChangeDetail">
+      <el-option v-for="item in allcolumns" :key="item.value" :label="item.label" :value="item.value">
+      </el-option>
+    </el-select>
+    <div ref="chartContainer" style="display: flex; margin-top: 50px; margin-left: 15px;"></div>
   </div>
 </template>
 
 <script>
-import * as d3 from "d3";
+import * as d3 from 'd3';
+import * as Plot from '@observablehq/plot';
+import { data } from 'jquery';
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default {
-  name: "ScatterplotMatrix",
+  name: 'ClusterPlotChart',
   data() {
     return {
-      selectedcolumns: ["submit_times_avg", "time_split_2_percentage"],
+      state_all: true,
+      state_detail: false,
+      data: [],
+      // 默认显示所有类别数据, 根据不同的clusterSelected值向后段请求不同的数据，all 0 1 2 3
+      clusterSelected: 'all',
+      width: 800,
+      height: 500,
+      boxWidth: 100,
       allcolumns: [
         { label: "做题数量", value: "title_counts" },
         { label: "平均间隔时间", value: "time_difference_mean" },
         { label: "上午做题比例", value: "time_split_0_percentage" },
-        { label: "中午做题比例", value: "time_split_1_percentage" },
-        { label: "下午做题比例", value: "time_split_2_percentage" },
+        { label: "下午做题比例", value: "time_split_1_percentage" },
+        { label: "晚上做题比例", value: "time_split_2_percentage" },
         { label: "平均提交次数", value: "submit_times_avg" },
         { label: "平均空间复杂度", value: "all_memory_avg" },
         { label: "平均时间复杂度", value: "all_timeconsume_avg" },
@@ -27,198 +46,325 @@ export default {
         { label: "E状态占比", value: "state_pc_percentage" },
         { label: "AC状态占比", value: "state_ac_percentage" }
       ],
-      data: []
+      selectedcolumns: ["time_split_2_percentage"],
+      selectedcolumns_detail: ["submit_times_avg", "time_split_2_percentage"]
     };
   },
-  mounted() {
-    this.fetchStudentScores();
+  computed: {
+    clusters() {
+      return [...new Set(this.data.map(d => d.cluster_label_tsne))];
+    },
+    // 纵轴计算范围，使用所选的特征变量
+    dataRange() {
+      return d3.extent(this.data, d => d[this.selectedcolumns[0]]);
+    },
+    // this.selectedcolumns_detail[1] 是y轴
+    dataRangeDetail() {
+      return d3.extent(this.data, d => d[this.selectedcolumns_detail[1]]);
+    },
+    st() {
+      const values = this.data.map(d => d[this.selectedcolumns[0]]);
+      return {
+        max: d3.quantile(values, 0.95),
+        upper: d3.quantile(values, 0.75),
+        lower: d3.quantile(values, 0.25),
+        min: d3.quantile(values, 0.05),
+        mean: d3.mean(values),
+        median: d3.median(values)
+      };
+    },
+    // 纵轴统计数据箱线图计算
+    stDetail() {
+      const values = this.data.map(d => d[this.selectedcolumns_detail[1]]);
+      return {
+        max: d3.quantile(values, 0.95),
+        upper: d3.quantile(values, 0.75),
+        lower: d3.quantile(values, 0.25),
+        min: d3.quantile(values, 0.05),
+        mean: d3.mean(values),
+        median: d3.median(values)
+      };
+    },
+    // boxPlotStats() {
+    //   // 计算每个 cluster_label_tsne 的统计数据
+    //   const stats = {};
+    //   for (const cluster of this.clusters) {
+    //     const values = this.data.filter(d => d.cluster_label_tsne === cluster).map(d => d.submit_times_avg);
+    //     stats[cluster] = {
+    //       max: d3.quantile(values, 0.95),
+    //       upper: d3.quantile(values, 0.75),
+    //       lower: d3.quantile(values, 0.25),
+    //       min: d3.quantile(values, 0.05),
+    //       mean: d3.mean(values),
+    //       median: d3.median(values),
+    //     };
+    //   }
+    //   return stats;
+    // },
   },
+  mounted() {
+    // this.renderChart();
+    this.fetchStudentScores();
+    // 监听clusterSelected事件，当clusterSelected发生变化时，重新获取数据
+    EventBus.$on('clusterSelected', (clusterSelected) => {
+      // alert('clusterSelected: ' + clusterSelected);
+      this.clusterSelected = clusterSelected;
+      this.fetchStudentScores();
+    });
+  },
+  beforeDestroy() {
+    EventBus.$off('clusterSelected');
+  },
+
   methods: {
     fetchStudentScores() {
       this.$axios
-        .get('http://10.12.44.190:8000/scatterMatrix/?class_id=Class1') // Replace with actual API endpoint
+        .get(`http://10.12.44.190:8000/boxplot/?cluster_id=${this.clusterSelected}&class_id=Class1`) // Replace with actual API endpoint
         .then((response) => {
           this.data = JSON.parse(response.data);
-          this.createScatterplotMatrix();
+          // 如果是整体视图，就显示每个类别的数据，集中比较用户选的变量的统计情况
+          if (this.clusterSelected === 'all') {
+            this.state_all = true;
+            this.state_detail = false;
+            this.renderChart();
+            // 如果是类别视图，就细致展示每个类里面的数据，比如用户选择变量1和变量2 就使用变量1和变量2的数据画图；这里暂时以submit_times_avg为横轴 total_score为纵轴
+          } else {
+            this.state_all = false;
+            this.state_detail = true;
+            this.renderChartDetail();
+          }
         })
         .catch((error) => {
           console.error('There was an error!', error);
         });
     },
-    createScatterplotMatrix() {
-      if (!this.selectedcolumns.length) {
-        return;
+    handleSelectChange(val) {
+      const maxSelection = 1;
+      if (val.length > maxSelection) {
+        val.pop();
+        this.$message({
+          message: `最多只能选择 ${maxSelection} 项`,
+          type: 'warning'
+        });
       }
+      this.selectedcolumns = val;
+      this.renderChart();
+    },
+    handleSelectChangeDetail(val) {
+      const maxSelection = 2;
+      if (val.length > maxSelection) {
+        val.pop();
+        this.$message({
+          message: `最多只能选择 ${maxSelection} 项`,
+          type: 'warning'
+        });
+      }
+      this.selectedcolumns_detail = val;
+      this.renderChartDetail();
+    },
+    renderChart() {
+      const colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(this.clusters);
 
-      const data = this.data;
-      const columns = this.selectedcolumns.concat('total_score');
-
-      const width = 470;
-      const height = width;
-      const padding = 28;
-      const size = (width - (columns.length + 1) * padding) / columns.length + padding;
-
-      const x = columns.map(c => d3.scaleLinear()
-        .domain(d3.extent(data, d => d[c]))
-        .rangeRound([padding / 2, size - padding / 2]));
-
-      const y = x.map(x => x.copy().range([size - padding / 2, padding / 2]));
-
-      const color = d3.scaleOrdinal()
-        .domain(data.map(d => d.cluster_label_tsne))
-        .range(d3.schemeCategory10);
-
-      const axisx = d3.axisBottom()
-        .ticks(6)
-        .tickSize(size * columns.length);
-      const xAxis = g => g.selectAll("g").data(x).join("g")
-        .attr("transform", (d, i) => `translate(${i * size},0)`)
-        .each(function (d) { return d3.select(this).call(axisx.scale(d)); })
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
-
-      const axisy = d3.axisLeft()
-        .ticks(6)
-        .tickSize(-size * columns.length);
-      const yAxis = g => g.selectAll("g").data(y).join("g")
-        .attr("transform", (d, i) => `translate(0,${i * size})`)
-        .each(function (d) { return d3.select(this).call(axisy.scale(d)); })
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
-
-      d3.select(this.$refs.scatterplot).selectAll("*").remove(); // Clear previous plot
-
-      const svg = d3.select(this.$refs.scatterplot).append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [-padding, 0, width, height]);
-
-      svg.append("style")
-        .text(`circle.hidden { fill: #000; fill-opacity: 1; r: 1px; }`);
-
-      svg.append("g")
-        .call(xAxis);
-
-      svg.append("g")
-        .call(yAxis);
-
-      const cell = svg.append("g")
-        .selectAll("g")
-        .data(d3.cross(d3.range(columns.length), d3.range(columns.length)))
-        .join("g")
-        .attr("transform", ([i, j]) => `translate(${i * size},${j * size})`);
-
-      cell.append("rect")
-        .attr("fill", "none")
-        .attr("stroke", "#aaa")
-        .attr("x", padding / 2 + 0.5)
-        .attr("y", padding / 2 + 0.5)
-        .attr("width", size - padding)
-        .attr("height", size - padding);
-
-      cell.each(function ([i, j]) {
-        d3.select(this).selectAll("circle")
-          .data(data.filter(d => !isNaN(d[columns[i]]) && !isNaN(d[columns[j]])))
-          .join("circle")
-          .attr("cx", d => x[i](d[columns[i]]))
-          .attr("cy", d => y[j](d[columns[j]]));
+      const dotPlot = Plot.plot({
+        width: this.width - this.boxWidth,
+        height: this.height,
+        x: {
+          label: 'Cluster Label',
+          // domain: d3.extent(this.data, d => d.cluster_label_tsne),
+          // 到时候嵌入视图分类成1 2 3 4类
+          domain: [0, 1, 2, 3],
+          tickSize: 6,
+          tickPadding: 6,
+          tickFormat: d3.format("d"),
+          line: true,
+          grid: true,
+          // labelAnchor: "end",
+          labelOffset: 10,
+          labelFontSize: 12,
+          stroke: "black",
+          strokeWidth: 2
+        },
+        y: {
+          label: `${this.selectedcolumns[0]}`,
+          domain: this.dataRange,
+          tickSize: 6,
+          tickPadding: 6,
+          tickFormat: d3.format(".2f"),
+          line: true,
+          grid: true,
+          // labelAnchor: "end",
+          labelOffset: 10,
+          labelFontSize: 12,
+          stroke: "black",
+          strokeWidth: 2
+        },
+        color: {
+          type: 'ordinal',
+          legend: false,
+          // TODO: 有待修改为嵌入视图传来的cluster颜色
+          range: d3.schemeCategory10,
+          domain: this.clusters
+        },
+        marks: [
+          Plot.dot(this.data, { x: 'cluster_label_tsne', y: d => d[this.selectedcolumns[0]], fill: d => colorScale(d.cluster_label_tsne), size: 50, title: d => `Cluster: ${d.cluster_label_tsne}\n ${this.selectedcolumns[0]}: ${d[this.selectedcolumns[0]]}` })
+        ]
       });
 
-      const circle = cell.selectAll("circle")
-        .attr("r", 3.5)
-        .attr("fill-opacity", 0.7)
-        .attr("fill", d => color(d.cluster_label_tsne));
+      const boxPlot = Plot.plot({
+        width: this.boxWidth,
+        height: this.height,
+        x: { type: 'identity' },
+        y: { label: null, domain: this.dataRange },
+        marks: [
+          Plot.ruleX([{ y1: this.st.min, y2: this.st.max }], { x: 12.5, y1: 'y1', y2: 'y2' }),
+          Plot.rect([{ y1: this.st.lower, y2: this.st.upper }], { x1: 0, x2: 25, y1: 'y1', y2: 'y2', fill: 'rgba(244,84,30,1)', stroke: 'black', strokeWidth: 1 }),
+          Plot.ruleY([this.st.min, this.st.max], { x1: 7, x2: 19 }),
+          Plot.ruleY([{ y: this.st.mean }], { x1: 0, x2: 25, y: 'y', strokeWidth: 0.75 }),
+          Plot.ruleY([{ y: this.st.median }], { x1: 0, x2: 25, y: 'y', strokeDasharray: '2', strokeWidth: 0.75 }),
+          Plot.text(
+            [
+              { y: this.st.lower, t: `25th Percentile (${this.st.lower.toFixed(2)})` },
+              { y: this.st.upper, t: `75th Percentile (${this.st.upper.toFixed(2)})` },
+              { y: this.st.min, t: `5th Percentile (${this.st.min.toFixed(2)})` },
+              { y: this.st.max, t: `95th Percentile (${this.st.max.toFixed(2)})` },
+              { y: this.st.mean, t: `Mean (${this.st.mean.toFixed(2)})` },
+              { y: this.st.median, t: `Median (${this.st.median.toFixed(2)})` }
+            ],
+            { x: 30, y: 'y', text: 't', textAnchor: 'start' }
+          ),
+          Plot.dotY(
+            this.data.filter(d => d[this.selectedcolumns[0]] < this.st.min || d[this.selectedcolumns[0]] > this.st.max),
+            { x: 12.5, y: 'submit_times_avg', fill: '#999', fillOpacity: 0.5 }
+          )
+        ]
+      });
 
-      cell.call(this.brush, circle, svg, { padding, size, x, y, columns, data });
+      const container = this.$refs.chartContainer;
+      container.innerHTML = ''; // 清除之前的图表
+      container.appendChild(dotPlot);
+      container.appendChild(boxPlot);
+      // container.appendChild(dotPlot.node());
+      // container.appendChild(boxPlot.node());
 
-      svg.append("g")
-        .style("font", "bold 10px sans-serif")
-        .style("pointer-events", "none")
-        .selectAll("text")
-        .data(columns)
-        .join("text")
-        .attr("transform", (d, i) => `translate(${i * size},${i * size})`)
-        .attr("x", padding)
-        .attr("y", padding)
-        .attr("dy", ".71em")
-        .text(d => d);
-
-      svg.property("value", []);
-      return Object.assign(svg.node(), { scales: { color } });
+      [...boxPlot.querySelectorAll('g.tick')].forEach(d => d.remove());
     },
-    brush(cell, circle, svg, { padding, size, x, y, columns, data }) {
-      const brush = d3.brush()
-        .extent([[padding / 2, padding / 2], [size - padding / 2, size - padding / 2]])
-        .on("start", brushstarted)
-        .on("brush", brushed)
-        .on("end", brushended);
 
-      cell.call(brush);
+    renderChartDetail() {
+      const colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(this.clusters);
 
-      let brushCell;
+      const dotPlot = Plot.plot({
+        width: this.width - this.boxWidth,
+        height: this.height,
+        x: {
+          label: `${this.selectedcolumns_detail[0]}`,
+          domain: d3.extent(this.data, d => d[this.selectedcolumns_detail[0]]),
+          tickSize: 6,
+          tickPadding: 6,
+          tickFormat: d3.format("d"),
+          line: true,
+          grid: true,
+          // labelAnchor: "end",
+          labelOffset: 10,
+          labelFontSize: 12,
+          stroke: "black",
+          strokeWidth: 2
+        },
+        y: {
+          label: `${this.selectedcolumns_detail[1]}`,
+          domain: this.dataRangeDetail,
+          tickSize: 6,
+          tickPadding: 6,
+          tickFormat: d3.format(".2f"),
+          line: true,
+          grid: true,
+          // labelAnchor: "end",
+          labelOffset: 10,
+          labelFontSize: 12,
+          stroke: "black",
+          strokeWidth: 2
+        },
+        color: {
+          type: 'ordinal',
+          legend: false,
+          // TODO: 有待修改为嵌入视图传来的cluster颜色
+          range: d3.schemeCategory10,
+          domain: this.clusters
+        },
+        marks: [
+          Plot.dot(this.data, { x: d => d[this.selectedcolumns_detail[0]], y: d => d[this.selectedcolumns_detail[1]], fill: d => colorScale(d.cluster_label_tsne), size: 150, title: d => `${this.selectedcolumns_detail[0]}: ${d[this.selectedcolumns_detail[0]]}\n ${this.selectedcolumns_detail[1]}: ${d[this.selectedcolumns_detail[1]]}` })
+        ]
+      });
 
-      function brushstarted() {
-        if (brushCell !== this) {
-          d3.select(brushCell).call(brush.move, null);
-          brushCell = this;
-        }
-      }
+      const boxPlot = Plot.plot({
+        width: this.boxWidth,
+        height: this.height,
+        x: { type: 'identity' },
+        y: { label: null, domain: this.dataRangeDetail },
+        marks: [
+          Plot.ruleX([{ y1: this.stDetail.min, y2: this.stDetail.max }], { x: 12.5, y1: 'y1', y2: 'y2' }),
+          Plot.rect([{ y1: this.stDetail.lower, y2: this.stDetail.upper }], { x1: 0, x2: 25, y1: 'y1', y2: 'y2', fill: 'rgba(244,84,30,1)', stroke: 'black', strokeWidth: 1 }),
+          Plot.ruleY([this.stDetail.min, this.stDetail.max], { x1: 7, x2: 19 }),
+          Plot.ruleY([{ y: this.stDetail.mean }], { x1: 0, x2: 25, y: 'y', strokeWidth: 0.75 }),
+          Plot.ruleY([{ y: this.stDetail.median }], { x1: 0, x2: 25, y: 'y', strokeDasharray: '2', strokeWidth: 0.75 }),
+          Plot.text(
+            [
+              { y: this.stDetail.lower, t: `25th Percentile (${this.stDetail.lower.toFixed(2)})` },
+              { y: this.stDetail.upper, t: `75th Percentile (${this.stDetail.upper.toFixed(2)})` },
+              { y: this.stDetail.min, t: `5th Percentile (${this.stDetail.min.toFixed(2)})` },
+              { y: this.stDetail.max, t: `95th Percentile (${this.stDetail.max.toFixed(2)})` },
+              { y: this.stDetail.mean, t: `Mean (${this.stDetail.mean.toFixed(2)})` },
+              { y: this.stDetail.median, t: `Median (${this.stDetail.median.toFixed(2)})` }
+            ],
+            { x: 30, y: 'y', text: 't', textAnchor: 'start' }
+          ),
+          Plot.dotY(
+            this.data.filter(d => d.total_score < this.stDetail.min || d.total_score > this.stDetail.max),
+            { x: 12.5, y: 'total_score', fill: '#999', fillOpacity: 0.5 }
+          )
+        ]
+      });
 
-      function brushed({ selection }, [i, j]) {
-        let selected = [];
-        if (selection) {
-          const [[x0, y0], [x1, y1]] = selection;
-          circle.classed("hidden",
-            d => x0 > x[i](d[columns[i]])
-              || x1 < x[i](d[columns[i]])
-              || y0 > y[j](d[columns[j]])
-              || y1 < y[j](d[columns[j]]));
-          selected = data.filter(
-            d => x0 < x[i](d[columns[i]])
-              && x1 > x[i](d[columns[i]])
-              && y0 < y[j](d[columns[j]])
-              && y1 > y[j](d[columns[j]]));
-        }
-        svg.property("value", selected).dispatch("input");
-      }
+      const container = this.$refs.chartContainer;
+      container.innerHTML = ''; // 清除之前的图表
+      container.appendChild(dotPlot);
+      container.appendChild(boxPlot);
 
-      function brushended({ selection }) {
-        if (selection) return;
-        svg.property("value", []).dispatch("input");
-        circle.classed("hidden", false);
-      }
+      [...boxPlot.querySelectorAll('g.tick')].forEach(d => d.remove());
     }
   },
   watch: {
-    selectedcolumns(newVal) {
-      this.createScatterplotMatrix(); // Redraw the plot when selected columns change
+    selectedcolumns: {
+      handler() {
+        this.renderChart();
+      },
+      deep: true
+    },
+    selectedcolumns_detail: {
+      handler() {
+        this.renderChartDetail();
+      },
+      deep: true
     }
   }
 };
 </script>
 
 <style scoped>
-#bottom-main {
+.bottomright-chart {
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
-.custom-select {
-  width: 13%;
+.feat-select {
+  width: 20%;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
   background-color: white;
-}
-
-#scattermatrix {
-  width: 87%;
-  height: 100%;
-  position: absolute;
-  right: 0;
 }
 </style>

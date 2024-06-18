@@ -22,7 +22,7 @@
       <RightViewer/>
     </div>
 
-    <div id="BottomViewer" v-if="currentView.BottomViewer">
+    <div id="BottomViewer" v-if="currentView.BottomViewer" :isVisible="currentView.BottomViewer">
       <BottomViewer/>
     </div>
 
@@ -150,6 +150,7 @@ export default {
       currentView: this.getViewState(this.getInitialStateCode())
     }
   },
+
   methods: {
     getInitialStateCode() {
       const savedState = localStorage.getItem('modelViewerStateCode');
@@ -241,9 +242,13 @@ export default {
       }else{
         console.error("stateCode error!", error);
       }
+      // 在此处判定BottomViewer的状态，传到BottomViewer.vue中用来及时让html覆盖层消失
+
     },
     handleStateChange(stateCode) {
       this.currentView = this.getViewState(stateCode);
+      // 跳转一次就刷新一次浏览器页面 及时让html覆盖层消失
+      window.location.reload();
     }
   }
 }
