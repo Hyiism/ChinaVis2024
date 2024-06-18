@@ -231,7 +231,12 @@ export default {
         .attr("x", width - 18)
         .attr("width", 18)
         .attr("height", 18)
-        .style("fill", colorScale);
+        .style("fill", colorScale)
+        .on('click', (event, d) => {
+          console.log("click legend");
+          console.log(d);
+          EventBus.$emit('clusterSelected', d); // Emit event
+        });
 
       legend.append("text")
         .attr("x", width - 24)
@@ -239,6 +244,7 @@ export default {
         .attr("dy", ".35em")
         .style("text-anchor", "end")
         .text(d => `cluster ${d}`);
+
 
       window.addEventListener('resize', () => {
         const newSvgWidth = this.$refs.ProjectionView.offsetWidth;

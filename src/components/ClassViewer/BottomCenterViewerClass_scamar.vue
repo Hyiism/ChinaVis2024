@@ -1,7 +1,15 @@
 <template>
-  <div id="bottom-main-right">
-    <p>放箱线图等 展示不同clusterlabel的特征统计情况！</p>
-    <!-- 有待监听 clusterSelected -->
+  <div id="bottom-main">
+    <el-select v-model="selectedcolumns" multiple placeholder="请选择" class="custom-select">
+      <el-option
+        v-for="item in allcolumns"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value">
+      </el-option>
+    </el-select>
+
+    <div ref="scatterplot" id="scattermatrix"></div>
   </div>
 </template>
 
@@ -207,7 +215,7 @@ export default {
 }
 
 .custom-select {
-  width: 13%;
+  width: 20%;
   position: absolute;
   top: 0;
   left: 0;
@@ -216,9 +224,10 @@ export default {
 }
 
 #scattermatrix {
-  width: 87%;
+  width: 80%;
   height: 100%;
   position: absolute;
   right: 0;
+  bottom: 0;
 }
 </style>
