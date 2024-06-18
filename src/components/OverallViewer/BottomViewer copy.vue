@@ -36,7 +36,6 @@ export default {
           this.top_students_scores = JSON.parse(response.data);
           // 数据获取成功后再初始化图表，不然图表获取不到数据
           this.initChart();
-
         })
         .catch(error => {
           console.error("There was an error!", error);
@@ -47,8 +46,8 @@ export default {
     initChart() {
 
       console.log("###start###")
-      // console.log(this.top_students_scores['top5'])
       console.log(this.top_students_scores.top5)
+      console.log("###start###")
       const top5 = this.top_students_scores.top5;
       const top10 = this.top_students_scores.top10;
       const top15 = this.top_students_scores.top15;
@@ -101,14 +100,14 @@ export default {
       };
 
       var option = {
-        title: {
+        title:{
           text: '异常题目检测表',
           left: 'center',
           textStyle: {
             color: '#000',
             fontSize: 20
-          },
-          top: '2%'
+        },
+        top: '2%'
         },
 
         backgroundColor: '#fff',
@@ -129,8 +128,8 @@ export default {
         },
 
         parallelAxis: [
-          { dim: 0, name: schema[0].text, min: 3, max: 4 },
-          { dim: 1, name: schema[1].text, min: 3, max: 4 },
+          { dim: 0,name: schema[0].text,min: 3,max: 4},
+          { dim: 1, name: schema[1].text, min: 3, max: 4},
           { dim: 2, name: schema[2].text, min: 3, max: 4 },
           { dim: 3, name: schema[3].text, min: 3, max: 4 },
           { dim: 4, name: schema[4].text, min: 3, max: 4 },
@@ -167,8 +166,8 @@ export default {
           { dim: 35, name: schema[35].text, min: 3, max: 4 },
           { dim: 36, name: schema[36].text, min: 3, max: 4 },
           { dim: 37, name: schema[37].text, min: 3, max: 4 },
-          { dim: 38, name: schema[38].text, min: 130, max: 137 },
-
+          { dim: 38, name: schema[38].text, min: 130, max: 137},
+          
         ],
 
         visualMap: {
@@ -248,15 +247,6 @@ export default {
       var myChart = echarts.init(chartDom);
       myChart.setOption(option);
       this.myChart = myChart;
-      this.myChart.on('mouseover', function (params) {
-
-        console.log("!!!!!平行图鼠标事件");
-        // 控制台打印数据的名称
-        console.log(params.name);
-        console.log(params);
-
-      });
-
     },
     resizeChart() {
       if (this.myChart) {
@@ -277,7 +267,7 @@ export default {
   align-items: center;
 }
 
-#bottom-main {
+#bottom-main{
   width: 100%;
   height: 100%;
 }

@@ -1,252 +1,224 @@
 <template>
-  <!-- 变换图 展示总体知识点和题目情况 -->
-  <div>
-    <!-- <p>班级视图BottomLeft test</p> -->
-    <div ref="chart" class="chart-container"></div>
+  <div id="bottom-main-right">
+    <p>放箱线图等 展示不同clusterlabel的特征统计情况！</p>
+    <!-- 有待监听 clusterSelected -->
   </div>
 </template>
 
 <script>
-import * as d3 from 'd3';
-import axios from 'axios';
+import * as d3 from "d3";
 
 export default {
-  name: 'StackedLineChart',
+  name: "ScatterplotMatrix",
   data() {
     return {
-      // data: [
-      //   { date: new Date(2020, 0, 1), industry: 'A', unemployed: 100 },
-      //   { date: new Date(2020, 0, 1), industry: 'B', unemployed: 200 },
-      //   { date: new Date(2020, 0, 1), industry: 'C', unemployed: 300 },
-      //   { date: new Date(2020, 1, 1), industry: 'A', unemployed: 150 },
-      //   { date: new Date(2020, 1, 1), industry: 'B', unemployed: 250 },
-      //   { date: new Date(2020, 1, 1), industry: 'C', unemployed: 350 },
-      //   { date: new Date(2020, 2, 1), industry: 'A', unemployed: 200 },
-      //   { date: new Date(2020, 2, 1), industry: 'B', unemployed: 100 },
-      //   { date: new Date(2020, 2, 1), industry: 'C', unemployed: 250 },
-      //   { date: new Date(2020, 3, 1), industry: 'A', unemployed: 50 },
-      //   { date: new Date(2020, 3, 1), industry: 'B', unemployed: 350 },
-      //   { date: new Date(2020, 3, 1), industry: 'C', unemployed: 450 },
-      //   { date: new Date(2020, 4, 1), industry: 'A', unemployed: 300 },
-      //   { date: new Date(2020, 4, 1), industry: 'B', unemployed: 400 },
-      //   { date: new Date(2020, 4, 1), industry: 'C', unemployed: 540 },
-      //   { date: new Date(2020, 5, 1), industry: 'A', unemployed: 300 },
-      //   { date: new Date(2020, 5, 1), industry: 'B', unemployed: 450 },
-      //   { date: new Date(2020, 5, 1), industry: 'C', unemployed: 100 },
-      //   { date: new Date(2020, 6, 1), industry: 'A', unemployed: 400 },
-      //   { date: new Date(2020, 6, 1), industry: 'B', unemployed: 50 },
-      //   { date: new Date(2020, 6, 1), industry: 'C', unemployed: 80 },
-      //   { date: new Date(2020, 7, 1), industry: 'A', unemployed: 450 },
-      //   { date: new Date(2020, 7, 1), industry: 'B', unemployed: 120 },
-      //   { date: new Date(2020, 7, 1), industry: 'C', unemployed: 650 },
-      //   { date: new Date(2020, 8, 1), industry: 'A', unemployed: 500 },
-      //   { date: new Date(2020, 8, 1), industry: 'B', unemployed: 200 },
-      //   { date: new Date(2020, 8, 1), industry: 'C', unemployed: 700 },
-      //   { date: new Date(2020, 9, 1), industry: 'A', unemployed: 50 },
-      //   { date: new Date(2020, 9, 1), industry: 'B', unemployed: 650 },
-      //   { date: new Date(2020, 9, 1), industry: 'C', unemployed: 750 },
-      //   { date: new Date(2020, 10, 1), industry: 'A', unemployed: 500 },
-      //   { date: new Date(2020, 10, 1), industry: 'B', unemployed: 700 },
-      //   { date: new Date(2020, 10, 1), industry: 'C', unemployed: 800 },
-      //   { date: new Date(2020, 11, 1), industry: 'A', unemployed: 320 },
-      //   { date: new Date(2020, 11, 1), industry: 'B', unemployed: 750 },
-      //   { date: new Date(2020, 11, 1), industry: 'C', unemployed: 200 },
-      // ]
+      selectedcolumns: ["submit_times_avg", "time_split_2_percentage"],
+      allcolumns: [
+        { label: "做题数量", value: "title_counts" },
+        { label: "平均间隔时间", value: "time_difference_mean" },
+        { label: "上午做题比例", value: "time_split_0_percentage" },
+        { label: "中午做题比例", value: "time_split_1_percentage" },
+        { label: "下午做题比例", value: "time_split_2_percentage" },
+        { label: "平均提交次数", value: "submit_times_avg" },
+        { label: "平均空间复杂度", value: "all_memory_avg" },
+        { label: "平均时间复杂度", value: "all_timeconsume_avg" },
+        { label: "AE状态占比", value: "state_ae_percentage" },
+        { label: "AE状态占比", value: "state_e_percentage" },
+        { label: "E状态占比", value: "state_pc_percentage" },
+        { label: "AC状态占比", value: "state_ac_percentage" }
+      ],
       data: []
     };
   },
   mounted() {
-    this.fetchData();
+    this.fetchStudentScores();
   },
   methods: {
-    async fetchData() {
-      try {
-        const response = await axios.get('http://10.12.44.190:8000/get_student_scores_data');
-        const data = response.data;
-        this.processData(data);
-        this.createChart();
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    },
-    processData(data) {
-      const formattedData = [];
-      data.forEach(row => {
-        // 遍历 row 的所有属性
-        Object.keys(row).forEach(key => {
-            // 检查属性名是否匹配 dateYYYYMMDD 的模式
-            const match = key.match(/^date(\d{4})(\d{2})(\d{2})$/);
-            if (match) {
-                // 提取年份、月份和日期
-                const year = parseInt(match[1], 10);
-                const month = parseInt(match[2], 10) - 1; // JavaScript 中的月份是从 0 开始的
-                const day = parseInt(match[3], 10);
-                // 将数据添加到 formattedData 中
-                formattedData.push({ 
-                    industry: row.knowledge_id, 
-                    date: new Date(year, month, day), 
-                    unemployed: row[key] 
-                });
-            }
+    fetchStudentScores() {
+      this.$axios
+        .get('http://10.12.44.190:8000/scatterMatrix/?class_id=Class1') // Replace with actual API endpoint
+        .then((response) => {
+          this.data = JSON.parse(response.data);
+          this.createScatterplotMatrix();
+        })
+        .catch((error) => {
+          console.error('There was an error!', error);
         });
-        // formattedData.push({ industry: row.student_id, date: new Date(2024, 6, 1), unemployed: row.date20240601 });
-        // formattedData.push({ industry: row.student_id, date: new Date(2024, 6, 2), unemployed: row.date20240602 });
-      });
-      this.data = formattedData;
     },
-    createChart() {
+    createScatterplotMatrix() {
+      if (!this.selectedcolumns.length) {
+        return;
+      }
+
       const data = this.data;
+      const columns = this.selectedcolumns.concat('total_score');
 
-      const width = 928;
-      const height = 550;
-      const marginTop = 50;
-      const marginRight = 10;
-      const marginBottom = 50;
-      const marginLeft = 50;
+      const width = 470;
+      const height = width;
+      const padding = 28;
+      const size = (width - (columns.length + 1) * padding) / columns.length + padding;
 
-      const series = d3.stack()
-        .keys(d3.union(data.map(d => d.industry)))
-        .value(([, D], key) => D.get(key)?.unemployed || 0)
-        (d3.index(data, d => d.date, d => d.industry));
+      const x = columns.map(c => d3.scaleLinear()
+        .domain(d3.extent(data, d => d[c]))
+        .rangeRound([padding / 2, size - padding / 2]));
 
-      const x = d3.scaleUtc()
-        .domain(d3.extent(data, d => d.date))
-        .range([marginLeft, width - marginRight]);
-
-      const y = d3.scaleLinear()
-        .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
-        .rangeRound([height - marginBottom, marginTop]);
+      const y = x.map(x => x.copy().range([size - padding / 2, padding / 2]));
 
       const color = d3.scaleOrdinal()
-        .domain(series.map(d => d.key))
-        .range(d3.schemeTableau10);
+        .domain(data.map(d => d.cluster_label_tsne))
+        .range(d3.schemeCategory10);
 
-      const area = d3.area()
-        .x(d => x(d.data[0]))
-        .y0(d => y(d[0]))
-        .y1(d => y(d[1]));
+      const axisx = d3.axisBottom()
+        .ticks(6)
+        .tickSize(size * columns.length);
+      const xAxis = g => g.selectAll("g").data(x).join("g")
+        .attr("transform", (d, i) => `translate(${i * size},0)`)
+        .each(function (d) { return d3.select(this).call(axisx.scale(d)); })
+        .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
 
-      const svg = d3.select(this.$refs.chart)
-        .append("svg")
-        .attr("id", "stacked-line-chart")
+      const axisy = d3.axisLeft()
+        .ticks(6)
+        .tickSize(-size * columns.length);
+      const yAxis = g => g.selectAll("g").data(y).join("g")
+        .attr("transform", (d, i) => `translate(0,${i * size})`)
+        .each(function (d) { return d3.select(this).call(axisy.scale(d)); })
+        .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
+
+      d3.select(this.$refs.scatterplot).selectAll("*").remove(); // Clear previous plot
+
+      const svg = d3.select(this.$refs.scatterplot).append("svg")
         .attr("width", width)
         .attr("height", height)
-        .attr("viewBox", [0, 0, width, height])
-        .attr("style", "max-width: 100%; height: 100%;");
+        .attr("viewBox", [-padding, 0, width, height]);
+
+      svg.append("style")
+        .text(`circle.hidden { fill: #000; fill-opacity: 1; r: 1px; }`);
 
       svg.append("g")
-        .attr("transform", `translate(${marginLeft},0)`)
-        .call(d3.axisLeft(y).ticks(height / 80))
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").clone()
-          .attr("x2", width - marginLeft - marginRight)
-          .attr("stroke-opacity", 0.1))
-          .style("font-size", "20px")
-        // .call(g => g.append("text")
-        //   .attr("x", -marginLeft)
-        //   .attr("y", 10)
-        //   .attr("fill", "currentColor")
-        //   .attr("text-anchor", "start")
-        //   .text("↑ Unemployed persons"));
+        .call(xAxis);
 
-        const xAxis = d3.axisBottom(x).tickSizeOuter(0).tickFormat(d3.timeFormat("%Y.%m.%d"));
-        svg.append("g")
-        .attr("transform", `translate(0,${height - marginBottom})`)
-        .style("font-size", "16px")
-        .call(xAxis)
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").clone()
-          .attr("y2", -height + marginTop + marginBottom)
-          .attr("stroke-opacity", 0.1))
-        .call(g => g.selectAll(".tick text")
-          .style("font-size", "20px"));
+      svg.append("g")
+        .call(yAxis);
 
-        const paths = svg.append("g")
-        .selectAll("path")
-        .data(series)
-        .join("path")
-        .attr("fill", d => color(d.key))
-        .attr("d", area)
-        .attr("class", "area");
+      const cell = svg.append("g")
+        .selectAll("g")
+        .data(d3.cross(d3.range(columns.length), d3.range(columns.length)))
+        .join("g")
+        .attr("transform", ([i, j]) => `translate(${i * size},${j * size})`);
 
-      // 添加工具提示框
-      const tooltip = svg.append("g")
-        .attr("id", "tooltip")
-        .style("display", "none");
+      cell.append("rect")
+        .attr("fill", "none")
+        .attr("stroke", "#aaa")
+        .attr("x", padding / 2 + 0.5)
+        .attr("y", padding / 2 + 0.5)
+        .attr("width", size - padding)
+        .attr("height", size - padding);
 
-      tooltip.append("rect")
-        .attr("width", 150)
-        .attr("height", 40)
-        .attr("fill", "white")
-        .attr("stroke", "black");
+      cell.each(function ([i, j]) {
+        d3.select(this).selectAll("circle")
+          .data(data.filter(d => !isNaN(d[columns[i]]) && !isNaN(d[columns[j]])))
+          .join("circle")
+          .attr("cx", d => x[i](d[columns[i]]))
+          .attr("cy", d => y[j](d[columns[j]]));
+      });
 
-      tooltip.append("text")
-        .attr("x", 80)
-        .attr("y", 20)
-        .attr("dy", ".35em")
-        .attr("text-anchor", "middle");
+      const circle = cell.selectAll("circle")
+        .attr("r", 3.5)
+        .attr("fill-opacity", 0.7)
+        .attr("fill", d => color(d.cluster_label_tsne));
 
-      // 添加交互效果
-      paths
-        .on("mouseover", function(event, d) {
-          d3.selectAll(".area").style("opacity", 0.1);
-          d3.select(this).style("opacity", 1);
-          tooltip.style("display", null);
-        })
-        .on("mousemove", function(event, d) {
-          const [mouseX, mouseY] = d3.pointer(event, svg.node());
-          tooltip.attr("transform", `translate(${mouseX + 10},${mouseY + 20})`);
-          tooltip.select("text").text(d.key);
-        })
-        .on("mouseout", function() {
-          d3.selectAll(".area").style("opacity", 1);
-          tooltip.style("display", "none");
-        });
+      cell.call(this.brush, circle, svg, { padding, size, x, y, columns, data });
 
-      // 添加图例
-      const legend = svg.append("g")
-        .attr("transform", `translate(${marginRight + 70},${marginTop})`)
-        .attr("class", "legend");
+      svg.append("g")
+        .style("font", "bold 10px sans-serif")
+        .style("pointer-events", "none")
+        .selectAll("text")
+        .data(columns)
+        .join("text")
+        .attr("transform", (d, i) => `translate(${i * size},${i * size})`)
+        .attr("x", padding)
+        .attr("y", padding)
+        .attr("dy", ".71em")
+        .text(d => d);
 
-      // 设置每行显示的图例项数量
-      const itemsPerRow = 5;
+      svg.property("value", []);
+      return Object.assign(svg.node(), { scales: { color } });
+    },
+    brush(cell, circle, svg, { padding, size, x, y, columns, data }) {
+      const brush = d3.brush()
+        .extent([[padding / 2, padding / 2], [size - padding / 2, size - padding / 2]])
+        .on("start", brushstarted)
+        .on("brush", brushed)
+        .on("end", brushended);
 
-      // 计算图例项的宽度和高度
-      const legendItemWidth = 150;
-      const legendItemHeight = 30;
-      
-      const legendItems = legend.selectAll(".legend-item")
-        .data(series)
-        .enter()
-        .append("g")
-        .attr("class", "legend-item")
-        // .attr("transform", (d, i) => `translate(0,${i * 20})`);
-        .attr("transform", (d, i) => {
-          const x = (i % itemsPerRow) * legendItemWidth;
-          const y = Math.floor(i / itemsPerRow) * legendItemHeight;
-          return `translate(${x},${y})`;
-        });
+      cell.call(brush);
 
-      legendItems.append("rect")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", 24)
-        .attr("height", 24)
-        .attr("fill", d => color(d.key));
+      let brushCell;
 
-      legendItems.append("text")
-        .attr("x", 30)
-        .attr("y", 12)
-        .attr("dy", ".35em")
-        .text(d => d.key);
+      function brushstarted() {
+        if (brushCell !== this) {
+          d3.select(brushCell).call(brush.move, null);
+          brushCell = this;
+        }
+      }
+
+      function brushed({ selection }, [i, j]) {
+        let selected = [];
+        if (selection) {
+          const [[x0, y0], [x1, y1]] = selection;
+          circle.classed("hidden",
+            d => x0 > x[i](d[columns[i]])
+              || x1 < x[i](d[columns[i]])
+              || y0 > y[j](d[columns[j]])
+              || y1 < y[j](d[columns[j]]));
+          selected = data.filter(
+            d => x0 < x[i](d[columns[i]])
+              && x1 > x[i](d[columns[i]])
+              && y0 < y[j](d[columns[j]])
+              && y1 > y[j](d[columns[j]]));
+        }
+        svg.property("value", selected).dispatch("input");
+      }
+
+      function brushended({ selection }) {
+        if (selection) return;
+        svg.property("value", []).dispatch("input");
+        circle.classed("hidden", false);
+      }
+    }
+  },
+  watch: {
+    selectedcolumns(newVal) {
+      this.createScatterplotMatrix(); // Redraw the plot when selected columns change
     }
   }
 };
 </script>
 
-<style>
-.chart-container {
+<style scoped>
+#bottom-main {
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-select {
+  width: 13%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: white;
+}
+
+#scattermatrix {
+  width: 87%;
+  height: 100%;
+  position: absolute;
+  right: 0;
 }
 </style>

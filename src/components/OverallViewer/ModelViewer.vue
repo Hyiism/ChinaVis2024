@@ -86,24 +86,28 @@ export default {
       menuLeft: 0,
       menuTop: 0,
       defaultValue: moment('2023-08-31'),
-      model: null,
+      floorModel: null,
+      classModel: null,
+      currentModelType: null,
       container: null,
       scene: null,
       camera: null,
       renderer: null,
       // controls: null,
       student: null,
+      classRoom: null,
       raycaster: new THREE.Raycaster(),
       mouse: new THREE.Vector2(),
       studentsPositions,
       allStudent: [],
       appearStudent: [],
       mappedStudents: [],
-      receivedStudent: []
+      receivedStudent: [],
+      className: 'Class1'
     };
   },
   mounted() {
-    this.initThreeJS();
+    this.initFloorThreeJS();
     this.subscriptionToken = PubSub.subscribe('studentAppear', (msg, value) => {
       this.handleStudentAppear(value);
     });
@@ -111,17 +115,52 @@ export default {
   },
   created() {
     EventBus.$on('studentSelected', this.handleStudentSelected);
+    EventBus.$on('checkSelected', this.handleCheckSelected);
   },
   beforeDestroy() {
     EventBus.$off('studentSelected', this.handleStudentSelected);
+    EventBus.$off('checkSelected', this.handleCheckSelected);
+    this.controls.dispose(); // 清理轨道控制
   },
   methods: {
     // TODO: 处理在嵌入中选择学生点的操作
-    handleStudentSelected(studentId){
+    handleStudentSelected(studentId) {
       this.selectedStudentId = studentId;
-      // 模拟点击此studentId对应的学生
+      this.appearStudent = this.mappedStudents.map(student => student.original);
+      const foundStudent = this.mappedStudents.find(student => student.original == this.selectedStudentId);
+      console.log(foundStudent.mapped)
+      this.student = this.allStudent[foundStudent.mapped - 1]
+
+      this.student.material.color.set(0xff0000);
+      // // 获取学生的ID
+      const studentName = this.student.name;
+
+      // 从studentsPositions中获取位置信息
+      const targetPosition = new THREE.Vector3(
+        this.studentsPositions[studentName].x,
+        this.studentsPositions[studentName].y,
+        this.studentsPositions[studentName].z
+      );
+
+      // const targetPosition = new THREE.Vector3().copy(this.student.position);
+      console.log(targetPosition, this.student);
+
+      new TWEEN.Tween(this.camera.position)
+        .to({
+          x: targetPosition.x,
+          y: targetPosition.y,
+          z: targetPosition.z
+        }, 1000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
       console.log("studentId-modelview", studentId);
-      
+
+    },
+    // TODO: 点击github打卡图，主视图跳转日期且显示对应学生，由此可以再拖拽查看其他人情况
+    // data:{student_id:" ",year:" ",month:" ",date:" "}
+    handleCheckSelected(data) {
+      console.log('modelview dataselect:', data)
+
     },
 
     getSavedState() {
@@ -137,7 +176,7 @@ export default {
       this.$emit('stateChanged', this.stateCode);
     },
 
-    initThreeJS() {
+    initFloorThreeJS() {
       // 创建场景
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xffffff);
@@ -149,7 +188,6 @@ export default {
 
       const axesHelper = new THREE.AxesHelper(20000);
       this.scene.add(axesHelper);
-
 
       // 创建渲染器
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -163,62 +201,133 @@ export default {
       // 添加光源
       this.addLights();
 
-      // // 添加OrbitControls
-      // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      // this.controls.enableDamping = true;
-      // this.controls.dampingFactor = 0.25;
-      // this.controls.screenSpacePanning = false;
-      // this.controls.maxPolarAngle = Math.PI / 2;
-
+      // 添加轨道控制
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true; // 启用阻尼效果
+      this.controls.dampingFactor = 0.25; // 阻尼系数
+      this.controls.screenSpacePanning = false; // 禁用屏幕空间平移
+      this.loadFloorModel()
       // 加载模型
-      this.loadModel();
-      // 动画循环
+      // this.loadModel();
+      // // 动画循环
       this.animate();
       this.initialView();
     },
     addLights() {
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      // 添加光源
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);// 增加环境光强度，可以减少阴影
       this.scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(10, 10, 10).normalize();
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 3);// 平行光，即太阳光，会生成阴影。
+      directionalLight.position.set(5, 10, 7.5);
       this.scene.add(directionalLight);
 
-      const pointLight = new THREE.PointLight(0xffffff, 1, 500);
-      pointLight.position.set(0, 50, 100);
+      const pointLight = new THREE.PointLight(0xffffff, 1.5, 100); // 单点发光，照射所有方向的光源（需要设置光源位置），它也不会生成阴影。
+      pointLight.position.set(0, 2, 5);
       this.scene.add(pointLight);
     },
-    loadModel() {
+    loadFloorModel() {
       const loader = new GLTFLoader();
-      loader.load('/models/student101_4.glb', (gltf) => {
-        this.model = gltf.scene;
-        this.model.scale.set(1.5, 1.5, 1.5);
-        // model.scale.set(1, 1, 1);
-        this.scene.add(this.model);
-
-        const objectsToRemove = [];
-
-        for (let i = 1; i <= 100; i++) {
-          const studentName = "student" + i.toString().padStart(3, "0"); // 将数字格式化为三位数，例如001
-          this.model.traverse((child) => {
-            if (child.isMesh && child.name.includes(studentName)) {
-              objectsToRemove.push(child);
-              this.allStudent.push(child);
-            }
-          });
+      loader.load(
+        '/models/floor.glb', // 替换为你的模型路径
+        (gltf) => {
+          this.floorModel = gltf.scene;
+          // this.model.scale.set(2, 2, 2);
+          this.scene.add(this.floorModel);
+          // this.floorModel.name = 'floor';
+          this.currentModelType = 'floor'; // 标记当前加载的文件类型
+          this.animate();
+        },
+        undefined,
+        (error) => {
+          console.error('An error happened', error);
         }
-        // 从场景中移除这些对象
-        objectsToRemove.forEach((child) => {
-          if (child.parent) {
-            child.parent.remove(child);
-          }
+      );
+    },
+    loadClassModel() {
+      const loadModelPromise = () => {
+        return new Promise((resolve, reject) => {
+          const loader = new GLTFLoader();
+          loader.load('/models/student101_4.glb', (gltf) => {
+            this.classModel = gltf.scene;
+            this.classModel.scale.set(2, 2, 2);
+            const currentPosition = this.camera.position.clone();
+            const targetPosition = new THREE.Vector3(251.0974656502318, 153.83576291656343, 247.37127012156563);
+
+            new TWEEN.Tween(currentPosition)
+              .to(targetPosition, 1000)
+              .easing(TWEEN.Easing.Quadratic.Out)
+              .onUpdate(() => {
+                this.camera.position.copy(currentPosition);
+                this.camera.lookAt(0, 0, 0);
+              })
+              .start();
+            this.scene.add(this.classModel);
+
+            const objectsToRemove = [];
+
+            for (let i = 1; i <= 100; i++) {
+              const studentName = "student" + i.toString().padStart(3, "0");
+              this.classModel.traverse((child) => {
+                if (child.isMesh && child.name.includes(studentName)) {
+                  objectsToRemove.push(child);
+                  this.allStudent.push(child);
+                }
+              });
+            }
+            console.log("初始化视图allStudent", this.allStudent);
+            objectsToRemove.forEach((child) => {
+              if (child.parent) {
+                child.parent.remove(child);
+              }
+            });
+            resolve(); // 模型加载完成后，resolve Promise
+          }, undefined, (error) => {
+            console.error('An error happened while loading the model', error);
+            reject(error); // 如果模型加载失败，reject Promise
+          });
         });
-        // const mesh = this.allStudent[5]; // 因为appearStudent中的值是1到100的数，需要减1以匹配allStudent的索引
-        // if (mesh) { // 确保mesh存在
-        //   this.scene.add(mesh);
-        // }
-      }, undefined, (error) => {
-        console.error('An error happened while loading the model', error);
+      };
+
+      loadModelPromise().then(() => {
+        // 模型加载完成后执行axios.get请求
+        this.$axios.get('http://10.12.44.205:8000/getStudent4Class', {
+          params: {
+            className: this.className,
+          }
+        })
+          .then(response => {
+            console.error('success sending data:', JSON.parse(response.data));
+
+            let studentNumbers = [];
+            for (let i = 1; i <= 100; i++) {
+              studentNumbers.push(i);
+            }
+            studentNumbers = this.shuffleArray(studentNumbers);
+            this.receivedStudent = JSON.parse(response.data).students;
+            // 创建映射
+            this.mappedStudents = this.receivedStudent.map((student, index) => {
+              return { original: student, mapped: studentNumbers[index] };
+            });
+            this.appearStudent = this.mappedStudents.map(student => student.mapped);
+            console.log("appearStudent", this.appearStudent);
+
+            this.container = new THREE.Object3D();
+            this.appearStudent.forEach(index => {
+              const mesh = this.allStudent[index - 1];
+              if (mesh) { // 确保mesh存在
+                this.container.add(mesh);
+                // 将容器添加到场景中
+                this.scene.add(this.container);
+                // 对容器进行放大操作，而不是对模型直接进行放大
+                this.container.scale.set(1.5, 1.5, 1.5); // 重新应用缩放设置
+              }
+            });
+            this.animate();
+          })
+          .catch(error => {
+            console.error('Error sending data:', error);
+          });
       });
     },
     // onWindowResize() {
@@ -232,16 +341,23 @@ export default {
     animate() {
       requestAnimationFrame(this.animate);
       TWEEN.update();
-      // this.controls.update();
+      this.controls.update();
       this.renderer.render(this.scene, this.camera);
     },
     initialView() {
       //原方案
       // this.camera.position.set(0, 400, 0);
       //初始相机看第一个学生
-      this.camera.position.set(178.434532168853, 113.66997527109939, 164.5923843414466)
-      this.camera.lookAt(97.55521392822266, 32.887508392333984, 75.55369567871094);
+      this.camera.position.set(41.24496143531983, 11.34006114803207, 29.61265994712179)
+      this.camera.lookAt(0, 0, 0);
     },
+    // initialView() {
+    //   //原方案
+    //   // this.camera.position.set(0, 400, 0);
+    //   //初始相机看第一个学生
+    //   this.camera.position.set(178.434532168853, 113.66997527109939, 164.5923843414466)
+    //   this.camera.lookAt(97.55521392822266, 32.887508392333984, 75.55369567871094);
+    // },
     setTopView() {
       const currentPosition = this.camera.position.clone();
       const targetPosition = new THREE.Vector3(0, 400, 0);
@@ -283,42 +399,82 @@ export default {
         top: `${y}px`,
       };
     },
+    hideCurrentModel(model, callback) {
+      new TWEEN.Tween({ opacity: 1 }) // 初始透明度为1
+        .to({ opacity: 0 }, 1000) // 目标透明度为0，持续时间为1秒
+        .easing(TWEEN.Easing.Quadratic.In)
+        .onStart(function () {
+          //动画开始：允许透明opacity属性才能生效
+          model.material.transparent = true;
+        })
+        .onUpdate(function (obj) {
+          model.material.opacity = obj.opacity
+        })
+        .onComplete(() => {
+          this.scene.remove(model); // 动画结束后移除模型
+          if (callback) callback(); // 调用回调函数加载新模型
+        })
+        .start();
+    },
     onClick(event) {
       const rect = this.$refs.sceneContainer.getBoundingClientRect();
 
       this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-      this.raycaster.setFromCamera(this.mouse, this.camera);
-      const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-      console.log(intersects);
-      if (intersects.length > 0) {
-
-        this.student = intersects[0].object;
-        this.student.material.color.set(0xff0000);
-        // 获取学生的ID
-        const studentName = this.student.name;
-
-        // 从studentsPositions中获取位置信息
-        const targetPosition = new THREE.Vector3(
-          this.studentsPositions[studentName].x,
-          this.studentsPositions[studentName].y,
-          this.studentsPositions[studentName].z
-        );
-
-        // const targetPosition = new THREE.Vector3().copy(this.student.position);
-        console.log(targetPosition, this.student);
-
-        new TWEEN.Tween(this.camera.position)
-          .to({
-            x: targetPosition.x,
-            y: targetPosition.y,
-            z: targetPosition.z
-          }, 1000)
-          .easing(TWEEN.Easing.Quadratic.Out)
-          .start();
-        // this.onCameraMoveComplete(targetPosition)
+      if (this.currentModelType === 'floor') {
+        console.log('Currently loaded model: floor');
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        console.log(intersects);
+        if (intersects.length > 0) {
+          this.classRoom = intersects[0].object;
+          this.className = this.classRoom.name
+          this.hideCurrentModel(this.floorModel, () => {
+            this.loadClassModel();
+          });
+        }
       }
+
+      // this.raycaster.setFromCamera(this.mouse, this.camera);
+      // const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+      // console.log(intersects);
+      // if (intersects.length > 0) {
+
+      //   this.classRoom = intersects[0].object;
+      //   this.className = this.classRoom.name
+
+
+
+      //   if (this.classRoom)
+
+
+
+      //     this.student = intersects[0].object;
+      //   this.student.material.color.set(0xff0000);
+      //   // 获取学生的ID
+      //   const studentName = this.student.name;
+
+      //   // 从studentsPositions中获取位置信息
+      //   const targetPosition = new THREE.Vector3(
+      //     this.studentsPositions[studentName].x,
+      //     this.studentsPositions[studentName].y,
+      //     this.studentsPositions[studentName].z
+      //   );
+
+      //   // const targetPosition = new THREE.Vector3().copy(this.student.position);
+      //   console.log(targetPosition, this.student);
+
+      //   new TWEEN.Tween(this.camera.position)
+      //     .to({
+      //       x: targetPosition.x,
+      //       y: targetPosition.y,
+      //       z: targetPosition.z
+      //     }, 1000)
+      //     .easing(TWEEN.Easing.Quadratic.Out)
+      //     .start();
+      //   // this.onCameraMoveComplete(targetPosition)
+      // }
     },
     onCameraMoveComplete(targetPosition) {
       const rect = this.renderer.domElement.getBoundingClientRect(); // 获取渲染器容器的位置信息
@@ -465,8 +621,7 @@ export default {
           return { original: student, mapped: studentNumbers[index] };
         });
         this.appearStudent = this.mappedStudents.map(student => student.mapped);
-        console.log("allStudent",this.allStudent)
-        console.log("appearStudent",this.appearStudent)
+        // console.log("allStudent", this.allStudent)
         this.container = new THREE.Object3D();
         this.appearStudent.forEach(index => {
           const mesh = this.allStudent[index - 1]; // 因为appearStudent中的值是1到100的数，需要减1以匹配allStudent的索引
@@ -482,6 +637,7 @@ export default {
         this.animate();
       } else {
         console.log(222222222222222222222222)
+        // console.log("allStudent", this.allStudent)
         const changedStudent = data.students
         const newMappedStudents = [];
         console.log("旧的mapped：", this.mappedStudents)
