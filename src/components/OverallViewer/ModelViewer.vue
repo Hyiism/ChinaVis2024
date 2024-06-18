@@ -87,13 +87,15 @@ export default {
       menuTop: 0,
       defaultValue: moment('2023-08-31'),
       floorModel: null,
-      model: null,
+      classModel: null,
+      currentModelType: null,
       container: null,
       scene: null,
       camera: null,
       renderer: null,
       // controls: null,
       student: null,
+      classRoom: null,
       raycaster: new THREE.Raycaster(),
       mouse: new THREE.Vector2(),
       studentsPositions,
@@ -209,7 +211,7 @@ export default {
       // this.loadModel();
       // // 动画循环
       this.animate();
-      // this.initialView();
+      this.initialView();
     },
     addLights() {
       // 添加光源
@@ -232,6 +234,8 @@ export default {
           this.floorModel = gltf.scene;
           // this.model.scale.set(2, 2, 2);
           this.scene.add(this.floorModel);
+          // this.floorModel.name = 'floor';
+          this.currentModelType = 'floor'; // 标记当前加载的文件类型
           this.animate();
         },
         undefined,
@@ -240,20 +244,31 @@ export default {
         }
       );
     },
-    loadModel() {
+    loadClassModel() {
       const loadModelPromise = () => {
         return new Promise((resolve, reject) => {
           const loader = new GLTFLoader();
-          loader.load('/models/floor.glb', (gltf) => {
-            this.model = gltf.scene;
-            this.model.scale.set(6, 6, 6);
-            this.scene.add(this.model);
+          loader.load('/models/student101_4.glb', (gltf) => {
+            this.classModel = gltf.scene;
+            this.classModel.scale.set(2, 2, 2);
+            const currentPosition = this.camera.position.clone();
+            const targetPosition = new THREE.Vector3(251.0974656502318, 153.83576291656343, 247.37127012156563);
+
+            new TWEEN.Tween(currentPosition)
+              .to(targetPosition, 1000)
+              .easing(TWEEN.Easing.Quadratic.Out)
+              .onUpdate(() => {
+                this.camera.position.copy(currentPosition);
+                this.camera.lookAt(0, 0, 0);
+              })
+              .start();
+            this.scene.add(this.classModel);
 
             const objectsToRemove = [];
 
             for (let i = 1; i <= 100; i++) {
               const studentName = "student" + i.toString().padStart(3, "0");
-              this.model.traverse((child) => {
+              this.classModel.traverse((child) => {
                 if (child.isMesh && child.name.includes(studentName)) {
                   objectsToRemove.push(child);
                   this.allStudent.push(child);
@@ -266,7 +281,6 @@ export default {
                 child.parent.remove(child);
               }
             });
-
             resolve(); // 模型加载完成后，resolve Promise
           }, undefined, (error) => {
             console.error('An error happened while loading the model', error);
@@ -334,9 +348,16 @@ export default {
       //原方案
       // this.camera.position.set(0, 400, 0);
       //初始相机看第一个学生
-      this.camera.position.set(178.434532168853, 113.66997527109939, 164.5923843414466)
-      this.camera.lookAt(97.55521392822266, 32.887508392333984, 75.55369567871094);
+      this.camera.position.set(41.24496143531983, 11.34006114803207, 29.61265994712179)
+      this.camera.lookAt(0, 0, 0);
     },
+    // initialView() {
+    //   //原方案
+    //   // this.camera.position.set(0, 400, 0);
+    //   //初始相机看第一个学生
+    //   this.camera.position.set(178.434532168853, 113.66997527109939, 164.5923843414466)
+    //   this.camera.lookAt(97.55521392822266, 32.887508392333984, 75.55369567871094);
+    // },
     setTopView() {
       const currentPosition = this.camera.position.clone();
       const targetPosition = new THREE.Vector3(0, 400, 0);
@@ -378,42 +399,82 @@ export default {
         top: `${y}px`,
       };
     },
+    hideCurrentModel(model, callback) {
+      new TWEEN.Tween({ opacity: 1 }) // 初始透明度为1
+        .to({ opacity: 0 }, 1000) // 目标透明度为0，持续时间为1秒
+        .easing(TWEEN.Easing.Quadratic.In)
+        .onStart(function () {
+          //动画开始：允许透明opacity属性才能生效
+          model.material.transparent = true;
+        })
+        .onUpdate(function (obj) {
+          model.material.opacity = obj.opacity
+        })
+        .onComplete(() => {
+          this.scene.remove(model); // 动画结束后移除模型
+          if (callback) callback(); // 调用回调函数加载新模型
+        })
+        .start();
+    },
     onClick(event) {
       const rect = this.$refs.sceneContainer.getBoundingClientRect();
 
       this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-      this.raycaster.setFromCamera(this.mouse, this.camera);
-      const intersects = this.raycaster.intersectObjects(this.scene.children, true);
-      console.log(intersects);
-      if (intersects.length > 0) {
-
-        this.student = intersects[0].object;
-        this.student.material.color.set(0xff0000);
-        // 获取学生的ID
-        const studentName = this.student.name;
-
-        // 从studentsPositions中获取位置信息
-        const targetPosition = new THREE.Vector3(
-          this.studentsPositions[studentName].x,
-          this.studentsPositions[studentName].y,
-          this.studentsPositions[studentName].z
-        );
-
-        // const targetPosition = new THREE.Vector3().copy(this.student.position);
-        console.log(targetPosition, this.student);
-
-        new TWEEN.Tween(this.camera.position)
-          .to({
-            x: targetPosition.x,
-            y: targetPosition.y,
-            z: targetPosition.z
-          }, 1000)
-          .easing(TWEEN.Easing.Quadratic.Out)
-          .start();
-        // this.onCameraMoveComplete(targetPosition)
+      if (this.currentModelType === 'floor') {
+        console.log('Currently loaded model: floor');
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        console.log(intersects);
+        if (intersects.length > 0) {
+          this.classRoom = intersects[0].object;
+          this.className = this.classRoom.name
+          this.hideCurrentModel(this.floorModel, () => {
+            this.loadClassModel();
+          });
+        }
       }
+
+      // this.raycaster.setFromCamera(this.mouse, this.camera);
+      // const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+      // console.log(intersects);
+      // if (intersects.length > 0) {
+
+      //   this.classRoom = intersects[0].object;
+      //   this.className = this.classRoom.name
+
+
+
+      //   if (this.classRoom)
+
+
+
+      //     this.student = intersects[0].object;
+      //   this.student.material.color.set(0xff0000);
+      //   // 获取学生的ID
+      //   const studentName = this.student.name;
+
+      //   // 从studentsPositions中获取位置信息
+      //   const targetPosition = new THREE.Vector3(
+      //     this.studentsPositions[studentName].x,
+      //     this.studentsPositions[studentName].y,
+      //     this.studentsPositions[studentName].z
+      //   );
+
+      //   // const targetPosition = new THREE.Vector3().copy(this.student.position);
+      //   console.log(targetPosition, this.student);
+
+      //   new TWEEN.Tween(this.camera.position)
+      //     .to({
+      //       x: targetPosition.x,
+      //       y: targetPosition.y,
+      //       z: targetPosition.z
+      //     }, 1000)
+      //     .easing(TWEEN.Easing.Quadratic.Out)
+      //     .start();
+      //   // this.onCameraMoveComplete(targetPosition)
+      // }
     },
     onCameraMoveComplete(targetPosition) {
       const rect = this.renderer.domElement.getBoundingClientRect(); // 获取渲染器容器的位置信息
