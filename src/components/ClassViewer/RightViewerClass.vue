@@ -1,9 +1,16 @@
 <template>
   <div id="right-all">
-    <div id="scatter-button">
-      <button @click="setClusterMethod('pca')" class="cluster-button" :class="{ 'active': clusterMethod === 'pca' }">PCA</button>
-      <button @click="setClusterMethod('tsne')" class="cluster-button" :class="{ 'active': clusterMethod === 'tsne' }">T-SNE</button>
-      <button @click="setClusterMethod('umap')" class="cluster-button" :class="{ 'active': clusterMethod === 'umap' }">UMAP</button>
+    <div id="controls">
+      <select v-model="selectedEmbedding" @change="setEmbedding(selectedEmbedding)">
+          <option value="features_vis_seq">SeqData</option>
+          <option value="features_vis_concat">ConcatData</option>
+          <option value="features_vis_all">AllData</option>
+      </select>
+      <div id="scatter-button">
+        <button @click="setClusterMethod('pca')" class="cluster-button" :class="{ 'active': clusterMethod === 'pca' }">PCA</button>
+        <button @click="setClusterMethod('tsne')" class="cluster-button" :class="{ 'active': clusterMethod === 'tsne' }">T-SNE</button>
+        <button @click="setClusterMethod('umap')" class="cluster-button" :class="{ 'active': clusterMethod === 'umap' }">UMAP</button>
+      </div>
     </div>
     <div ref="ProjectionView" id="ProjectionView"></div>
   </div>
@@ -20,6 +27,7 @@ export default {
     return {
       nodes: [],
       clusterMethod: 'pca',
+      selectedEmbedding: 'features_vis_seq',
     };
   },
   mounted() {
@@ -34,9 +42,13 @@ export default {
       this.clusterMethod = method;
       this.drawView(); // Update the view with new data
     },
+    setEmbedding(embedding) {
+      this.selectedEmbedding = embedding;
+      this.drawView(); // Update the view with new data
+    },
     async getdata() {
       var _this = this;
-      await axios.get(`http://10.12.44.190:8000/get_projection_data/?class_id=Class2&method=${this.clusterMethod}`)
+      await axios.get(`http://10.12.44.190:8000/get_projection_data/?class_id=Class2&method=${this.clusterMethod}&embedding=${this.selectedEmbedding}`)
         .then(res => {
           console.log("projection data");
           _this.nodes = JSON.parse(res.data).nodes;
@@ -45,7 +57,7 @@ export default {
         .catch(error => {
           console.error("There was an error!", error);
         });
-      console.log("11111111")
+      // console.log("11111111")
     },
     async drawView() {
       await this.getdata();
@@ -208,13 +220,6 @@ export default {
       };
 
 
-
-
-
-
-
-
-
       // Add legend
       const legend = svg.selectAll(".legend")
         .data(colorScale.domain())
@@ -226,7 +231,12 @@ export default {
         .attr("x", width - 18)
         .attr("width", 18)
         .attr("height", 18)
-        .style("fill", colorScale);
+        .style("fill", colorScale)
+        .on('click', (event, d) => {
+          console.log("click legend");
+          console.log(d);
+          EventBus.$emit('clusterSelected', d); // Emit event
+        });
 
       legend.append("text")
         .attr("x", width - 24)
@@ -234,6 +244,7 @@ export default {
         .attr("dy", ".35em")
         .style("text-anchor", "end")
         .text(d => `cluster ${d}`);
+
 
       window.addEventListener('resize', () => {
         const newSvgWidth = this.$refs.ProjectionView.offsetWidth;
@@ -257,12 +268,34 @@ export default {
   height: 100%;
 }
 
-#scatter-button {
+/* #scatter-button {
   width: 100%;
   height: 10%;
   display: flex;
   justify-content: center;
   align-items: center;
+} */
+#controls {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#scatter-button {
+  width: 86%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+select {
+  margin-left: 10px;
+  width: 14%;
+  height: 40%;
+  font-size: 12px;
+  border-radius: 5px; /* 添加圆角 */
 }
 
 #ProjectionView {

@@ -12,40 +12,66 @@ export default {
       data: [
         // 有待了解各个属性作用，以及怎么实现元素间联系的目标
         {
-          // species使用颜色区分属性
-          rank_label: "Top 1/3",
-          island: "Torgersen",
+          // cluster_label_tsne使用颜色区分属性
+          cluster_label_tsne: 0,
           // 下面四个数值属性作为特征
           time_difference_mean: 3,
-          time_split_0_percentage: 18.7,
+          time_split_2_percentage: 18.7,
           submit_times_avg: 181,
-          total_score: 3750,
-          sex: "MALE",
+          total_score: 3750
         },
         {
-          rank_label: "Top 2/3",
-          island: "Torgersen",
+          cluster_label_tsne: 1,
           time_difference_mean: 35,
-          time_split_0_percentage: 17.4,
+          time_split_2_percentage: 17.4,
           submit_times_avg: 186,
-          total_score: 3800,
-          sex: "FEMALE",
+          total_score: 3800
         },
         // 可以添加更多的数据对象
       ],
+      data: this.generateData(100)
     };
   },
   mounted() {
-    this.createScatterplotMatrix();
+    this.fetchStudentScores();
+    // this.createScatterplotMatrix();
   },
   methods: {
+    // // 生成随机数据
+    // generateData(num) {
+    //   const data = [];
+    //   for (let i = 0; i < num; i++) {
+    //     data.push({
+    //       cluster_label_tsne: Math.floor(Math.random() * 4),
+    //       time_difference_mean: Math.random() * 50,
+    //       time_split_0_percentage: Math.random() * 20,
+    //       submit_times_avg: Math.random() * 200 + 100,
+    //       total_score: Math.random() * 4000 + 1000
+    //     });
+    //   }
+    //   return data;
+    // },
+    // 向后端请求top15的详细成绩数据
+    fetchStudentScores() {
+      this.$axios
+        .get('http://10.12.44.190:8000/scatterMatrix/?class_id=all') // 替换为实际的API端点
+        .then((response) => {
+          this.data = JSON.parse(response.data);
+          // 确保在DOM元素完全加载并设置尺寸后再初始化图表
+          this.createScatterplotMatrix();
+        })
+        .catch((error) => {
+          console.error('There was an error!', error);
+        });
+    },    
     createScatterplotMatrix() {
       const data = this.data;
 
       const width = 928;
       const height = width;
       const padding = 28;
-      const columns = Object.keys(data[0]).filter(key => typeof data[0][key] === "number");
+      // const columns = Object.keys(data[0]).filter(key => typeof data[0][key] === "number");
+      const columns = ['time_difference_mean', 'time_split_2_percentage', 'submit_times_avg', 'total_score'];
       const size = (width - (columns.length + 1) * padding) / columns.length + padding;
 
       const x = columns.map(c => d3.scaleLinear()
@@ -56,7 +82,7 @@ export default {
 
       // 设置颜色 按照rank_label属性分类
       const color = d3.scaleOrdinal()
-        .domain(data.map(d => d.rank_label))
+        .domain(data.map(d => d.cluster_label_tsne))
         .range(d3.schemeCategory10);
 
       const axisx = d3.axisBottom()
@@ -116,7 +142,7 @@ export default {
       const circle = cell.selectAll("circle")
         .attr("r", 3.5)
         .attr("fill-opacity", 0.7)
-        .attr("fill", d => color(d.rank_label));
+        .attr("fill", d => color(d.cluster_label_tsne));
 
       cell.call(this.brush, circle, svg, { padding, size, x, y, columns, data });
 

@@ -122,14 +122,19 @@ export default {
       }
 
     });
+    
     // 监听从stack传来的知识点id
     EventBus.$on('stackSelected', this.handleStackSelected);
+    // 监听从parallel传来的题目id parallelSelected
+    EventBus.$on('parallelSelected', this.handleParallelSelected);
     window.addEventListener('resize', this.resizeChart);
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeChart);
     // 关闭监听从stack传来的知识点id
     EventBus.$off('stackSelected', this.handleStackSelected);
+    // 关闭监听从parallel传来的题目id parallelSelected
+    EventBus.$off('parallelSelected', this.handleParallelSelected);
   },
   methods: {
     initChart() {
@@ -151,11 +156,18 @@ export default {
       this.triggerDispatchAction(knowledge_id.substr(0,5));
     },
 
+    // 处理从stack传来的知识点id,
+    handleParallelSelected(title_id) {
+      // console.log("leftbottom: stack传来的知识点id", knowledge_id.substr(0,5));
+      // 通过知识点id找到对应的知识点
+      this.triggerDispatchAction(title_id);
+    },
+
     // 处理传来的title_ID
     triggerDispatchAction(nodeName) {
       const path = this.findNodeByName(this.initialData, nodeName);
-      console.log("题目的名字！！！！")
-      console.log(path[path.length - 1].name)
+      // console.log("题目的名字！！！！")
+      // console.log(path[path.length - 1].name)
 
       console.log(path);
       if (path.length > 0) {

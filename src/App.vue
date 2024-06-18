@@ -433,7 +433,7 @@ export default {
 }
 
 #BottomViewerClass {
-  width: calc(55% - 4px);
+  width: calc(45% - 4px);
   height: calc(37% - 1px);
   display: flex;
   justify-content: center;
@@ -448,7 +448,7 @@ export default {
 }
 
 #BottomCenterViewerClass {
-  width: calc(20% - 4px);
+  width: calc(30% - 4px);
   height: calc(37% - 1px);
   display: flex;
   justify-content: center;
@@ -459,7 +459,7 @@ export default {
   border-radius: 10px; 
   position: absolute;
   bottom: 0; /* Stick to the bottom */
-  left: 55%;
+  left: 45%;
 }
 
 #BottomRightViewerClass {

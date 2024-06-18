@@ -86,6 +86,7 @@ export default {
       menuLeft: 0,
       menuTop: 0,
       defaultValue: moment('2023-08-31'),
+      floorModel: null,
       model: null,
       container: null,
       scene: null,
@@ -104,7 +105,7 @@ export default {
     };
   },
   mounted() {
-    this.initThreeJS();
+    this.initFloorThreeJS();
     this.subscriptionToken = PubSub.subscribe('studentAppear', (msg, value) => {
       this.handleStudentAppear(value);
     });
@@ -117,6 +118,7 @@ export default {
   beforeDestroy() {
     EventBus.$off('studentSelected', this.handleStudentSelected);
     EventBus.$off('checkSelected', this.handleCheckSelected);
+    this.controls.dispose(); // 清理轨道控制
   },
   methods: {
     // TODO: 处理在嵌入中选择学生点的操作
@@ -155,7 +157,7 @@ export default {
     // TODO: 点击github打卡图，主视图跳转日期且显示对应学生，由此可以再拖拽查看其他人情况
     // data:{student_id:" ",year:" ",month:" ",date:" "}
     handleCheckSelected(data) {
-        console.log('modelview dataselect:', data)
+      console.log('modelview dataselect:', data)
 
     },
 
@@ -172,7 +174,7 @@ export default {
       this.$emit('stateChanged', this.stateCode);
     },
 
-    initThreeJS() {
+    initFloorThreeJS() {
       // 创建场景
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xffffff);
@@ -184,7 +186,6 @@ export default {
 
       const axesHelper = new THREE.AxesHelper(20000);
       this.scene.add(axesHelper);
-
 
       // 创建渲染器
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -198,38 +199,54 @@ export default {
       // 添加光源
       this.addLights();
 
-      // // 添加OrbitControls
-      // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      // this.controls.enableDamping = true;
-      // this.controls.dampingFactor = 0.25;
-      // this.controls.screenSpacePanning = false;
-      // this.controls.maxPolarAngle = Math.PI / 2;
-
+      // 添加轨道控制
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true; // 启用阻尼效果
+      this.controls.dampingFactor = 0.25; // 阻尼系数
+      this.controls.screenSpacePanning = false; // 禁用屏幕空间平移
+      this.loadFloorModel()
       // 加载模型
-      this.loadModel();
-      // 动画循环
+      // this.loadModel();
+      // // 动画循环
       this.animate();
-      this.initialView();
+      // this.initialView();
     },
     addLights() {
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      // 添加光源
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);// 增加环境光强度，可以减少阴影
       this.scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(10, 10, 10).normalize();
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 3);// 平行光，即太阳光，会生成阴影。
+      directionalLight.position.set(5, 10, 7.5);
       this.scene.add(directionalLight);
 
-      const pointLight = new THREE.PointLight(0xffffff, 1, 500);
-      pointLight.position.set(0, 50, 100);
+      const pointLight = new THREE.PointLight(0xffffff, 1.5, 100); // 单点发光，照射所有方向的光源（需要设置光源位置），它也不会生成阴影。
+      pointLight.position.set(0, 2, 5);
       this.scene.add(pointLight);
+    },
+    loadFloorModel() {
+      const loader = new GLTFLoader();
+      loader.load(
+        '/models/floor.glb', // 替换为你的模型路径
+        (gltf) => {
+          this.floorModel = gltf.scene;
+          // this.model.scale.set(2, 2, 2);
+          this.scene.add(this.floorModel);
+          this.animate();
+        },
+        undefined,
+        (error) => {
+          console.error('An error happened', error);
+        }
+      );
     },
     loadModel() {
       const loadModelPromise = () => {
         return new Promise((resolve, reject) => {
           const loader = new GLTFLoader();
-          loader.load('/models/student101_4.glb', (gltf) => {
+          loader.load('/models/floor.glb', (gltf) => {
             this.model = gltf.scene;
-            this.model.scale.set(1.5, 1.5, 1.5);
+            this.model.scale.set(6, 6, 6);
             this.scene.add(this.model);
 
             const objectsToRemove = [];
@@ -310,7 +327,7 @@ export default {
     animate() {
       requestAnimationFrame(this.animate);
       TWEEN.update();
-      // this.controls.update();
+      this.controls.update();
       this.renderer.render(this.scene, this.camera);
     },
     initialView() {
