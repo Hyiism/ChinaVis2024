@@ -1,11 +1,10 @@
-<!-- <template>
+<template>
   <div class="chat-container">
     <img class="avatar" :src="avatar" alt="Avatar" />
     <div class="chat-box" ref="chatBox" v-html="renderedText"></div>
   </div>
 </template>
 <script>
-import { html } from 'd3';
 import MarkdownIt from 'markdown-it';
 
 export default {
@@ -26,7 +25,17 @@ export default {
     this.fetchTextStream();
   },
   methods: {
-
+    fetchText() {
+      this.$axios.get('http://10.12.44.190:8000/getComments/?student_id=00cbf05221bb479e66c3')
+        .then(response => {
+          this.text = JSON.parse(response.data).text;
+          console.log("#####this.text#######:", this.text)
+          this.showText();
+        })
+        .catch(error => {
+          console.error("There was an error!", error);
+        });
+    },
     fetchTextStream() {
       let _this = this;
 
@@ -40,13 +49,9 @@ export default {
           const chunk = decoder.decode(result.value, { stream: !result.done });
           // 可以接收到异步数据！
           console.log('Received chunk:', chunk);
-          // 成功显示在前端页面！现在的问题是前端显示太快了，需要加一个延时显示
-          _this.displayedText += chunk;
-          // _this.text += chunk;
-          // showText中慢慢将text倒入到displayedText中
-          // _this.showText();
-          _this.renderMarkdown();
-          _this.scrollToBottom();
+          this.text += chunk;
+          this.showText();
+
 
           if (!result.done) {
             reader.read().then(processStreamResult);
@@ -59,31 +64,31 @@ export default {
         });
 
     },
-    // showText() {
-    //   let index = 0;
-    //   const textLength = this.text.length;
-    //   const interval = setInterval(() => {
-    //     this.displayedText += this.text.charAt(index);
-    //     index++;
-    //     this.scrollToBottom();
-    //     if (index === textLength) {
-    //       clearInterval(interval);
-    //     }
-    //   }, this.typingSpeed);
-    //   // 导入到displayedText后，再进行markdown渲染
-    //   this.renderMarkdown();
-    //   this.scrollToBottom();
-    // },
-    renderMarkdown() {
-      const md = new MarkdownIt({html: true, linkify: true, typographer: true, breaks: true});
-      this.renderedText = md.render(this.displayedText);
-      // this.renderedText = this.displayedText;
+    showText() {
+      let index = 0;
+      const textLength = this.text.length;
+      const interval = setInterval(() => {
+        this.displayedText += this.text.charAt(index);
+        index++;
+        this.scrollToBottom();
+        if (index === textLength) {
+          clearInterval(interval);
+        }
+      }, this.typingSpeed);
     },
     scrollToBottom() {
       const chatBox = this.$refs.chatBox;
       chatBox.scrollTop = chatBox.scrollHeight;
     }
   },
+  // 监听要显示文本的增加 及时变为markdown文本 添加到显示文本中
+  watch: {
+    displayedText(newVal) {
+      const md = new MarkdownIt();
+      // this.renderedText = md.render(newVal);
+      this.renderedText = newVal;
+    }
+  }
 };
 </script>
 <style scoped>
@@ -102,19 +107,11 @@ export default {
   background-color: #f0f0f0;
   border-radius: 10px;
   padding: 10px;
-
-  max-width: 580px;
-  max-height: 700px;
+  max-width: 500px;
+  max-height: 650px;
   overflow-y: auto;
-  /* 下面两行代码导致间距过大 */
   word-break: break-word;
-  /* white-space: pre-wrap;  */
+  white-space: pre-wrap;
   font-family: Arial, sans-serif;
 }
-
-/* 调整标题与正文之间的间距 */
-.chat-box h1, .chat-box h2, .chat-box h3, .chat-box h4, .chat-box h5, .chat-box h6 {
-  margin-top: 0.01em; /* 根据需要调整上边距 */
-  margin-bottom: 0.01em; /* 根据需要调整下边距 */
-}
-</style> -->
+</style>
