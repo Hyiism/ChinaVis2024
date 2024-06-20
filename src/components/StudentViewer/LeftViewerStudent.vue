@@ -183,7 +183,7 @@ export default {
       // 设置雷达图的一些参数，如半径、中心点等
       const centerX = width / 2;
       const centerY = height / 2;
-      const radius = Math.max(width, height) / 2 * 0.4;
+      const radius = Math.max(width, height) / 2 * 0.3;
 
       // 角度比例尺，根据数据点的数量计算角度
       const angleScale = d3.scaleLinear()
@@ -302,19 +302,8 @@ export default {
           if (angle == Math.PI * 2) return '0.8em';
           return '0em';
         })
-        .style('font-size', '10px')
+        .style('font-size', '8px')
         .text(d => d.hour);
-
-
-      // 添加雷达图的中心标签
-      // svg.append('text')
-      //   .attr('class', 'radar-center-label')
-      //   .attr('x', centerX)
-      //   .attr('y', centerY)
-      //   .attr('text-anchor', 'middle')
-      //   .attr('dy', '0.35em')
-      //   .style('font-size', '12px')
-      //   .text('Hourly Activity');
 
       // 添加雷达图的中心圆点
       svg.append('circle')
@@ -330,12 +319,16 @@ export default {
 
 <style>
 #all-card {
-  width: 90%;
-  height: 90%;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* border: 1px solid #ccc; 添加边框
+  border-radius: 10px; 添加圆角
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 添加阴影
+  padding: 20px; 添加内边距 */
 }
 /* 上面的提交次数打卡表 */
 #check-card {
@@ -345,6 +338,9 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border: 1px solid #ccc; /* 添加边框 */
+  border-radius: 10px; /* 添加圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
   /* border: #D0D7DE solid 1px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px; */
@@ -369,14 +365,20 @@ export default {
   bottom: 0;
   left: 0;
   width: 50%;
-  height: 50%;
+  height: 40%;
+  border: 1px solid #ccc; /* 添加边框 */
+  border-radius: 10px; /* 添加圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
 }
 #radar-chart {
   position: absolute;
   bottom: 0;
   right: 0;
   width: 50%;
-  height: 50%;
+  height: 40%;
+  border: 1px solid #ccc; /* 添加边框 */
+  border-radius: 10px; /* 添加圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
 }
 
 .grid-container {
