@@ -1,218 +1,223 @@
 <template>
-  <div ref="scatterplot"></div>
+  <div ref="chart" id="scater"></div>
 </template>
 
 <script>
-import * as d3 from "d3";
+import * as echarts from 'echarts';
+import 'echarts-gl';  // 引入 ECharts 3D 扩展
 
 export default {
-  name: "ScatterplotMatrix",
+  name: 'ChartViewer',
   data() {
     return {
-      data: [
-        // 有待了解各个属性作用，以及怎么实现元素间联系的目标
-        {
-          // cluster_label_tsne使用颜色区分属性
-          cluster_label_tsne: 0,
-          // 下面四个数值属性作为特征
-          time_difference_mean: 3,
-          time_split_2_percentage: 18.7,
-          submit_times_avg: 181,
-          total_score: 3750
-        },
-        {
-          cluster_label_tsne: 1,
-          time_difference_mean: 35,
-          time_split_2_percentage: 17.4,
-          submit_times_avg: 186,
-          total_score: 3800
-        },
-        // 可以添加更多的数据对象
-      ],
-      data: null
+      myChart: null,
+      // data: [
+      //   [1, 10, 20, 30, 85, 'A'],
+      //   [2, 20, 30, 40, 90, 'B'],
+      //   [3, 30, 40, 50, 95, 'A'],
+      //   [4, 40, 50, 60, 80, 'C'],
+      //   [5, 50, 60, 70, 70, 'B']
+      // ],
+
+      // 这个用来接受后段传来的json数据
+      data: [],
+
+      
+      fieldIndices: {
+        student_id: 0,
+        x: 1,
+        y: 2,
+        z: 3,
+        cluster_label: 4,
+        total_score: 5,
+
+        title_counts: 6,
+        time_difference_mean: 7,
+        time_split_0_percentage: 8,
+        time_split_1_percentage: 9,
+        time_split_2_percentage: 10,
+        submit_times_avg: 11,
+        submit_times_max: 12,
+        total_syth_score_avg: 13,
+        all_memory_avg: 14,
+        all_timeconsume_avg: 15,
+        state_ae_percentage: 16,
+        state_e_percentage: 17,
+        state_pc_percentage: 18,
+        state_ac_percentage: 19
+      },
+
+      labels: [0, 1, 2, 3 ],
+      labelColors: ['#9A60B4', '#FB8351', '#3BA272', '#73C0DE']
     };
   },
   mounted() {
-    this.fetchStudentScores();
-    // this.createScatterplotMatrix();
+    this.fetchScaterData();
+    // this.myChart = echarts.init(this.$refs.chart);
+    // this.updateChart();
   },
+
   methods: {
-    // // 生成随机数据
-    // generateData(num) {
-    //   const data = [];
-    //   for (let i = 0; i < num; i++) {
-    //     data.push({
-    //       cluster_label_tsne: Math.floor(Math.random() * 4),
-    //       time_difference_mean: Math.random() * 50,
-    //       time_split_0_percentage: Math.random() * 20,
-    //       submit_times_avg: Math.random() * 200 + 100,
-    //       total_score: Math.random() * 4000 + 1000
-    //     });
-    //   }
-    //   return data;
-    // },
     // 向后端请求top15的详细成绩数据
-    fetchStudentScores() {
-      this.$axios
-        .get('http://10.12.44.190:8000/scatterMatrix/?class_id=all') // 替换为实际的API端点
-        .then((response) => {
-          this.data = JSON.parse(response.data);
-          // 确保在DOM元素完全加载并设置尺寸后再初始化图表
-          this.createScatterplotMatrix();
+    fetchScaterData() {
+      this.$axios.get('http://10.12.44.190:8000/scaterVis/?class_id=all') // 替换为实际的API端点
+        .then(response => {
+          this.data = JSON.parse(response.data).data;
+          console.log("###scater start###")
+          console.log(this.data)
+          // 数据获取成功后再初始化图表，不然图表获取不到数据
+          this.myChart = echarts.init(this.$refs.chart);
+          this.updateChart();
         })
-        .catch((error) => {
-          console.error('There was an error!', error);
+        .catch(error => {
+          console.error("There was an error!", error);
         });
-    },    
-    createScatterplotMatrix() {
-      const data = this.data;
-
-      const width = 928;
-      const height = width;
-      const padding = 28;
-      // const columns = Object.keys(data[0]).filter(key => typeof data[0][key] === "number");
-      const columns = ['time_difference_mean', 'time_split_2_percentage', 'submit_times_avg', 'total_score'];
-      const size = (width - (columns.length + 1) * padding) / columns.length + padding;
-
-      const x = columns.map(c => d3.scaleLinear()
-        .domain(d3.extent(data, d => d[c]))
-        .rangeRound([padding / 2, size - padding / 2]));
-
-      const y = x.map(x => x.copy().range([size - padding / 2, padding / 2]));
-
-      // 设置颜色 按照rank_label属性分类
-      const color = d3.scaleOrdinal()
-        .domain(data.map(d => d.cluster_label_tsne))
-        .range(d3.schemeCategory10);
-
-      const axisx = d3.axisBottom()
-        .ticks(6)
-        .tickSize(size * columns.length);
-      const xAxis = g => g.selectAll("g").data(x).join("g")
-        .attr("transform", (d, i) => `translate(${i * size},0)`)
-        .each(function (d) { return d3.select(this).call(axisx.scale(d)); })
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
-
-      const axisy = d3.axisLeft()
-        .ticks(6)
-        .tickSize(-size * columns.length);
-      const yAxis = g => g.selectAll("g").data(y).join("g")
-        .attr("transform", (d, i) => `translate(0,${i * size})`)
-        .each(function (d) { return d3.select(this).call(axisy.scale(d)); })
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
-
-      const svg = d3.select(this.$refs.scatterplot).append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [-padding, 0, width, height]);
-
-      svg.append("style")
-        .text(`circle.hidden { fill: #000; fill-opacity: 1; r: 1px; }`);
-
-      svg.append("g")
-        .call(xAxis);
-
-      svg.append("g")
-        .call(yAxis);
-
-      const cell = svg.append("g")
-        .selectAll("g")
-        .data(d3.cross(d3.range(columns.length), d3.range(columns.length)))
-        .join("g")
-        .attr("transform", ([i, j]) => `translate(${i * size},${j * size})`);
-
-      cell.append("rect")
-        .attr("fill", "none")
-        .attr("stroke", "#aaa")
-        .attr("x", padding / 2 + 0.5)
-        .attr("y", padding / 2 + 0.5)
-        .attr("width", size - padding)
-        .attr("height", size - padding);
-
-      cell.each(function ([i, j]) {
-        d3.select(this).selectAll("circle")
-          .data(data.filter(d => !isNaN(d[columns[i]]) && !isNaN(d[columns[j]])))
-          .join("circle")
-          .attr("cx", d => x[i](d[columns[i]]))
-          .attr("cy", d => y[j](d[columns[j]]));
-      });
-
-      const circle = cell.selectAll("circle")
-        .attr("r", 3.5)
-        .attr("fill-opacity", 0.7)
-        .attr("fill", d => color(d.cluster_label_tsne));
-
-      cell.call(this.brush, circle, svg, { padding, size, x, y, columns, data });
-
-      svg.append("g")
-        .style("font", "bold 10px sans-serif")
-        .style("pointer-events", "none")
-        .selectAll("text")
-        .data(columns)
-        .join("text")
-        .attr("transform", (d, i) => `translate(${i * size},${i * size})`)
-        .attr("x", padding)
-        .attr("y", padding)
-        .attr("dy", ".71em")
-        .text(d => d);
-
-      svg.property("value", []);
-      return Object.assign(svg.node(), { scales: { color } });
     },
-    brush(cell, circle, svg, { padding, size, x, y, columns, data }) {
-      const brush = d3.brush()
-        .extent([[padding / 2, padding / 2], [size - padding / 2, size - padding / 2]])
-        .on("start", brushstarted)
-        .on("brush", brushed)
-        .on("end", brushended);
 
-      cell.call(brush);
+    getMaxScore(data) {
+      return Math.max(...data.map(item => item[this.fieldIndices.total_score]));
+    },
+    updateChart() {
+      const maxScore = this.getMaxScore(this.data);
+      const labelIndexMap = this.labels.reduce((obj, label, index) => {
+        obj[label] = index;
+        return obj;
+      }, {});
 
-      let brushCell;
+      this.myChart.setOption({
+        title: {
+          text: '学生做题情况嵌入展示',
+          left: 'center',
+          textStyle: {
+            color: '#000',
+            fontSize: 20
+        },
+          top: 40
+        },
 
-      function brushstarted() {
-        if (brushCell !== this) {
-          d3.select(brushCell).call(brush.move, null);
-          brushCell = this;
-        }
-      }
+        tooltip: {},
+        visualMap: {
+          show: true, // 不显示视觉映射控件
+          dimension: this.fieldIndices.cluster_label,
+          categories: this.labels,
+          inRange: {
+            color: this.labelColors
+          }
+        },
+        xAxis3D: {
+          name: 'x',
+          type: 'value',
+          min: -7,  // 指定 y 轴的最小值
+          max: 13,  // 指定 y 轴的最大值
+          axisLine: {
+            lineStyle: {
+              color: '#c0c0c0' // 坐标轴线颜色
+            }
+          },
+          axisLabel: {
+            color: '#c0c0c0' // 坐标轴标签颜色
+          }
+        },
+        yAxis3D: {
+          name: 'y',
+          type: 'value',
+          min: -7,  // 指定 y 轴的最小值
+          max: 13,  // 指定 y 轴的最大值
+          axisLine: {
+            lineStyle: {
+              color: '#c0c0c0' // 坐标轴线颜色
+            }
+          },
+          axisLabel: {
+            color: '#c0c0c0' // 坐标轴标签颜色
+          }
+        },
+        zAxis3D: {
+          name: 'z',
+          type: 'value',
+          min: 4,  // 指定 z 轴的最小值
+          max: 14,  // 指定 z 轴的最大值
+          axisLine: {
+            lineStyle: {
+              color: '#c0c0c0' // 坐标轴线颜色
+            }
+          },
+          axisLabel: {
+            color: '#000' // 坐标轴标签颜色
+          }
+        },
+        grid3D: {
+          axisLine: {
+            lineStyle: {
+              color: '#000' // 三维网格轴线颜色
+            }
+          },
+          axisPointer: {
+            lineStyle: {
+              color: '#ffbd67'
+            }
+          },
+          viewControl: {}
+        },
+        series: [
+          {
+            type: 'scatter3D',
+            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score', 'student_id', 'title_counts', 'time_difference_mean', 'time_split_0_percentage', 'time_split_1_percentage', 'time_split_2_percentage', 'submit_times_avg', 'submit_times_max', 'total_syth_score_avg', 'all_memory_avg', 'all_timeconsume_avg', 'state_ae_percentage', 'state_e_percentage', 'state_pc_percentage', 'state_ac_percentage'],
+            data: this.data.map(item => {
+              return {
+                value: [
+                  item[this.fieldIndices.x],
+                  item[this.fieldIndices.y],
+                  item[this.fieldIndices.z],
+                  item[this.fieldIndices.cluster_label],
+                  item[this.fieldIndices.total_score],
+                  item[this.fieldIndices.student_id],
 
-      function brushed({ selection }, [i, j]) {
-        let selected = [];
-        if (selection) {
-          const [[x0, y0], [x1, y1]] = selection;
-          circle.classed("hidden",
-            d => x0 > x[i](d[columns[i]])
-              || x1 < x[i](d[columns[i]])
-              || y0 > y[j](d[columns[j]])
-              || y1 < y[j](d[columns[j]]));
-          selected = data.filter(
-            d => x0 < x[i](d[columns[i]])
-              && x1 > x[i](d[columns[i]])
-              && y0 < y[j](d[columns[j]])
-              && y1 > y[j](d[columns[j]]));
-        }
-        svg.property("value", selected).dispatch("input");
-      }
-
-      function brushended({ selection }) {
-        if (selection) return;
-        svg.property("value", []).dispatch("input");
-        circle.classed("hidden", false);
-      }
+                  item[this.fieldIndices.title_counts],
+                  item[this.fieldIndices.time_difference_mean],
+                  item[this.fieldIndices.time_split_0_percentage],
+                  item[this.fieldIndices.time_split_1_percentage],
+                  item[this.fieldIndices.time_split_2_percentage],
+                  item[this.fieldIndices.submit_times_avg],
+                  item[this.fieldIndices.submit_times_max],
+                  item[this.fieldIndices.total_syth_score_avg],
+                  item[this.fieldIndices.all_memory_avg],
+                  item[this.fieldIndices.all_timeconsume_avg],
+                  item[this.fieldIndices.state_ae_percentage],
+                  item[this.fieldIndices.state_e_percentage],
+                  item[this.fieldIndices.state_pc_percentage],
+                  item[this.fieldIndices.state_ac_percentage]
+                ],
+                itemStyle: {
+                  color: this.labelColors[labelIndexMap[item[this.fieldIndices.cluster_label]]]
+                }
+              };
+            }),
+            symbolSize: val => {
+              // 根据total_score的值来调整点的大小
+              // return (val[4] / (maxScore)) * 10; // Scale symbol size based on score
+              return ((val[4] - 30) / (maxScore - 30)) * 8 + 5
+            },
+            itemStyle: {
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.8)'
+            },
+            emphasis: {
+              itemStyle: {
+                color: '#fff'
+              }
+            }
+          }
+        ]
+      });
     }
   }
 };
 </script>
 
 <style scoped>
-div {
+#scater{
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>

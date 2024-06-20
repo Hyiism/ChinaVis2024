@@ -15,7 +15,7 @@
     </div>
 
     <div v-once id="ModelViewer">
-      <ModelViewer @stateChanged="handleStateChange" :stateCode="initialStateCode""/>
+      <ModelViewer @stateChanged="handleStateChange" :stateCode="initialStateCode"/>
     </div>
 
     <div id="RightViewer" v-if="currentView.RightViewer">
@@ -34,7 +34,7 @@
       <BottomRightViewer/>
     </div>
 
-    <div id="TimeLine">
+    <div id="TimeLine" v-if="currentView.TimeLine">
       <TimeLine/>
     </div>
 
@@ -97,7 +97,6 @@ import LeftViewer from './components/OverallViewer/LeftViewer.vue';
 import LeftBottomViewer from './components/OverallViewer/LeftBottomViewer.vue';
 import RightViewer from './components/OverallViewer/RightViewer.vue';
 import BottomViewer from './components/OverallViewer/BottomViewer.vue';
-// import BottomCenterViewer from './components/OverallViewer/BottomCenterViewer.vue';
 import BottomRightViewer from './components/OverallViewer/BottomRightViewer.vue';
 import TimeLine from './components/OverallViewer/TimeLine.vue';
 
@@ -147,7 +146,7 @@ export default {
   data() {
     return {
       initialStateCode: this.getInitialStateCode(),
-      currentView: this.getViewState(this.getInitialStateCode())
+      currentView: this.getViewState(this.getInitialStateCode()),
     }
   },
 
@@ -169,7 +168,7 @@ export default {
           BottomViewer: true,
           // BottomCenterViewer: true,
           BottomRightViewer: true,
-          TimeLine: true,
+          TimeLine: false,
           // 班级视图组件显示控制
           LeftViewerClass: false,
           LeftBottomViewerClass: false,
@@ -194,7 +193,7 @@ export default {
           BottomViewer: false,
           // BottomCenterViewer: false,
           BottomRightViewer: false,
-          TimeLine: false,
+          TimeLine: true,
           // 班级视图组件显示控制
           LeftViewerClass: true,
           LeftBottomViewerClass: true,
@@ -221,7 +220,7 @@ export default {
           BottomViewer: false,
           // BottomCenterViewer: false,
           BottomRightViewer: false,
-          TimeLine: false,
+          TimeLine: true,
           // 班级视图组件显示控制
           LeftViewerClass: false,
           LeftBottomViewerClass: false,
@@ -243,10 +242,16 @@ export default {
       // 在此处判定BottomViewer的状态，传到BottomViewer.vue中用来及时让html覆盖层消失
 
     },
+    // 视图切换执行操作
     handleStateChange(stateCode) {
+      // 获取当前视图
       this.currentView = this.getViewState(stateCode);
-      // 跳转一次就刷新一次浏览器页面 及时让html覆盖层消失
-      window.location.reload();
+      // 当切换到1 2 视图 移除平行坐标图的覆盖层
+      if (stateCode === 1 || stateCode === 2) {
+        // 清除已有的覆盖层
+        const existingLabels = document.querySelectorAll('.overlay-label');
+        existingLabels.forEach(label => label.remove());
+      }
     }
   }
 }
@@ -362,20 +367,6 @@ export default {
   bottom: 0; /* Stick to the bottom */
   left: 0;
 }
-
-/* #BottomCenterViewer {
-  width: calc(20% - 4px);
-  height: calc(37% - 1px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1); 
-  border-radius: 10px; 
-  position: absolute;
-  bottom: 0; 
-  left: 55%;
-} */
 
 #BottomRightViewer {
   width: calc(50% - 4px);

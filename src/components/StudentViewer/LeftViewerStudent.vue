@@ -389,9 +389,9 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ccc; /* 添加边框 */
-  border-radius: 10px; /* 添加圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  border-bottom: 2px solid hsl(0, 3%, 93%); /* 添加边框 */
+  /* border-radius: 10px; */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   /* border: #D0D7DE solid 1px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px; */
@@ -417,9 +417,12 @@ export default {
   left: 0;
   width: 50%;
   height: 40%;
-  border: 1px solid #ccc; /* 添加边框 */
-  border-radius: 10px; /* 添加圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  /* 添加边框 */
+  border-right: 2px solid hsl(0, 3%, 93%);
+  /* 添加圆角 */
+  /* border-radius: 10px;  */
+  /* 添加阴影 */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
 }
 #radar-chart {
   position: absolute;
@@ -427,9 +430,11 @@ export default {
   right: 0;
   width: 50%;
   height: 40%;
-  border: 1px solid #ccc; /* 添加边框 */
+  /* 添加边框 */
+  /* border: 1px solid #ccc;  */
   border-radius: 10px; /* 添加圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  /* 添加阴影 */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
 }
 
 .grid-container {

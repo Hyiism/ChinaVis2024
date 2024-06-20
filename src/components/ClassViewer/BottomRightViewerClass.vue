@@ -5,7 +5,7 @@
       <el-option v-for="item in allcolumns" :key="item.value" :label="item.label" :value="item.value">
       </el-option>
     </el-select>
-    <el-select v-model="selectedcolumns_detail" multiple placeholder="请选择x y轴" class="feat-select" v-if="state_detail" 
+    <el-select v-model="selectedcolumns_detail" multiple placeholder="请选择x y轴" class="feat-select" v-if="state_detail"
       @change="handleSelectChangeDetail">
       <el-option v-for="item in allcolumns" :key="item.value" :label="item.label" :value="item.value">
       </el-option>
@@ -50,8 +50,60 @@ export default {
       selectedcolumns_detail: ["submit_times_avg", "time_split_2_percentage"]
     };
   },
+
   computed: {
-    ...mapGetters(['classId'])
+    ...mapGetters(['classId']),
+
+    clusters() {
+      return [...new Set(this.data.map(d => d.cluster_label_tsne))];
+    },
+    // 纵轴计算范围，使用所选的特征变量
+    dataRange() {
+      return d3.extent(this.data, d => d[this.selectedcolumns[0]]);
+    },
+    // this.selectedcolumns_detail[1] 是y轴
+    dataRangeDetail() {
+      return d3.extent(this.data, d => d[this.selectedcolumns_detail[1]]);
+    },
+    st() {
+      const values = this.data.map(d => d[this.selectedcolumns[0]]);
+      return {
+        max: d3.quantile(values, 0.95),
+        upper: d3.quantile(values, 0.75),
+        lower: d3.quantile(values, 0.25),
+        min: d3.quantile(values, 0.05),
+        mean: d3.mean(values),
+        median: d3.median(values)
+      };
+    },
+    // 纵轴统计数据箱线图计算
+    stDetail() {
+      const values = this.data.map(d => d[this.selectedcolumns_detail[1]]);
+      return {
+        max: d3.quantile(values, 0.95),
+        upper: d3.quantile(values, 0.75),
+        lower: d3.quantile(values, 0.25),
+        min: d3.quantile(values, 0.05),
+        mean: d3.mean(values),
+        median: d3.median(values)
+      };
+    },
+    // boxPlotStats() {
+    //   // 计算每个 cluster_label_tsne 的统计数据
+    //   const stats = {};
+    //   for (const cluster of this.clusters) {
+    //     const values = this.data.filter(d => d.cluster_label_tsne === cluster).map(d => d.submit_times_avg);
+    //     stats[cluster] = {
+    //       max: d3.quantile(values, 0.95),
+    //       upper: d3.quantile(values, 0.75),
+    //       lower: d3.quantile(values, 0.25),
+    //       min: d3.quantile(values, 0.05),
+    //       mean: d3.mean(values),
+    //       median: d3.median(values),
+    //     };
+    //   }
+    //   return stats;
+    // },
   },
   mounted() {
     // this.renderChart();
@@ -68,9 +120,8 @@ export default {
   },
   methods: {
     fetchStudentScores() {
-      this.$axios.get(`'http://10.12.44.190:8000/scatterMatrix/?class_id=${this.classId}`)
       this.$axios
-        .get(`http://10.12.44.190:8000/boxplot/?cluster_id=${this.clusterSelected}&class_id=Class1`) // Replace with actual API endpoint
+        .get(`http://10.12.44.190:8000/boxplot/?cluster_id=${this.clusterSelected}&class_id=${this.classId}`) // Replace with actual API endpoint
         .then((response) => {
           this.data = JSON.parse(response.data);
           // 如果是整体视图，就显示每个类别的数据，集中比较用户选的变量的统计情况
