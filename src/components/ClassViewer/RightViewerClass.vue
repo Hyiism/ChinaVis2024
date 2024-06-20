@@ -20,6 +20,7 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 import EventBus from '@/eventBus'; // 导入事件总线
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'RightViewerClass',
@@ -29,6 +30,9 @@ export default {
       clusterMethod: 'pca',
       selectedEmbedding: 'features_vis_seq',
     };
+  },
+  computed: {
+    ...mapGetters(['classId'])
   },
   mounted() {
     this.drawView();
@@ -48,7 +52,7 @@ export default {
     },
     async getdata() {
       var _this = this;
-      await axios.get(`http://10.12.44.190:8000/get_projection_data/?class_id=Class2&method=${this.clusterMethod}&embedding=${this.selectedEmbedding}`)
+      await axios.get(`http://10.12.44.190:8000/get_projection_data/?class_id=${this.classId}&method=${this.clusterMethod}&embedding=${this.selectedEmbedding}`)
         .then(res => {
           console.log("projection data");
           _this.nodes = JSON.parse(res.data).nodes;

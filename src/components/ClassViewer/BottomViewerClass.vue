@@ -8,6 +8,8 @@
 <script>
 import * as d3 from 'd3';
 import axios from 'axios';
+import { mapGetters } from 'vuex';
+
 
 export default {
   name: 'BottomChart',
@@ -15,6 +17,9 @@ export default {
     return {
       heatmapData: [],
     };
+  },
+  computed: {
+    ...mapGetters(['classId'])
   },
   mounted() {
     this.fetchHeatmapData();

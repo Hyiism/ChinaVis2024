@@ -19,7 +19,7 @@ import * as d3 from 'd3';
 import * as Plot from '@observablehq/plot';
 import { data } from 'jquery';
 import EventBus from '@/eventBus'; // 导入事件总线
-
+import { mapGetters } from 'vuex';
 export default {
   name: 'ClusterPlotChart',
   data() {
@@ -51,56 +51,7 @@ export default {
     };
   },
   computed: {
-    clusters() {
-      return [...new Set(this.data.map(d => d.cluster_label_tsne))];
-    },
-    // 纵轴计算范围，使用所选的特征变量
-    dataRange() {
-      return d3.extent(this.data, d => d[this.selectedcolumns[0]]);
-    },
-    // this.selectedcolumns_detail[1] 是y轴
-    dataRangeDetail() {
-      return d3.extent(this.data, d => d[this.selectedcolumns_detail[1]]);
-    },
-    st() {
-      const values = this.data.map(d => d[this.selectedcolumns[0]]);
-      return {
-        max: d3.quantile(values, 0.95),
-        upper: d3.quantile(values, 0.75),
-        lower: d3.quantile(values, 0.25),
-        min: d3.quantile(values, 0.05),
-        mean: d3.mean(values),
-        median: d3.median(values)
-      };
-    },
-    // 纵轴统计数据箱线图计算
-    stDetail() {
-      const values = this.data.map(d => d[this.selectedcolumns_detail[1]]);
-      return {
-        max: d3.quantile(values, 0.95),
-        upper: d3.quantile(values, 0.75),
-        lower: d3.quantile(values, 0.25),
-        min: d3.quantile(values, 0.05),
-        mean: d3.mean(values),
-        median: d3.median(values)
-      };
-    },
-    // boxPlotStats() {
-    //   // 计算每个 cluster_label_tsne 的统计数据
-    //   const stats = {};
-    //   for (const cluster of this.clusters) {
-    //     const values = this.data.filter(d => d.cluster_label_tsne === cluster).map(d => d.submit_times_avg);
-    //     stats[cluster] = {
-    //       max: d3.quantile(values, 0.95),
-    //       upper: d3.quantile(values, 0.75),
-    //       lower: d3.quantile(values, 0.25),
-    //       min: d3.quantile(values, 0.05),
-    //       mean: d3.mean(values),
-    //       median: d3.median(values),
-    //     };
-    //   }
-    //   return stats;
-    // },
+    ...mapGetters(['classId'])
   },
   mounted() {
     // this.renderChart();
@@ -115,9 +66,9 @@ export default {
   beforeDestroy() {
     EventBus.$off('clusterSelected');
   },
-
   methods: {
     fetchStudentScores() {
+      this.$axios.get(`'http://10.12.44.190:8000/scatterMatrix/?class_id=${this.classId}`)
       this.$axios
         .get(`http://10.12.44.190:8000/boxplot/?cluster_id=${this.clusterSelected}&class_id=Class1`) // Replace with actual API endpoint
         .then((response) => {

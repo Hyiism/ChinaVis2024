@@ -6,6 +6,7 @@
 
 <script>
 import * as d3 from 'd3';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'SunburstChart',
@@ -16,6 +17,7 @@ export default {
         knowledge: [
           {
             name: "r8S3g",
+            color: "#1f6694",
             subknowledge: [
               {
                 name: "r8S3g_l0p5viby",
@@ -37,6 +39,7 @@ export default {
           },
           {
             name: "t5V9e",
+            color: "#af5f0e",
             subknowledge: [
               {
                 name: "t5V9e_e1k6cixp",
@@ -52,6 +55,7 @@ export default {
           },
           {
             name: "m3D1v",
+            color: "#206018",
             subknowledge: [
               {
                 name: "m3D1v_r1d7fr3l",
@@ -87,6 +91,7 @@ export default {
           },
           {
             name: "y9W5d",
+            color: "#8860b0",
             subknowledge: [
               {
                 name: "y9W5d_c0w4mj5h",
@@ -118,6 +123,7 @@ export default {
           },
           {
             name: "k4W1c",
+            color: "#323456",
             subknowledge: [
               {
                 name: "k4W1c_h5r6nux7",
@@ -129,6 +135,7 @@ export default {
           },
           {
             name: "s8Y2f",
+            color: "#2a6c7b",
             subknowledge: [
               {
                 name: "s8Y2f_v4x8by9j",
@@ -140,6 +147,7 @@ export default {
           },
           {
             name: "g7R2j",
+            color: "#c36682",
             subknowledge: [
               {
                 name: "g7R2j_e0v1yls8",
@@ -161,6 +169,7 @@ export default {
           },
           {
             name: "b3C9s",
+            color: "#787878",
             subknowledge: [
               {
                 name: "b3C9s_l4z6od7y",
@@ -181,6 +190,9 @@ export default {
       }
     };
   },
+  computed: {
+    ...mapGetters(['studentId'])
+  },
   mounted() {
     this.drawChart();
     window.addEventListener('resize', this.drawChart);
@@ -199,13 +211,20 @@ export default {
 
       svg.selectAll("*").remove();
 
+      const tooltip = d3.select(container)
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("background", "rgba(0, 0, 0, 0.7)")
+        .style("color", "#fff")
+        .style("padding", "5px")
+        .style("border-radius", "3px")
+        .style("font-size", "12px");
+
       const processData = (data) => {
         const convert = (node) => {
           if (node.title) {
-            // return { 
-            //   name: node.name, 
-            //   value: node.title.reduce((sum, t) => sum + t.value, 0) 
-            // };
             return {
               name: node.name,
               children: node.title.map(titleNode => ({
@@ -217,6 +236,7 @@ export default {
           const children = node.knowledge || node.subknowledge;
           return { 
             name: node.name, 
+            color: node.color,
             children: children.map(convert) 
           };
         };
@@ -230,15 +250,38 @@ export default {
 
       partition(root);
 
-      const color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, root.children.length + 1));
-
       const arc = d3.arc()
         .startAngle(d => d.x0)
         .endAngle(d => d.x1)
-        .innerRadius(d => d.y0)
+        .innerRadius(d => d.y0 ? d.y0 : 0.5 * radius)
         .outerRadius(d => d.y1);
 
-      svg
+      const getColor = (d) => {
+        if (d.depth === 0) return 'white';
+        if (d.depth === 1) return d.data.color;
+
+        let parent = d.parent;
+        while (parent.depth > 1) {
+          parent = parent.parent;
+        }
+        const rootColor = parent.data.color;
+
+        // 为每个深度定义不同的亮度插值范围
+        const depthBrightness = [0.5, 1, 2]; // 根据层级设定亮度增量
+
+        const interpolate = d3.interpolateRgb(
+          d3.rgb(rootColor).brighter(depthBrightness[d.depth - 2]),
+          d3.rgb(rootColor).brighter(depthBrightness[d.depth - 1])
+        );
+
+        const index = d.parent.children.indexOf(d);
+        const step = 1 / (d.parent.children.length + 1) * 1.6;
+        const color = interpolate((index + 1) * step);
+
+        return color;
+      };
+
+      const paths = svg
         .attr('width', width)
         .attr('height', height)
         .append('g')
@@ -247,9 +290,67 @@ export default {
         .data(root.descendants())
         .enter().append('path')
         .attr('d', arc)
-        .style('fill', d => color(d.data.name))
-        .append('title')
-        .text(d => `${d.data.name}\n${d.value}`);
+        .style('fill', getColor)
+        
+      //鼠标悬浮在某段圆弧上的时候它的父圆弧和所有子圆弧透明度为1，其余圆弧透明度为0.2
+      const highlightPaths = (d) => {
+        const nodesToHighlight = new Set([d]);
+        let current = d;
+
+        while (current.parent) {
+          nodesToHighlight.add(current.parent);
+          current = current.parent;
+        }
+
+        const collectChildren = (node) => {
+          if (!node.children) return;
+          node.children.forEach(child => {
+            nodesToHighlight.add(child);
+            collectChildren(child);
+          });
+        };
+
+        collectChildren(d);
+
+        paths.style('opacity', node => nodesToHighlight.has(node) ? 1 : 0.2);
+      };
+
+      //鼠标移走的时候所有圆弧透明图为1
+      const resetHighlight = () => {
+        paths.style('opacity', 1);
+      };
+        
+      paths  
+        .on('mouseover', function(event, d) {
+          tooltip.style('visibility', 'visible')
+                 .text(`${d.data.name}\n${d.value}`);
+          highlightPaths(d);
+        })
+        .on('mousemove', function(event, d) {
+          const containerRect = container.getBoundingClientRect();
+          const tooltipWidth = tooltip.node().getBoundingClientRect().width;
+          const tooltipHeight = tooltip.node().getBoundingClientRect().height;
+
+          let top = event.clientY - containerRect.top - tooltipHeight - 10;
+          let left = event.clientX - containerRect.left + 10;
+
+          // 确保 tooltip 不会超出容器的右边界
+          if (left + tooltipWidth > containerRect.width) {
+            left = event.clientX - containerRect.left - tooltipWidth - 10;
+          }
+
+          // 确保 tooltip 不会超出容器的顶部边界
+          if (top < 0) {
+            top = event.clientY - containerRect.top + 10;
+          }
+
+          tooltip.style('top', top + 40 + 'px')
+                 .style('left', left + 'px');
+        })
+        .on('mouseout', function() {
+          tooltip.style('visibility', 'hidden');
+        resetHighlight();  
+        });
     },
   },
 };
@@ -262,5 +363,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.tooltip {
+  position: absolute;
+  visibility: hidden;
 }
 </style>

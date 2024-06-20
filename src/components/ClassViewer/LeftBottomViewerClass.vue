@@ -7,6 +7,8 @@
 
   <script>
   import * as echarts from 'echarts';
+  import { mapGetters } from 'vuex';
+
   
   export default {
     name: 'EChartsComponent',
@@ -18,6 +20,9 @@
         showEchart: true // 是否展示滚动条
       };
     },
+    computed: {
+    ...mapGetters(['classId'])
+  },
     mounted() {
       this.fetchStudentScores();
       // this.initChart();
@@ -29,7 +34,7 @@
     methods: {
       // 向后端请求top15的详细成绩数据
       fetchStudentScores() {
-        this.$axios.get('http://10.12.44.190:8000/ranking_per_class/Class2') // 替换为实际的API端点
+        this.$axios.get(`http://10.12.44.190:8000/ranking_per_class?class_id=${this.classId}`)
           .then(response => {
             this.top_students = JSON.parse(response.data);
             console.log("###class left start###")
