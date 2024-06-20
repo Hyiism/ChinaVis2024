@@ -14,7 +14,7 @@
       <LeftBottomViewer/>
     </div>
 
-    <div id="ModelViewer">
+    <div v-once id="ModelViewer">
       <ModelViewer @stateChanged="handleStateChange" :stateCode="initialStateCode""/>
     </div>
 
@@ -185,9 +185,7 @@ export default {
           BottomCenterViewerStudent: false,
           BottomRightViewerStudent: false
         };
-        // stateCode === 1，class视图
       } else if (stateCode === 1) {
-        // alert("To 班级视图");
         return{
           // 整体视图组件显示控制
           LeftViewer: false,

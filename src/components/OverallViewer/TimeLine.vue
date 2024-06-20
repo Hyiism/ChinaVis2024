@@ -76,7 +76,9 @@ export default {
     methods: {
         drawChart() {
             const margin = { top: 0, right: 0, bottom: 0, left: 0 };
-            const chartContainerWidth = this.$refs.chartContainer.clientWidth;
+            // const chartContainerWidth = this.$refs.chartContainer.clientWidth;
+            const chartContainerWidth = 1268;
+            console.log('chartContainerWidth', chartContainerWidth)
             const width = chartContainerWidth;
             const height = 65;
             const svg = d3.select(this.$refs.chartContainer)
