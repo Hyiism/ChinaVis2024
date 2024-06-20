@@ -1,10 +1,13 @@
 <template>
   <div ref="sceneContainer" class="scene-container" @click="onClick">
     <div class="view-controls">
-      <button @click="setTopView">俯视图</button>
-      <button @click="setSideView">侧视图</button>
-      <button @click="lookCameraPosition">查看相机位置</button>
+      <!-- <button @click="setTopView">俯视图</button>
+      <button @click="setSideView">侧视图</button> -->
+      <!-- <button @click="lookCameraPosition">查看相机位置</button>
       <button @click="changeState">Change State</button>
+      <button @click="changeToOverview">返回主视图</button> -->
+      <a-button type="dashed" @click="lookCameraPosition">Look Camera Position</a-button>
+      <a-button type="dashed" @click="changeToOverview">Switch OverView</a-button>
     </div>
 
     <div class="calendar-container">
@@ -31,7 +34,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from '@tweenjs/tween.js';
 import PubSub from 'pubsub-js';
 import moment from 'moment';
@@ -58,30 +61,25 @@ export default {
       30.671859741211,
       50.9932708740234
     ];
-    const xdistances = 50.4543222900391
+    const xdistances = 50.4543222900391;
     const studentsPositions = {};
-    let xOffsetCounter = 0; // 记录x轴偏移次数
-    for (let i = 0; i <= 99; i++) {
+
+    for (let i = 0; i < 100; i++) {
       const studentId = `student${String(i).padStart(3, '0')}`;
-      let zOffset = 0; // 计算z轴的偏移量
-      let xOffset = xOffsetCounter * xdistances; // 计算x轴的偏移量
-      if (i % 10 === 0) {
-        xOffsetCounter++; // 每加10个学生，xOffsetCounter加1
+
+      let xOffset = Math.floor(i / 10) * xdistances; // 每10个学生x轴偏移一次
+      let zOffset = 0;
+
+      for (let j = 1; j <= i % 10; j++) { // 处理当前这组10个学生的z轴偏移
+        zOffset += zdistances[(j - 1) % zdistances.length];
       }
-      for (let j = 1; j < i; j++) {
-        if (j % 10 === 0) {
-          zOffset = 0;
-        } else {
-          zOffset += zdistances[(j - 1) % zdistances.length];
-        }
-      }
+
       studentsPositions[studentId] = {
         x: basePosition.x - xOffset,
         y: basePosition.y,
         z: basePosition.z - zOffset
       };
     }
-
     // 添加字典，key为Rectangle001，value为Class1
     const rectangleToClassMap = {
       'Rectangle001': 'Class1',
@@ -227,7 +225,6 @@ export default {
     },
 
     async initThreeJS() {
-      console.log("又一次init")
       // 创建场景
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xffffff);
@@ -254,11 +251,11 @@ export default {
       this.addLights();
 
       // 添加轨道控制
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true; // 启用阻尼效果
-      this.controls.dampingFactor = 0.25; // 阻尼系数
-      this.controls.screenSpacePanning = false; // 禁用屏幕空间平移
-      const click = await this.getModelDataFromIndexedDB('schoolModel');
+      // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      // this.controls.enableDamping = true; // 启用阻尼效果
+      // this.controls.dampingFactor = 0.25; // 阻尼系数
+      // this.controls.screenSpacePanning = false; // 禁用屏幕空间平移
+      // const click = await this.getModelDataFromIndexedDB('schoolModel');
       // if (savedModelData) {
       //   console.log("Loading model from IndexedDB...");
       //   this.loadModelFromBuffer(savedModelData, 'school');
@@ -267,7 +264,12 @@ export default {
       //   console.log("Loading model from network...");
       //   this.loadSchoolModel();
       // }
-      this.loadSchoolModel();
+      const savedState = this.getSavedState()
+      if (savedState == 0) {
+        this.loadSchoolModel();
+      } else {
+        this.loadClassModel()
+      }
 
       this.animate();
       this.initialView();
@@ -408,7 +410,7 @@ export default {
               .easing(TWEEN.Easing.Linear.None)
               .onUpdate(() => {
                 this.camera.position.copy(currentPosition);
-                this.camera.lookAt(0, 0, 0);
+                this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
               })
               .start();
 
@@ -441,14 +443,14 @@ export default {
         // 模型加载完成后执行axios.get请求
         this.$axios.get('http://10.12.44.205:8000/getStudent4Class', {
           params: {
-            className: this.className,
+            className: this.classId,
           }
         })
           .then(response => {
             console.error('success sending data:', JSON.parse(response.data));
 
             let studentNumbers = [];
-            for (let i = 1; i <= 100; i++) {
+            for (let i = 0; i <= 99; i++) {
               studentNumbers.push(i);
             }
             studentNumbers = this.shuffleArray(studentNumbers);
@@ -468,7 +470,7 @@ export default {
                 // 将容器添加到场景中
                 this.scene.add(this.container);
                 // 对容器进行放大操作，而不是对模型直接进行放大
-                this.container.scale.set(1.5, 1.5, 1.5); // 重新应用缩放设置
+                this.container.scale.set(2, 2, 2); // 重新应用缩放设置
               }
             });
             this.animate();
@@ -489,7 +491,7 @@ export default {
     animate() {
       requestAnimationFrame(this.animate);
       TWEEN.update();
-      this.controls.update();
+      // this.controls.update();
       this.renderer.render(this.scene, this.camera);
     },
     initialView() {
@@ -497,7 +499,7 @@ export default {
       // this.camera.position.set(0, 400, 0);
       //初始相机看第一个学生
       this.camera.position.set(-434.0740788423603, 601.6679527037107, 1345.2141853240598)
-      this.camera.lookAt(0, 0, 0);
+      this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
     },
     // initialView() {
     //   //原方案
@@ -536,6 +538,20 @@ export default {
     lookCameraPosition() {
       console.log(this.camera.position.clone());
     },
+    changeToOverview() {
+      this.stateCode = 0
+      this.saveState(this.stateCode);
+      this.currentModelType = 'school'
+      window.location.reload();
+      // this.stateCode = 0
+      // this.saveState(this.stateCode);
+      // this.currentModelType = 'school'
+      // this.scene.remove(this.container);
+      // this.hideCurrentModel(this.classModel, () => {
+      //   this.loadSchoolModel();
+      // });
+      // this.$emit('stateChanged', this.stateCode);
+    },
     calculateItemPosition(index) {
       const angleStep = (2 * Math.PI) / this.items.length;
       const radius = 80;
@@ -549,7 +565,7 @@ export default {
     },
     hideCurrentModel(model, callback) {
       new TWEEN.Tween({ opacity: 1 }) // 初始透明度为1
-        .to({ opacity: 0 }, 1500) // 目标透明度为0，持续时间为1秒
+        .to({ opacity: 0 }, 1000) // 目标透明度为0，持续时间为1秒
         .easing(TWEEN.Easing.Linear.None)
         .onUpdate(function (obj) {
           model.children.forEach(child => {
@@ -568,6 +584,24 @@ export default {
         })
         .onComplete(() => {
           this.scene.remove(model); // 动画结束后移除模型
+          new TWEEN.Tween(this.camera.position)
+            .to({ x: -434.0740788423603, y: 601.6679527037107, z: 1345.2141853240598 }, 1000) // 设置相机的新位置和移动时间
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .onUpdate(() => {
+              this.camera.lookAt(new THREE.Vector3(0, 0, 0)); // 每次更新时让相机指向目标位置
+            })
+            .start();
+          if (this.currentModelType === 'school') {
+            // 移动相机的逻辑
+            // this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
+            new TWEEN.Tween(this.camera.position)
+              .to({ x: -434.0740788423603, y: 601.6679527037107, z: 1345.2141853240598 }, 1000) // 设置相机的新位置和移动时间
+              .easing(TWEEN.Easing.Quadratic.Out)
+              .onUpdate(() => {
+                this.camera.lookAt(new THREE.Vector3(0, 0, 0)); // 每次更新时让相机指向目标位置
+              })
+              .start();
+          }
           if (callback) callback(); // 调用回调函数加载新模型
         })
         .start();
@@ -621,50 +655,22 @@ export default {
             this.studentsPositions[studentName].y,
             this.studentsPositions[studentName].z
           );
-          console.log('目标学生的', foundStudent)
+          console.log('目标学生的', this.student)
           console.log('全部学生的坐标信息', this.studentsPositions)
           console.log('targetPosition', targetPosition)
           new TWEEN.Tween(this.camera.position)
             .to({
-              x: targetPosition.x,
-              y: targetPosition.y,
-              z: targetPosition.z
+              x: targetPosition.x + 301,
+              y: targetPosition.y + 89,
+              z: targetPosition.z + 279
             }, 1000)
             .easing(TWEEN.Easing.Quadratic.Out)
+            .onComplete(() => {
+              // 确保动画完成后相机仍然指向目标位置
+              // this.camera.lookAt(targetPosition);
+            })
             .start();
-          // this.onCameraMoveComplete(targetPosition)
         }
-      }
-    },
-    onCameraMoveComplete(targetPosition) {
-      const rect = this.renderer.domElement.getBoundingClientRect(); // 获取渲染器容器的位置信息
-      const halfWidth = rect.width / 2; // 容器宽度的一半
-      const halfHeight = rect.height / 2; // 容器高度的一半
-      const vec2 = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z).project(this.camera); // 获取相机坐标投影到屏幕坐标系中的位置
-      const menuX = vec2.x * halfWidth + halfWidth; // 计算菜单应该显示的x坐标
-      const menuY = -vec2.y * halfHeight + halfHeight; // 计算菜单应该显示的y坐标
-      // this.showMenu(menuX, menuY); // 调用显示菜单的函数，并传入计算得到的菜单位置信息
-    },
-    showMenu(x, y) {
-      let isAnimating = false;
-
-      const menu = document.querySelector('.menu');
-      const isOpen = menu.classList.contains('open');
-
-      if (isOpen) {
-        menu.classList.remove('open');
-        isAnimating = true;
-
-        setTimeout(() => {
-          menu.style.left = `${x}px`;
-          menu.style.top = `${y}px`;
-          menu.classList.add('open');
-          isAnimating = false;
-        }, 500);
-      } else {
-        menu.style.left = `${x}px`;
-        menu.style.top = `${y}px`;
-        menu.classList.add('open');
       }
     },
     onPanelChange(value, mode) {
@@ -847,7 +853,7 @@ export default {
             // 将容器添加到场景中
             this.scene.add(this.container);
             // 对容器进行放大操作，而不是对模型直接进行放大
-            this.container.scale.set(1.5, 1.5, 1.5); // 重新应用缩放设置
+            this.container.scale.set(2, 2, 2); // 重新应用缩放设置
           }
         });
         this.animate();
@@ -899,7 +905,7 @@ canvas {
   left: 10px;
 }
 
-.view-controls button {
+/* .view-controls button {
   margin: 10px;
   padding: 10px 20px;
   font-size: 10px;
@@ -908,11 +914,11 @@ canvas {
   border-radius: 5px;
   background-color: #4CAF50;
   color: white;
-}
+} */
 
-.view-controls button:hover {
+/* .view-controls button:hover {
   background-color: #45a049;
-}
+} */
 
 .menu {
   position: absolute;
