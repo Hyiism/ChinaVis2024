@@ -6,6 +6,7 @@
 
 <script>
 import * as d3 from 'd3';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'SunburstChart',
@@ -180,6 +181,9 @@ export default {
         ]
       }
     };
+  },
+  computed: {
+    ...mapGetters(['studentId'])
   },
   mounted() {
     this.drawChart();

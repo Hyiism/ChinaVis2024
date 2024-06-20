@@ -15,6 +15,8 @@
 
 <script>
 import * as d3 from "d3";
+import { mapGetters } from 'vuex';
+
 
 export default {
   name: "ScatterplotMatrix",
@@ -38,13 +40,17 @@ export default {
       data: []
     };
   },
+  computed: {
+    ...mapGetters(['classId'])
+  },
   mounted() {
     this.fetchStudentScores();
   },
   methods: {
     fetchStudentScores() {
+      console.log("className接收：",this.classId)
       this.$axios
-        .get('http://10.12.44.190:8000/scatterMatrix/?class_id=Class1') // Replace with actual API endpoint
+        .get('http://10.12.44.190:8000/scatterMatrix/?class_id=${this.classId}') // Replace with actual API endpoint
         .then((response) => {
           this.data = JSON.parse(response.data);
           this.createScatterplotMatrix();

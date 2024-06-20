@@ -29,7 +29,7 @@ export default {
         },
         // 可以添加更多的数据对象
       ],
-      data: this.generateData(100)
+      data: null
     };
   },
   mounted() {

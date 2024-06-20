@@ -41,6 +41,7 @@
 <script>
 import EventBus from '@/eventBus'; // 导入事件总线
 import * as d3 from 'd3';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'CheckChart',
@@ -86,7 +87,9 @@ export default {
       // weekBar: ["Mon", "周二", "周三", "周四", "周五", "周六", "周日"],
     };
   },
-
+  computed: {
+    ...mapGetters(['studentId'])
+  },
   created() {
     this.fetchStudentScores();
   },
@@ -97,7 +100,7 @@ export default {
 
   methods: {
     fetchStudentScores() {
-      this.$axios.get('http://10.12.44.190:8000/get_check_data/?student_id=r28s9kyo7knrvytyvmt8')
+      this.$axios.get(`http://10.12.44.190:8000/get_check_data/?student_id=${this.studentId}`)
         .then(response => {
           this.infos = JSON.parse(response.data).infos;
           console.log("this.infos");
