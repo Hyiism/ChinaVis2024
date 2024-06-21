@@ -1,223 +1,360 @@
 <template>
-  <div ref="chart" id="scater"></div>
+  <div ref="chart">
+    <div class="dropdown-wrapper">
+      <a-dropdown class="dropdown">
+        <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+          Select Territory Group <a-icon type="down" />
+        </a>
+        <a-menu slot="overlay" @click="handleMenuClick">
+          <a-menu-item key="Group1">Group 1</a-menu-item>
+          <a-menu-item key="Group2">Group 2</a-menu-item>
+        </a-menu>
+      </a-dropdown>
+    </div>
+  </div>
 </template>
 
 <script>
-import * as echarts from 'echarts';
-import 'echarts-gl';  // 引入 ECharts 3D 扩展
+import * as d3 from "d3";
 
 export default {
-  name: 'ChartViewer',
+  name: "BubblePieChart",
   data() {
     return {
-      myChart: null,
-      // data: [
-      //   [1, 10, 20, 30, 85, 'A'],
-      //   [2, 20, 30, 40, 90, 'B'],
-      //   [3, 30, 40, 50, 95, 'A'],
-      //   [4, 40, 50, 60, 80, 'C'],
-      //   [5, 50, 60, 70, 70, 'B']
-      // ],
-
-      // 这个用来接受后段传来的json数据
-      data: [],
-
-      
-      fieldIndices: {
-        student_id: 0,
-        x: 1,
-        y: 2,
-        z: 3,
-        cluster_label: 4,
-        total_score: 5,
-
-        title_counts: 6,
-        time_difference_mean: 7,
-        time_split_0_percentage: 8,
-        time_split_1_percentage: 9,
-        time_split_2_percentage: 10,
-        submit_times_avg: 11,
-        submit_times_max: 12,
-        total_syth_score_avg: 13,
-        all_memory_avg: 14,
-        all_timeconsume_avg: 15,
-        state_ae_percentage: 16,
-        state_e_percentage: 17,
-        state_pc_percentage: 18,
-        state_ac_percentage: 19
+      chartData: [
+        {
+          "class": "Class1",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class2",
+          "values": [
+            834239.75,
+            528526.45,
+            790321.8,
+            702123.55,
+            743201.45
+          ],
+          "total": 3598413
+        },
+        {
+          "class": "Class3",
+          "values": [
+            706713.65,
+            680840.1,
+            852513.1,
+            784705.65,
+            758358.55
+          ],
+          "total": 3783131.05
+        },
+        {
+          "class": "Class4",
+          "values": [
+            794760.85,
+            810682.75,
+            1115504.4,
+            864321.8,
+            1046147.4
+          ],
+          "total": 4631417.2
+        },
+        {
+          "class": "Class5",
+          "values": [
+            662596.75,
+            681682.75,
+            857757.85,
+            717995.5,
+            806509.45
+          ],
+          "total": 3726542.3
+        },
+        {
+          "class": "Class6",
+          "values": [
+            743987.1,
+            719003.35,
+            983205.7,
+            929722.4,
+            1062684.3
+          ],
+          "total": 4438602.85
+        },
+        {
+          "class": "Class7",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class8",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class9",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class10",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class11",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class12",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class13",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class14",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class15",
+          "values": [
+            638204.73,
+            773652.1,
+            901256.45,
+            563472.8,
+            677852.5
+          ],
+          "total": 3554438.58
+        }
+      ],
+      territoryGroups: {
+        Group1: ["Far West", "Great Lakes", "Mideast", "Plains", "Southwest"],
+        Group2: ["Northeast", "Southeast", "Central", "Mountain", "Pacific"]
       },
-
-      labels: [0, 1, 2, 3 ],
-      labelColors: ['#9A60B4', '#FB8351', '#3BA272', '#73C0DE']
+      selectedTerritoryGroup: "Group1",
+      classes: ["Class1", "Class2", "Class3", "Class4", "Class5", "Class6", "Class7", "Class8", "Class9", "Class10", "Class11", "Class12", "Class13", "Class14", "Class15"],
+      width: 700,
+      height: 650,
+      margin: { left: 40, bottom: 50, top: 60, right: 20 },
+      color: d3.scaleOrdinal(d3.schemeTableau10).domain(["Class1", "Class2", "Class3", "Class4", "Class5", "Class6", "Class7", "Class8", "Class9", "Class10", "Class11", "Class12", "Class13", "Class14", "Class15"]),
+      legend: null,
+      slice: null,
+      pct: null
     };
   },
   mounted() {
-    this.fetchScaterData();
-    // this.myChart = echarts.init(this.$refs.chart);
-    // this.updateChart();
+    this.drawChart();
   },
-
   methods: {
-    // 向后端请求top15的详细成绩数据
-    fetchScaterData() {
-      this.$axios.get('http://10.12.44.190:8000/scaterVis/?class_id=all') // 替换为实际的API端点
-        .then(response => {
-          this.data = JSON.parse(response.data).data;
-          console.log("###scater start###")
-          console.log(this.data)
-          // 数据获取成功后再初始化图表，不然图表获取不到数据
-          this.myChart = echarts.init(this.$refs.chart);
-          this.updateChart();
+    handleMenuClick({ key }) {
+      this.selectedTerritoryGroup = key;
+      this.updateChart();
+    },
+    drawChart() {
+      const { chartData, territoryGroups, selectedTerritoryGroup, classes, width, height, margin, color } = this;
+      const territories = territoryGroups[selectedTerritoryGroup];
+      const svg = d3.select(this.$refs.chart)
+        .append("svg")
+        .attr("font-size", "10pt")
+        .attr("cursor", "default")
+        .attr("viewBox", [0, 0, width, height])
+        .attr("width", width)
+        .attr("height", height);
+
+      const x = d3.scaleBand()
+        .domain(classes)
+        .range([margin.left, width - margin.left - margin.right]);
+
+      const hx = x.bandwidth() / 2;
+
+      const y = d3.scaleLinear()
+        .domain(d3.extent(chartData.map(d => d.total)))
+        .range([height - margin.top - margin.bottom, margin.top]);
+
+      const r = d3.scaleLinear()
+        .domain(d3.extent(chartData.map(d => d.total)))
+        .range([hx / 2, hx]);
+
+      const toCurrency = num => d3.format("$,.2f")(num);
+
+      const drawGuidelines = (g, data, line) => {
+        g.selectAll("path")
+          .data(data)
+          .join("path")
+          .attr("stroke", "#ddd")
+          .attr("stroke-dasharray", "5,5")
+          .attr("d", line);
+      };
+
+      svg.append("g").call(g => drawGuidelines(g, classes,
+        d => d3.line()([[x(d) + hx, margin.top], [x(d) + hx, height - margin.bottom]]))
+      );
+
+      svg.append("g").call(g => drawGuidelines(g, y.ticks().reverse().slice(1),
+        d => d3.line()([[margin.left, y(d)], [width - margin.left - margin.right, y(d)]]))
+      );
+
+      const g = svg.selectAll(".pie")
+        .data(chartData)
+        .join("g")
+        .attr("class", "pie")
+        .attr("transform", d => `translate(${x(d.class) + hx},${y(d.total)})`)
+        .call(g => g.append("text")
+          .attr("dy", "1em")
+          .attr("text-anchor", "middle")
+          .attr("transform", d => `translate(0,${r(d.total)})`)
+          .text(d => toCurrency(d.total)));
+
+      const pg = g.selectAll("g")
+        .data(d => d3.pie()(d.values).map(p => ({ pie: p, total: d.total })))
+        .join("g")
+        .call(g => g.append("title")
+          .text((d, i) => `${territories[i]}\n${toCurrency(d.pie.value)} (${(d.pie.value / d.total * 100).toFixed(1)}%)`));
+
+      const pie = d => d3.arc()
+        .innerRadius(0)
+        .outerRadius(r(d.total))
+        .startAngle(d.pie.startAngle)
+        .endAngle(d.pie.endAngle);
+
+      this.slice = pg.append("path")
+        .attr("d", d => pie(d)())
+        .attr("opacity", 1)
+        .attr("fill", (d, i) => color(territories[i]));
+
+      this.pct = pg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .attr("transform", (d, i) => {
+          const c = pie(d).centroid(d.pie.value);
+          return `translate(${c[0]},${c[1]})`;
         })
-        .catch(error => {
-          console.error("There was an error!", error);
+        .attr("opacity", "0")
+        .text(d => (d.pie.value / d.total * 100).toFixed(1) + "%");
+
+      svg.append("g").call(g => this.drawAxis(g, margin.left, 0, d3.axisLeft(y).ticks(height / 100, "s")));
+      svg.append("g").call(g => this.drawAxis(g, 0, height - margin.bottom, d3.axisBottom(x)));
+      svg.append("g").call(this.drawLegend);
+      return svg.node();
+    },
+
+    drawAxis(g, x, y, axis) {
+      g.attr("transform", `translate(${x},${y})`)
+        .call(axis)
+        .selectAll(".tick text")
+        .attr("font-size", "9pt");
+    },
+
+    drawLegend(g) {
+      const { territoryGroups, selectedTerritoryGroup, color, margin, width } = this;
+      const territories = territoryGroups[selectedTerritoryGroup];
+      this.legend = g.attr("transform", `translate(${margin.left + 20}, ${margin.top - 60})`)
+        .selectAll("g")
+        .data(territories)
+        .join("g")
+        .attr("transform", (d, i) => `translate(0,${i * 20})`)
+        .call(g => g.append("rect")
+          .attr("rx", 3).attr("ry", 3)
+          .attr("width", 20).attr("height", 15)
+          .attr("fill", d => color(d)))
+        .call(g => g.append("text").attr("dx", 25).attr("alignment-baseline", "hanging").text(d => d))
+        .on("mouseover", this.highlight)
+        .on("mouseout", () => this.highlight());
+    },
+    highlight(e) {
+      const i = e ? this.legend.nodes().indexOf(e.currentTarget) : -1;
+      this.slice.transition().duration(500).attr("opacity", (d, j) => i === -1 || j === i ? 1 : 0.3);
+      this.pct.transition().duration(500)
+        .attr("opacity", function (d, j) {
+          if (j === i) {
+            this.parentNode.parentNode.appendChild(this.parentNode);
+            return 1;
+          }
+          else return 0;
         });
     },
-
-    getMaxScore(data) {
-      return Math.max(...data.map(item => item[this.fieldIndices.total_score]));
-    },
     updateChart() {
-      const maxScore = this.getMaxScore(this.data);
-      const labelIndexMap = this.labels.reduce((obj, label, index) => {
-        obj[label] = index;
-        return obj;
-      }, {});
-
-      this.myChart.setOption({
-        title: {
-          text: '学生做题情况嵌入展示',
-          left: 'center',
-          textStyle: {
-            color: '#000',
-            fontSize: 20
-        },
-          top: 40
-        },
-
-        tooltip: {},
-        visualMap: {
-          show: true, // 不显示视觉映射控件
-          dimension: this.fieldIndices.cluster_label,
-          categories: this.labels,
-          inRange: {
-            color: this.labelColors
-          }
-        },
-        xAxis3D: {
-          name: 'x',
-          type: 'value',
-          min: -7,  // 指定 y 轴的最小值
-          max: 13,  // 指定 y 轴的最大值
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#c0c0c0' // 坐标轴标签颜色
-          }
-        },
-        yAxis3D: {
-          name: 'y',
-          type: 'value',
-          min: -7,  // 指定 y 轴的最小值
-          max: 13,  // 指定 y 轴的最大值
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#c0c0c0' // 坐标轴标签颜色
-          }
-        },
-        zAxis3D: {
-          name: 'z',
-          type: 'value',
-          min: 4,  // 指定 z 轴的最小值
-          max: 14,  // 指定 z 轴的最大值
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#000' // 坐标轴标签颜色
-          }
-        },
-        grid3D: {
-          axisLine: {
-            lineStyle: {
-              color: '#000' // 三维网格轴线颜色
-            }
-          },
-          axisPointer: {
-            lineStyle: {
-              color: '#ffbd67'
-            }
-          },
-          viewControl: {}
-        },
-        series: [
-          {
-            type: 'scatter3D',
-            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score', 'student_id', 'title_counts', 'time_difference_mean', 'time_split_0_percentage', 'time_split_1_percentage', 'time_split_2_percentage', 'submit_times_avg', 'submit_times_max', 'total_syth_score_avg', 'all_memory_avg', 'all_timeconsume_avg', 'state_ae_percentage', 'state_e_percentage', 'state_pc_percentage', 'state_ac_percentage'],
-            data: this.data.map(item => {
-              return {
-                value: [
-                  item[this.fieldIndices.x],
-                  item[this.fieldIndices.y],
-                  item[this.fieldIndices.z],
-                  item[this.fieldIndices.cluster_label],
-                  item[this.fieldIndices.total_score],
-                  item[this.fieldIndices.student_id],
-
-                  item[this.fieldIndices.title_counts],
-                  item[this.fieldIndices.time_difference_mean],
-                  item[this.fieldIndices.time_split_0_percentage],
-                  item[this.fieldIndices.time_split_1_percentage],
-                  item[this.fieldIndices.time_split_2_percentage],
-                  item[this.fieldIndices.submit_times_avg],
-                  item[this.fieldIndices.submit_times_max],
-                  item[this.fieldIndices.total_syth_score_avg],
-                  item[this.fieldIndices.all_memory_avg],
-                  item[this.fieldIndices.all_timeconsume_avg],
-                  item[this.fieldIndices.state_ae_percentage],
-                  item[this.fieldIndices.state_e_percentage],
-                  item[this.fieldIndices.state_pc_percentage],
-                  item[this.fieldIndices.state_ac_percentage]
-                ],
-                itemStyle: {
-                  color: this.labelColors[labelIndexMap[item[this.fieldIndices.cluster_label]]]
-                }
-              };
-            }),
-            symbolSize: val => {
-              // 根据total_score的值来调整点的大小
-              // return (val[4] / (maxScore)) * 10; // Scale symbol size based on score
-              return ((val[4] - 30) / (maxScore - 30)) * 8 + 5
-            },
-            itemStyle: {
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.8)'
-            },
-            emphasis: {
-              itemStyle: {
-                color: '#fff'
-              }
-            }
-          }
-        ]
-      });
+      // 清除之前的画布
+      d3.select(this.$refs.chart).selectAll("svg").remove();
+      // 重新绘制图表
+      this.drawChart();
+    },
+    toCurrency(num) {
+      return d3.format("$,.2f")(num);
     }
   }
 };
 </script>
 
 <style scoped>
-#scater{
-  width: 100%;
-  height: 100%;
+svg {
+  font-family: sans-serif;
+}
+
+.dropdown-wrapper {
+  position: absolute;
+  top: 30px;
+  right: 40px;
 }
 </style>
