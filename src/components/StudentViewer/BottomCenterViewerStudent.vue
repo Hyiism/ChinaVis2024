@@ -3,11 +3,11 @@
     <div class="button-container">
       <button :class="{'selected': selectedDistribution === 'time_distribution'}" @click="selectDistribution('time_distribution')">
         <div>执行用时分布</div>
-        <div>用时 {{ time_consume }} 毫秒&nbsp;&nbsp;&nbsp;击败 {{ (time_beat * 100).toFixed(2) }}%</div>
+        <div>用时 {{ time_consume }} ms&nbsp;&nbsp;&nbsp;击败 {{ (time_beat * 100).toFixed(2) }}%</div>
       </button>
       <button :class="{'selected': selectedDistribution === 'memory_distribution'}" @click="selectDistribution('memory_distribution')">
-        <div>内存用时分布</div>
-        <div>用时 {{ memory_consume }} MB&nbsp;击败 {{ (memory_beat * 100).toFixed(2) }}%</div>
+        <div>内存占用分布</div>
+        <div>占用 {{ memory_consume }} MB&nbsp;击败 {{ (memory_beat * 100).toFixed(2) }}%</div>
       </button>
     </div>
     <div class="barchart-container"></div>
@@ -17,6 +17,7 @@
 
 <script>
 import * as d3 from 'd3';
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default{
   name:'BarChart',
@@ -28,6 +29,7 @@ export default{
       memory_consume: 327,
       time_beat: 0.67,
       memory_beat: 0.59,
+      // 时间复杂度横轴 需要计算此题目 所有时间复杂度的占比情况 击败率只需要计算 比其大的学生数量 除以所有做过此题的学生数量
       time_distribution:{
         "1":0.01,
         "2":0.03,
@@ -38,8 +40,12 @@ export default{
         "7":0.12,
         "8":0.05,
         "9":0.02,
-        "10":0.01
+        "10":0.01,
+        "11":0.05,
+        "12":0.02,
+        "13":0.01,
       },
+      // 空间复杂度横轴 需要计算此题目 所有空间复杂度范围的占比情况 击败率只需要计算 比其大的学生数量 除以所有做过此题的学生数量
       memory_distribution:{
         "1~50":0.005,
         "51~100":0.01,
@@ -56,11 +62,17 @@ export default{
         "601~650":0.015,
         "651~700":0.005,
       },
-      selectedDistribution: 'time_distribution'
+      selectedDistribution: 'time_distribution',
+      titleId: ''
     }
   },
   mounted() {
+    // 监听从气泡图传来的题目id
+    EventBus.$on('titleIdSelected', this.handleBubSelected);
     this.drawChart();
+  },
+  beforeDestroy() {
+    EventBus.$off('titleIdSelected', this.handleBubSelected);
   },
   watch: {
     selectedDistribution() {  //选择时间复杂度或者空间复杂度
@@ -161,6 +173,10 @@ export default{
     updateChart() {
       d3.select('.barchart-container').select('svg').remove();
       this.drawChart();
+    },
+    // 接收从气泡图传来的题目id 使用此id请求数据
+    handleBubSelected(titleId) {
+      this.titleId = titleId;
     }
   }
 }
