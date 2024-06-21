@@ -1,223 +1,176 @@
 <template>
-  <div ref="chart" id="scater"></div>
+  <div ref="chart"></div>
 </template>
 
 <script>
-import * as echarts from 'echarts';
-import 'echarts-gl';  // 引入 ECharts 3D 扩展
+import * as d3 from "d3";
 
 export default {
-  name: 'ChartViewer',
+  name: "BubblePieChart",
   data() {
     return {
-      myChart: null,
-      // data: [
-      //   [1, 10, 20, 30, 85, 'A'],
-      //   [2, 20, 30, 40, 90, 'B'],
-      //   [3, 30, 40, 50, 95, 'A'],
-      //   [4, 40, 50, 60, 80, 'C'],
-      //   [5, 50, 60, 70, 70, 'B']
-      // ],
-
-      // 这个用来接受后段传来的json数据
-      data: [],
-
-      
-      fieldIndices: {
-        student_id: 0,
-        x: 1,
-        y: 2,
-        z: 3,
-        cluster_label: 4,
-        total_score: 5,
-
-        title_counts: 6,
-        time_difference_mean: 7,
-        time_split_0_percentage: 8,
-        time_split_1_percentage: 9,
-        time_split_2_percentage: 10,
-        submit_times_avg: 11,
-        submit_times_max: 12,
-        total_syth_score_avg: 13,
-        all_memory_avg: 14,
-        all_timeconsume_avg: 15,
-        state_ae_percentage: 16,
-        state_e_percentage: 17,
-        state_pc_percentage: 18,
-        state_ac_percentage: 19
-      },
-
-      labels: [0, 1, 2, 3 ],
-      labelColors: ['#9A60B4', '#FB8351', '#3BA272', '#73C0DE']
+      chartData: [
+        { year: "2015", Far_West: 638204.73, Great_Lakes: 773652.1, Mideast: 901256.45, Plains: 563472.8, Southwest: 677852.5 },
+        { year: "2016", Far_West: 834239.75, Great_Lakes: 528526.45, Mideast: 790321.8, Plains: 702123.55, Southwest: 743201.45 },
+        { year: "2017", Far_West: 706713.65, Great_Lakes: 680840.1, Mideast: 852513.1, Plains: 784705.65, Southwest: 758358.55 },
+        { year: "2018", Far_West: 794760.85, Great_Lakes: 810682.75, Mideast: 1115504.4, Plains: 864321.8, Southwest: 1046147.4 },
+        { year: "2019", Far_West: 662596.75, Great_Lakes: 681682.75, Mideast: 857757.85, Plains: 717995.5, Southwest: 806509.45 },
+        { year: "2020", Far_West: 743987.1, Great_Lakes: 719003.35, Mideast: 983205.7, Plains: 929722.4, Southwest: 1062684.3 },
+      ],
+      territories: ["Far West", "Great Lakes", "Mideast", "Plains", "Southwest"],
+      width: 700,
+      height: 650,
+      // 多出来的margin 放legend
+      margin: { left: 40, bottom: 50, top: 60, right: 20 },
+      color: d3.scaleOrdinal(d3.schemeTableau10).domain(["Far West", "Great Lakes", "Mideast", "Plains", "Southwest"])
     };
   },
   mounted() {
-    this.fetchScaterData();
-    // this.myChart = echarts.init(this.$refs.chart);
-    // this.updateChart();
+    this.drawChart();
   },
-
   methods: {
-    // 向后端请求top15的详细成绩数据
-    fetchScaterData() {
-      this.$axios.get('http://10.12.44.190:8000/scaterVis/?class_id=all') // 替换为实际的API端点
-        .then(response => {
-          this.data = JSON.parse(response.data).data;
-          console.log("###scater start###")
-          console.log(this.data)
-          // 数据获取成功后再初始化图表，不然图表获取不到数据
-          this.myChart = echarts.init(this.$refs.chart);
-          this.updateChart();
+    drawChart() {
+      const { chartData, territories, width, height, margin, color } = this;
+
+      console.log("Chart Data:", chartData);
+      console.log("Territories:", territories);
+
+      const svg = d3.select(this.$refs.chart)
+        .append("svg")
+        .attr("font-size", "10pt")
+        .attr("cursor", "default")
+        .attr("viewBox", [0, 0, width, height])
+        .attr("width", width)  
+        .attr("height", height);   
+
+
+      console.log("SVG element created:", svg.node());
+
+      const x = d3.scaleBand()
+        .domain(chartData.map(d => d.year))
+        .range([margin.left, width - margin.left - margin.right]);
+      const hx = x.bandwidth() / 2;
+
+      const y = d3.scaleLinear()
+        .domain(d3.extent(chartData.flatMap(d => territories.map(t => d[t]))))
+        .range([height - margin.top - margin.bottom, margin.top]);
+
+      const r = d3.scaleLinear()
+        .domain(d3.extent(chartData.flatMap(d => territories.map(t => d[t]))))
+        .range([hx / 2, hx]);
+
+      const drawGuidelines = (g, data, line) => {
+        g.selectAll("path")
+          .data(data)
+          .join("path")
+          .attr("stroke", "#ddd")
+          .attr("stroke-dasharray", "5,5")
+          .attr("d", line);
+      };
+
+      svg.append("g").call(g => drawGuidelines(g, chartData.map(d => d.year),
+        d => d3.line()([[x(d) + hx, margin.top], [x(d) + hx, height - margin.bottom]])
+      ));
+
+      svg.append("g").call(g => drawGuidelines(g, y.ticks().reverse().slice(1),
+        d => d3.line()([[margin.left, y(d)], [width - margin.left - margin.right, y(d)]])
+      ));
+
+      const g = svg.selectAll(".pie")
+        .data(chartData)
+        .join("g")
+        .attr("class", "pie")
+        .attr("transform", d => `translate(${x(d.year) + hx},${y(d3.sum(territories.map(t => d[t])))})`)
+        .call(g => g.append("text")
+          .attr("dy", "1em")
+          .attr("text-anchor", "middle")
+          .attr("transform", d => `translate(0,${r(d3.sum(territories.map(t => d[t])))})`)
+          .text(d => this.toCurrency(d3.sum(territories.map(t => d[t]))))
+        );
+
+      const pg = g.selectAll("g")
+        .data(d => d3.pie().value(d => d.value)(territories.map(t => ({ key: t, value: d[t] }))).map(p => ({ pie: p, total: d3.sum(territories.map(t => d[t])) })))
+        .join("g")
+        .call(g => g.append("title")
+          .text((d, i) => `${territories[i]}\n${this.toCurrency(d.pie.value)} (${(d.pie.value / d.total * 100).toFixed(1)}%)`)
+        );
+
+      const pie = d => d3.arc()
+        .innerRadius(0)
+        .outerRadius(r(d.total))
+        .startAngle(d.pie.startAngle)
+        .endAngle(d.pie.endAngle);
+
+      const slice = pg.append("path")
+        .attr("d", d => pie(d)())
+        .attr("opacity", 1)
+        .attr("fill", (d, i) => color(territories[i]));
+
+      const pct = pg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .attr("transform", (d, i) => {
+          const c = pie(d).centroid(d.pie.value);
+          return `translate(${c[0]},${c[1]})`;
         })
-        .catch(error => {
-          console.error("There was an error!", error);
+        .attr("opacity", "0")
+        .text(d => (d.pie.value / d.total * 100).toFixed(1) + "%");
+
+      svg.append("g").call(g => this.drawAxis(g, margin.left, 0, d3.axisLeft(y).ticks(height / 100, "s")));
+      svg.append("g").call(g => this.drawAxis(g, 0, height - margin.bottom, d3.axisBottom(x)));
+      // 先不去绘制legend
+      svg.append("g").call(this.drawLegend);
+
+      console.log("Chart drawn successfully.");
+
+      return svg.node();
+    },
+
+    drawAxis(g, x, y, axis) {
+      g.attr("transform", `translate(${x},${y})`)
+        .call(axis)
+        .selectAll(".tick text")
+        .attr("font-size", "9pt");
+    },
+
+    drawLegend(g) {
+      const { territories, color, margin, width } = this;
+      const legend = g.attr("transform", `translate(${margin.left}, ${margin.top})`)
+        .selectAll("g")
+        .data(territories)
+        .join("g")
+        .attr("transform", (d, i) => `translate(${i * 120}, 0)`)  // 每个图例项水平排列
+        .call(g => g.append("rect")
+          .attr("rx", 3).attr("ry", 3)
+          .attr("width", 20).attr("height", 15)
+          .attr("fill", d => color(d)))
+        .call(g => g.append("text").attr("dx", 25).attr("alignment-baseline", "hanging").text(d => d))
+        .on("mouseover", this.highlight)
+        .on("mouseout", () => this.highlight());
+    },
+    highlight(e) {
+      const { color } = this;
+      const legend = d3.selectAll("g");
+      const i = e ? legend.nodes().indexOf(e.currentTarget) : -1;
+      d3.selectAll("path").transition().duration(500).attr("opacity", (d, j) => i === -1 || j === i ? 1 : 0.3);
+      d3.selectAll("text").transition().duration(500)
+        .attr("opacity", function (d, j) {
+          if (j === i) {
+            this.parentNode.parentNode.appendChild(this.parentNode);
+            return 1;
+          }
+          else return 0;
         });
     },
-
-    getMaxScore(data) {
-      return Math.max(...data.map(item => item[this.fieldIndices.total_score]));
-    },
-    updateChart() {
-      const maxScore = this.getMaxScore(this.data);
-      const labelIndexMap = this.labels.reduce((obj, label, index) => {
-        obj[label] = index;
-        return obj;
-      }, {});
-
-      this.myChart.setOption({
-        title: {
-          text: '学生做题情况嵌入展示',
-          left: 'center',
-          textStyle: {
-            color: '#000',
-            fontSize: 20
-        },
-          top: 40
-        },
-
-        tooltip: {},
-        visualMap: {
-          show: true, // 不显示视觉映射控件
-          dimension: this.fieldIndices.cluster_label,
-          categories: this.labels,
-          inRange: {
-            color: this.labelColors
-          }
-        },
-        xAxis3D: {
-          name: 'x',
-          type: 'value',
-          min: -7,  // 指定 y 轴的最小值
-          max: 13,  // 指定 y 轴的最大值
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#c0c0c0' // 坐标轴标签颜色
-          }
-        },
-        yAxis3D: {
-          name: 'y',
-          type: 'value',
-          min: -7,  // 指定 y 轴的最小值
-          max: 13,  // 指定 y 轴的最大值
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#c0c0c0' // 坐标轴标签颜色
-          }
-        },
-        zAxis3D: {
-          name: 'z',
-          type: 'value',
-          min: 4,  // 指定 z 轴的最小值
-          max: 14,  // 指定 z 轴的最大值
-          axisLine: {
-            lineStyle: {
-              color: '#c0c0c0' // 坐标轴线颜色
-            }
-          },
-          axisLabel: {
-            color: '#000' // 坐标轴标签颜色
-          }
-        },
-        grid3D: {
-          axisLine: {
-            lineStyle: {
-              color: '#000' // 三维网格轴线颜色
-            }
-          },
-          axisPointer: {
-            lineStyle: {
-              color: '#ffbd67'
-            }
-          },
-          viewControl: {}
-        },
-        series: [
-          {
-            type: 'scatter3D',
-            dimensions: ['x', 'y', 'z', 'cluster_label', 'total_score', 'student_id', 'title_counts', 'time_difference_mean', 'time_split_0_percentage', 'time_split_1_percentage', 'time_split_2_percentage', 'submit_times_avg', 'submit_times_max', 'total_syth_score_avg', 'all_memory_avg', 'all_timeconsume_avg', 'state_ae_percentage', 'state_e_percentage', 'state_pc_percentage', 'state_ac_percentage'],
-            data: this.data.map(item => {
-              return {
-                value: [
-                  item[this.fieldIndices.x],
-                  item[this.fieldIndices.y],
-                  item[this.fieldIndices.z],
-                  item[this.fieldIndices.cluster_label],
-                  item[this.fieldIndices.total_score],
-                  item[this.fieldIndices.student_id],
-
-                  item[this.fieldIndices.title_counts],
-                  item[this.fieldIndices.time_difference_mean],
-                  item[this.fieldIndices.time_split_0_percentage],
-                  item[this.fieldIndices.time_split_1_percentage],
-                  item[this.fieldIndices.time_split_2_percentage],
-                  item[this.fieldIndices.submit_times_avg],
-                  item[this.fieldIndices.submit_times_max],
-                  item[this.fieldIndices.total_syth_score_avg],
-                  item[this.fieldIndices.all_memory_avg],
-                  item[this.fieldIndices.all_timeconsume_avg],
-                  item[this.fieldIndices.state_ae_percentage],
-                  item[this.fieldIndices.state_e_percentage],
-                  item[this.fieldIndices.state_pc_percentage],
-                  item[this.fieldIndices.state_ac_percentage]
-                ],
-                itemStyle: {
-                  color: this.labelColors[labelIndexMap[item[this.fieldIndices.cluster_label]]]
-                }
-              };
-            }),
-            symbolSize: val => {
-              // 根据total_score的值来调整点的大小
-              // return (val[4] / (maxScore)) * 10; // Scale symbol size based on score
-              return ((val[4] - 30) / (maxScore - 30)) * 8 + 5
-            },
-            itemStyle: {
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.8)'
-            },
-            emphasis: {
-              itemStyle: {
-                color: '#fff'
-              }
-            }
-          }
-        ]
-      });
+    toCurrency(num) {
+      return d3.format("$,.2f")(num);
     }
   }
 };
 </script>
 
 <style scoped>
-#scater{
-  width: 100%;
-  height: 100%;
+svg {
+  font-family: sans-serif;
 }
 </style>

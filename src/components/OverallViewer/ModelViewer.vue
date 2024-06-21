@@ -441,10 +441,10 @@ export default {
 
       loadModelPromise().then(() => {
         // 模型加载完成后执行axios.get请求
-        this.$axios.get('http://10.12.44.205:8000/getStudent4Class', {
-          params: {
-            className: this.classId,
-          }
+        this.$axios.get(`http://10.12.44.190:8000/getStudentByClass/?className=${this.classId}`, {
+          // params: {
+          //   className: this.classId,
+          // }
         })
           .then(response => {
             console.error('success sending data:', JSON.parse(response.data));
@@ -774,7 +774,7 @@ export default {
     },
     handleStudentAppear(data) {
       if (this.mappedStudents.length === 0) {
-        console.log(1111111111111111111111111)
+        // console.log(1111111111111111111111111)
         // 随机放置学生
         let studentNumbers = [];
         for (let i = 0; i <= 99; i++) {
