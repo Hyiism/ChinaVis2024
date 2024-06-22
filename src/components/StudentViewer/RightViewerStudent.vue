@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="chat-container">
     <img class="avatar" :src="avatar" alt="Avatar" />
     <div class="chat-box" ref="chatBox" v-html="renderedText"></div>
@@ -117,4 +117,4 @@ export default {
   margin-top: 0.01em; /* 根据需要调整上边距 */
   margin-bottom: 0.01em; /* 根据需要调整下边距 */
 }
-</style>
+</style> -->
