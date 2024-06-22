@@ -9,6 +9,7 @@ import * as echarts from 'echarts';
 import { min } from 'moment';
 import EventBus from '@/eventBus'; // 导入事件总线
 
+
 export default {
   name: 'BottomViewer',
   // props: {
@@ -208,6 +209,11 @@ export default {
 
     // 添加覆盖层方法，bug是切换视图后此html只有刷新才会消失
     addOverlayLabels(schema) {
+
+      // 清除已有的覆盖层
+      const existingLabels = document.querySelectorAll('.overlay-label');
+      existingLabels.forEach(label => label.remove());
+      
       const chartDom = document.getElementById('bottom-main');
       const chartRect = chartDom.getBoundingClientRect();
       schema.forEach((item, index) => {

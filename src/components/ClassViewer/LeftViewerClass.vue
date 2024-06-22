@@ -33,8 +33,8 @@
     </div>
   </div>
 </template>
-
 <script>
+import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
@@ -53,13 +53,16 @@ export default {
   mounted() {
     this.fetchStudentScores();
   },
+  computed: {
+    ...mapGetters(['classId'])
+  },
   methods: {
     mockRequset() {
       this.totalItems = this.resData.length; 
       this.updateTableData();
     },
     fetchStudentScores() {
-      this.$axios.get('http://10.12.44.190:8000/table/Class2')
+      this.$axios.get(`http://10.12.44.190:8000/table/?class_id=${this.classId}`)
         .then(response => {
           this.resData = JSON.parse(response.data).data;
           this.mockRequset();

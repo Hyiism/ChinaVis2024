@@ -59,7 +59,7 @@ export default {
       this.updateTableData();
     },
     fetchStudentScores() {
-      this.$axios.get('http://10.12.44.190:8000/table/all')
+      this.$axios.get('http://10.12.44.190:8000/table/?class_id=all')
         .then(response => {
           this.resData = JSON.parse(response.data).data;
           this.mockRequset();

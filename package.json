@@ -19,10 +19,12 @@
     "axios": "^1.7.2",
     "core-js": "^3.8.3",
     "d3": "^7.9.0",
+    "d3v5": "npm:d3@^5.16.0",
     "echarts": "^5.5.0",
     "echarts-gl": "^2.0.9",
     "echarts-stat": "^1.2.0",
     "element-ui": "^2.15.14",
+    "idb": "^8.0.0",
     "install": "^0.13.0",
     "jquery": "^1.9.1",
     "markdown-it": "^14.1.0",
@@ -33,7 +35,8 @@
     "three": "^0.164.1",
     "vue": "^2.6.14",
     "vue-activity-calendar": "^1.2.2",
-    "vue-quick-menu": "^1.0.7"
+    "vue-quick-menu": "^1.0.7",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

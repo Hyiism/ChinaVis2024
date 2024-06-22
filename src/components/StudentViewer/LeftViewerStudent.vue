@@ -41,6 +41,7 @@
 <script>
 import EventBus from '@/eventBus'; // 导入事件总线
 import * as d3 from 'd3';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'CheckChart',
@@ -79,25 +80,33 @@ export default {
         "22:00":0.21,
         "23:00":0.11,
         "24:00":0.09,
-      }
-        
-      
+      },
       // monthBar: ["Aug", "Sep", "Oct", "Nov", "Des", "Jau"],
       // weekBar: ["Mon", "周二", "周三", "周四", "周五", "周六", "周日"],
+      dateSelected: {
+        student_id: '0088dc183f73c83f763e',
+        year: 2023,
+        month: 12,
+        date: 6
+      },
     };
   },
-
+  computed: {
+    ...mapGetters(['studentId'])
+  },
   created() {
     this.fetchStudentScores();
+    this.fetchRingData();
+    this.fetchRadarData();
   },
   mounted() {
-    this.renderRingChart(); // 绘制环形图
-    this.renderRadarChart(); // 绘制雷达图
+    // this.renderRingChart(); // 绘制环形图
+    // this.renderRadarChart(); // 绘制雷达图
   },
 
   methods: {
     fetchStudentScores() {
-      this.$axios.get('http://10.12.44.190:8000/get_check_data/?student_id=r28s9kyo7knrvytyvmt8')
+      this.$axios.get(`http://10.12.44.190:8000/get_check_data/?student_id=${this.studentId}`)
         .then(response => {
           this.infos = JSON.parse(response.data).infos;
           console.log("this.infos");
@@ -108,15 +117,52 @@ export default {
           console.error("There was an error!", error);
         });
     },
+    fetchRingData() {
+      
+      this.$axios.get(`http://10.12.44.190:8000/get_checkring_data/?student_id=0088dc183f73c83f763e&year=${this.dateSelected.year}&month=${this.dateSelected.month}&date=${this.dateSelected.date}`)
+        .then(response => {
+          this.piedata = JSON.parse(response.data).piedata;
+          console.log("this.piedata", this.piedata);
+          // 请求到piedata数据后绘图
+          this.renderRingChart();
+        })
+        .catch(error => {
+          console.error("There was an error!", error);
+        });
+    },
+
+    fetchRadarData() {
+      this.$axios.get(`http://10.12.44.190:8000/get_checkradar_data/?student_id=0088dc183f73c83f763e&year=${this.dateSelected.year}&month=${this.dateSelected.month}&date=${this.dateSelected.date}`)
+        .then(response => {
+          this.timedata = JSON.parse(response.data).radardata;
+          console.log("this.radardata");
+          console.log(this.timedata);
+          this.renderRadarChart();
+          // this.initializeMonthBar();
+        })
+        .catch(error => {
+          console.error("There was an error!", error);
+        });
+    },
 
 
     handleClick(item) {
-      console.log(item.year + "1" + item.month + "1" + item.date);
-      点击传数据到modelview执行操作
-      EventBus.$emit('checkSelected', {student_id:'r28s9kyo7knrvytyvmt8', 'year':item.year, 'month':item.month, 'date':item.date}); // 触发事件，传递 student_id
+      // console.log(item.year + "1" + item.month + "1" + item.date);
+      // 点击传数据到modelview执行操作 暂时没有做 后面再看做不做
+      EventBus.$emit('checkSelected', {student_id:'0088dc183f73c83f763e', 'year':item.year, 'month':item.month, 'date':item.date}); // 触发事件，传递 student_id
+      // 点击后给当前学生id和日期赋新值，然后下面两个图重新请求数据
+      this.dateSelected = {student_id:'0088dc183f73c83f763e', 'year':item.year, 'month':item.month, 'date':item.date};
+      // 选择日期后重新请求数据
+      this.fetchRingData();
+      this.fetchRadarData();
     },
+
     renderRingChart() {
       const ringChartElement = document.getElementById('ring-chart');
+
+      // 绘制前清除现有的SVG元素
+      d3.select(ringChartElement).selectAll('*').remove();
+
       const width = ringChartElement.offsetWidth;
       const height = ringChartElement.offsetHeight;
       const radius = Math.min(width, height) / 2;
@@ -170,6 +216,10 @@ export default {
     },
     renderRadarChart() {
       const radarChartElement = document.getElementById('radar-chart');
+
+      // 绘制前清除现有的SVG元素
+      d3.select(radarChartElement).selectAll('*').remove();
+
       const width = radarChartElement.offsetWidth;
       const height = radarChartElement.offsetHeight;
       const data = Object.entries(this.timedata).map(([hour, value]) => ({ hour, value }));
@@ -338,9 +388,9 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ccc; /* 添加边框 */
-  border-radius: 10px; /* 添加圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  border-bottom: 2px solid hsl(0, 3%, 93%); /* 添加边框 */
+  /* border-radius: 10px; */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
   /* border: #D0D7DE solid 1px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px; */
@@ -362,23 +412,28 @@ export default {
 
 #ring-chart {
   position: absolute;
-  bottom: 0;
+  /* bottom: 0; */
   left: 0;
   width: 50%;
   height: 40%;
-  border: 1px solid #ccc; /* 添加边框 */
-  border-radius: 10px; /* 添加圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  /* 添加边框 */
+  border-right: 2px solid hsl(0, 3%, 93%);
+  /* 添加圆角 */
+  /* border-radius: 10px;  */
+  /* 添加阴影 */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
 }
 #radar-chart {
   position: absolute;
-  bottom: 0;
+  /* bottom: 0; */
   right: 0;
   width: 50%;
   height: 40%;
-  border: 1px solid #ccc; /* 添加边框 */
+  /* 添加边框 */
+  /* border: 1px solid #ccc;  */
   border-radius: 10px; /* 添加圆角 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  /* 添加阴影 */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  */
 }
 
 .grid-container {

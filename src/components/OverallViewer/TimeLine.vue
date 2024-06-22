@@ -76,7 +76,9 @@ export default {
     methods: {
         drawChart() {
             const margin = { top: 0, right: 0, bottom: 0, left: 0 };
-            const chartContainerWidth = this.$refs.chartContainer.clientWidth;
+            // const chartContainerWidth = this.$refs.chartContainer.clientWidth;
+            const chartContainerWidth = 1268;
+            console.log('chartContainerWidth', chartContainerWidth)
             const width = chartContainerWidth;
             const height = 65;
             const svg = d3.select(this.$refs.chartContainer)
@@ -187,12 +189,12 @@ export default {
         },
         sendDataToBackend(startTime, endTime, className) {
             // 使用axios发送数据到后端
-            this.$axios.get('http://10.12.44.205:8000/getStudent', {
-                params: {
-                    startTime: startTime, // 使用toISOString()将日期转换为ISO格式
-                    endTime: endTime,
-                    className: className
-                }
+            this.$axios.get(`http://10.12.44.190:8000/getStudentByTime/?startTime=${startTime}&endTime=${endTime}&className=${className}`, {
+                // params: {
+                //     startTime: startTime, // 使用toISOString()将日期转换为ISO格式
+                //     endTime: endTime,
+                //     className: className
+                // }
             })
                 .then(response => {
                     PubSub.publish('studentAppear', JSON.parse(response.data));

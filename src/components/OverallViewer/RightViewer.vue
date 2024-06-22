@@ -1,218 +1,257 @@
 <template>
-  <div ref="scatterplot"></div>
+  <div ref="chart">
+    <div class="dropdown-wrapper">
+      <a-dropdown class="dropdown">
+        <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+          Select Territory Group <a-icon type="down" />
+        </a>
+        <a-menu slot="overlay" @click="handleMenuClick">
+          <a-menu-item key="Group1">Group 1</a-menu-item>
+          <a-menu-item key="Group2">Group 2</a-menu-item>
+        </a-menu>
+      </a-dropdown>
+    </div>
+  </div>
 </template>
 
 <script>
 import * as d3 from "d3";
 
 export default {
-  name: "ScatterplotMatrix",
+  name: "BubblePieChart",
   data() {
     return {
-      data: [
-        // 有待了解各个属性作用，以及怎么实现元素间联系的目标
+      chartData: [
         {
-          // cluster_label_tsne使用颜色区分属性
-          cluster_label_tsne: 0,
-          // 下面四个数值属性作为特征
-          time_difference_mean: 3,
-          time_split_2_percentage: 18.7,
-          submit_times_avg: 181,
-          total_score: 3750
+          "class": "Class1",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
         },
         {
-          cluster_label_tsne: 1,
-          time_difference_mean: 35,
-          time_split_2_percentage: 17.4,
-          submit_times_avg: 186,
-          total_score: 3800
+          "class": "Class2",
+          "values": [834239.75, 528526.45, 790321.8, 702123.55, 743201.45],
+          "total": 3598413
         },
-        // 可以添加更多的数据对象
+        {
+          "class": "Class3",
+          "values": [706713.65, 680840.1, 852513.1, 784705.65, 758358.55],
+          "total": 3783131.05
+        },
+        {
+          "class": "Class4",
+          "values": [794760.85, 810682.75, 1115504.4, 864321.8, 1046147.4],
+          "total": 4631417.2
+        },
+        {
+          "class": "Class5",
+          "values": [662596.75, 681682.75, 857757.85, 717995.5, 806509.45],
+          "total": 3726542.3
+        },
+        {
+          "class": "Class6",
+          "values": [743987.1, 719003.35, 983205.7, 929722.4, 1062684.3],
+          "total": 4438602.85
+        },
+        {
+          "class": "Class7",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class8",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class9",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class10",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class11",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class12",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class13",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class14",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        },
+        {
+          "class": "Class15",
+          "values": [638204.73, 773652.1, 901256.45, 563472.8, 677852.5],
+          "total": 3554438.58
+        }
       ],
-      data: this.generateData(100)
+      territoryGroups: {
+        Group1: ["Far West", "Great Lakes", "Mideast", "Plains", "Southwest"],
+        Group2: ["Northeast", "Southeast", "Central", "Mountain", "Pacific"]
+      },
+      selectedTerritoryGroup: "Group1",
+      classes: [
+        "Class1", "Class2", "Class3", "Class4", "Class5", "Class6",
+        "Class7", "Class8", "Class9", "Class10", "Class11", "Class12",
+        "Class13", "Class14", "Class15"
+      ],
+      width: 700,
+      height: 650,
+      margin: { left: 40, bottom: 50, top: 60, right: 20 },
+      color: d3.scaleOrdinal(d3.schemeTableau10).domain([
+        "Class1", "Class2", "Class3", "Class4", "Class5", "Class6",
+        "Class7", "Class8", "Class9", "Class10", "Class11", "Class12",
+        "Class13", "Class14", "Class15"
+      ]),
+      legend: null,
+      slice: null,
+      pct: null
     };
   },
   mounted() {
-    this.fetchStudentScores();
-    // this.createScatterplotMatrix();
+    this.drawChart();
   },
   methods: {
-    // // 生成随机数据
-    // generateData(num) {
-    //   const data = [];
-    //   for (let i = 0; i < num; i++) {
-    //     data.push({
-    //       cluster_label_tsne: Math.floor(Math.random() * 4),
-    //       time_difference_mean: Math.random() * 50,
-    //       time_split_0_percentage: Math.random() * 20,
-    //       submit_times_avg: Math.random() * 200 + 100,
-    //       total_score: Math.random() * 4000 + 1000
-    //     });
-    //   }
-    //   return data;
-    // },
-    // 向后端请求top15的详细成绩数据
-    fetchStudentScores() {
-      this.$axios
-        .get('http://10.12.44.190:8000/scatterMatrix/?class_id=all') // 替换为实际的API端点
-        .then((response) => {
-          this.data = JSON.parse(response.data);
-          // 确保在DOM元素完全加载并设置尺寸后再初始化图表
-          this.createScatterplotMatrix();
-        })
-        .catch((error) => {
-          console.error('There was an error!', error);
-        });
-    },    
-    createScatterplotMatrix() {
-      const data = this.data;
-
-      const width = 928;
-      const height = width;
-      const padding = 28;
-      // const columns = Object.keys(data[0]).filter(key => typeof data[0][key] === "number");
-      const columns = ['time_difference_mean', 'time_split_2_percentage', 'submit_times_avg', 'total_score'];
-      const size = (width - (columns.length + 1) * padding) / columns.length + padding;
-
-      const x = columns.map(c => d3.scaleLinear()
-        .domain(d3.extent(data, d => d[c]))
-        .rangeRound([padding / 2, size - padding / 2]));
-
-      const y = x.map(x => x.copy().range([size - padding / 2, padding / 2]));
-
-      // 设置颜色 按照rank_label属性分类
-      const color = d3.scaleOrdinal()
-        .domain(data.map(d => d.cluster_label_tsne))
-        .range(d3.schemeCategory10);
-
-      const axisx = d3.axisBottom()
-        .ticks(6)
-        .tickSize(size * columns.length);
-      const xAxis = g => g.selectAll("g").data(x).join("g")
-        .attr("transform", (d, i) => `translate(${i * size},0)`)
-        .each(function (d) { return d3.select(this).call(axisx.scale(d)); })
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
-
-      const axisy = d3.axisLeft()
-        .ticks(6)
-        .tickSize(-size * columns.length);
-      const yAxis = g => g.selectAll("g").data(y).join("g")
-        .attr("transform", (d, i) => `translate(0,${i * size})`)
-        .each(function (d) { return d3.select(this).call(axisy.scale(d)); })
-        .call(g => g.select(".domain").remove())
-        .call(g => g.selectAll(".tick line").attr("stroke", "#ddd"));
-
-      const svg = d3.select(this.$refs.scatterplot).append("svg")
+    handleMenuClick({ key }) {
+      this.selectedTerritoryGroup = key;
+      this.updateChart();
+    },
+    drawChart() {
+      const { chartData, territoryGroups, selectedTerritoryGroup, classes, width, height, margin, color } = this;
+      const territories = territoryGroups[selectedTerritoryGroup];
+      const svg = d3.select(this.$refs.chart)
+        .append("svg")
+        .attr("font-size", "10pt")
+        .attr("cursor", "default")
+        .attr("viewBox", [0, 0, width, height])
         .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [-padding, 0, width, height]);
+        .attr("height", height);
 
-      svg.append("style")
-        .text(`circle.hidden { fill: #000; fill-opacity: 1; r: 1px; }`);
+      const x = d3.scaleBand()
+        .domain(classes)
+        .range([margin.left, width - margin.left - margin.right]);
 
-      svg.append("g")
-        .call(xAxis);
+      const hx = x.bandwidth() / 2;
 
-      svg.append("g")
-        .call(yAxis);
+      const y = d3.scaleLinear()
+        .domain(d3.extent(chartData.map(d => d.total)))
+        .range([height - margin.top - margin.bottom, margin.top]);
 
-      const cell = svg.append("g")
-        .selectAll("g")
-        .data(d3.cross(d3.range(columns.length), d3.range(columns.length)))
+      const r = d3.scaleLinear()
+        .domain(d3.extent(chartData.map(d => d.total)))
+        .range([hx / 2, hx]);
+
+      const toCurrency = num => d3.format("$,.2f")(num);
+
+      const drawGuidelines = (g, data, line) => {
+        g.selectAll("path")
+          .data(data)
+          .join("path")
+          .attr("stroke", "#ddd")
+          .attr("stroke-dasharray", "5,5")
+          .attr("d", line);
+      };
+
+      svg.append("g").call(g => drawGuidelines(g, classes,
+        d => d3.line()([[x(d) + hx, margin.top], [x(d) + hx, height - margin.bottom]])
+      ));
+
+      svg.append("g").call(g => drawGuidelines(g, y.ticks().reverse().slice(1),
+        d => d3.line()([[margin.left, y(d)], [width - margin.left - margin.right, y(d)]])
+      ));
+
+      const g = svg.selectAll(".pie")
+        .data(chartData)
         .join("g")
-        .attr("transform", ([i, j]) => `translate(${i * size},${j * size})`);
+        .attr("class", "pie")
+        .attr("transform", d => `translate(${x(d.class) + hx},${y(d.total)})`)
+        .call(g => g.append("text")
+          .attr("dy", "1em")
+          .attr("text-anchor", "middle")
+          .attr("transform", d => `translate(0,${r(d.total)})`)
+          .text(d => toCurrency(d.total))
+        );
 
-      cell.append("rect")
-        .attr("fill", "none")
-        .attr("stroke", "#aaa")
-        .attr("x", padding / 2 + 0.5)
-        .attr("y", padding / 2 + 0.5)
-        .attr("width", size - padding)
-        .attr("height", size - padding);
+      const pg = g.selectAll("g")
+        .data(d => d3.pie()(d.values).map(p => ({ pie: p, total: d.total })))
+        .join("g")
+        .call(g => g.append("title")
+          .text((d, i) => `${territories[i]}\n${toCurrency(d.pie.value)} (${(d.pie.value / d.total * 100).toFixed(1)}%)`)
+        );
 
-      cell.each(function ([i, j]) {
-        d3.select(this).selectAll("circle")
-          .data(data.filter(d => !isNaN(d[columns[i]]) && !isNaN(d[columns[j]])))
-          .join("circle")
-          .attr("cx", d => x[i](d[columns[i]]))
-          .attr("cy", d => y[j](d[columns[j]]));
-      });
+      const pie = d => d3.arc()
+        .innerRadius(0)
+        .outerRadius(r(d.total))
+        .startAngle(d.pie.startAngle)
+        .endAngle(d.pie.endAngle);
 
-      const circle = cell.selectAll("circle")
-        .attr("r", 3.5)
-        .attr("fill-opacity", 0.7)
-        .attr("fill", d => color(d.cluster_label_tsne));
+      this.slice = pg.append("path")
+        .attr("d", d => pie(d)())
+        .attr("opacity", 0.8)
+        .attr("fill", (d, i) => color(territories[i]));
 
-      cell.call(this.brush, circle, svg, { padding, size, x, y, columns, data });
+      const legend = svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`);
 
-      svg.append("g")
-        .style("font", "bold 10px sans-serif")
-        .style("pointer-events", "none")
-        .selectAll("text")
-        .data(columns)
-        .join("text")
-        .attr("transform", (d, i) => `translate(${i * size},${i * size})`)
-        .attr("x", padding)
-        .attr("y", padding)
-        .attr("dy", ".71em")
+      this.legend = legend.selectAll("g")
+        .data(territories)
+        .join("g")
+        .attr("transform", (d, i) => `translate(${x(classes[i]) + hx},0)`);
+
+      this.legend.append("rect")
+        .attr("width", hx)
+        .attr("height", 20)
+        .attr("fill", (d, i) => color(d));
+
+      this.legend.append("text")
+        .attr("dy", "1em")
+        .attr("dx", hx / 2)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#fff")
+        .text(d => d);
+    },
+    updateChart() {
+      const { territoryGroups, selectedTerritoryGroup, chartData, color } = this;
+      const territories = territoryGroups[selectedTerritoryGroup];
+
+      this.legend.data(territories)
+        .select("rect")
+        .attr("fill", (d, i) => color(d));
+
+      this.legend.data(territories)
+        .select("text")
         .text(d => d);
 
-      svg.property("value", []);
-      return Object.assign(svg.node(), { scales: { color } });
-    },
-    brush(cell, circle, svg, { padding, size, x, y, columns, data }) {
-      const brush = d3.brush()
-        .extent([[padding / 2, padding / 2], [size - padding / 2, size - padding / 2]])
-        .on("start", brushstarted)
-        .on("brush", brushed)
-        .on("end", brushended);
-
-      cell.call(brush);
-
-      let brushCell;
-
-      function brushstarted() {
-        if (brushCell !== this) {
-          d3.select(brushCell).call(brush.move, null);
-          brushCell = this;
-        }
-      }
-
-      function brushed({ selection }, [i, j]) {
-        let selected = [];
-        if (selection) {
-          const [[x0, y0], [x1, y1]] = selection;
-          circle.classed("hidden",
-            d => x0 > x[i](d[columns[i]])
-              || x1 < x[i](d[columns[i]])
-              || y0 > y[j](d[columns[j]])
-              || y1 < y[j](d[columns[j]]));
-          selected = data.filter(
-            d => x0 < x[i](d[columns[i]])
-              && x1 > x[i](d[columns[i]])
-              && y0 < y[j](d[columns[j]])
-              && y1 > y[j](d[columns[j]]));
-        }
-        svg.property("value", selected).dispatch("input");
-      }
-
-      function brushended({ selection }) {
-        if (selection) return;
-        svg.property("value", []).dispatch("input");
-        circle.classed("hidden", false);
-      }
+      this.slice.data(d => d3.pie()(d.values).map(p => ({ pie: p, total: d.total })))
+        .attr("fill", (d, i) => color(territories[i]));
     }
   }
 };
 </script>
 
 <style scoped>
-div {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.pie text {
+  font: 10px sans-serif;
+}
+.ant-dropdown-link {
+  cursor: pointer;
+  color: #1890ff;
+  user-select: none;
+}
+.dropdown-wrapper {
+  margin-bottom: 20px;
 }
 </style>

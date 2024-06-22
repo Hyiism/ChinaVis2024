@@ -60,7 +60,7 @@ export default {
   methods: {
     // 向后端请求top15的详细成绩数据
     fetchScaterData() {
-      this.$axios.get('http://10.12.44.190:8000/scaterVis/all') // 替换为实际的API端点
+      this.$axios.get('http://10.12.44.190:8000/scaterVis/?class_id=all') // 替换为实际的API端点
         .then(response => {
           this.data = JSON.parse(response.data).data;
           console.log("###scater start###")

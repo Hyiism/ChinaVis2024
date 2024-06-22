@@ -1,0 +1,97 @@
+<template>
+  <!-- 桑葚图 展示总体知识点和题目情况 -->
+  <div class="chart-container-right">
+    <div id="main-right"> </div>
+  </div>
+</template>
+
+<script>
+import * as echarts from 'echarts';
+
+export default {
+  name: 'EChartsComponent',
+  mounted() {
+    console.log("!!!!初始化桑吉图前")
+    this.initChart();
+
+    window.addEventListener('resize', this.resizeChart);
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.resizeChart);
+  },
+  methods: {
+
+
+    initChart() {
+
+      console.log("!!!!初始化桑吉图中")
+
+      var chartDom = document.getElementById('main-right');
+      var myChart = echarts.init(chartDom);
+
+      var option = {
+        backgroundColor: '#fff',
+        title: {
+          subtext: '题目信息',
+          left: 'center'
+        },
+        series: [
+          {
+            type: 'sankey',
+            left: 0,
+            top: 40.0,
+            right: 50.0,
+            bottom: 15.0,
+            data: [{name: "b3C9s", itemStyle: {color: "#7FD6FF", borderColor: "#7FD6FF"}}, {name: "g7R2j", itemStyle: {color: "#B4E07A", borderColor: "#B4E07A"}}, {name: "k4W1c", itemStyle: {color: "#FD7A7A", borderColor: "#FD7A7A"}}, {name: "m3D1v", itemStyle: {color: "#C4A6FD", borderColor: "#C4A6FD"}}, {name: "r8S3g", itemStyle: {color: "#FDD36C", borderColor: "#FDD36C"}}, {name: "s8Y2f", itemStyle: {color: "#96C7FD", borderColor: "#96C7FD"}}, {name: "t5V9e", itemStyle: {color: "#FDBE7A", borderColor: "#FDBE7A"}}, {name: "y9W5d", itemStyle: {color: "#B4FD7A", borderColor: "#B4FD7A"}}, {name: "b3C9s_j0v1yls8"}, {name: "b3C9s_l4z6od7y"}, {name: "g7R2j_e0v1yls8"}, {name: "g7R2j_j1g8gd3v"}, {name: "k4W1c_h5r6nux7"}, {name: "m3D1v_r1d7fr3l"}, {name: "m3D1v_t0v5ts9h"}, {name: "m3D1v_v3d9is1x"}, {name: "l0p5viby"}, {name: "n0m9rsw4"}, {name: "s8Y2f_v4x8by9j"}, {name: "t5V9e_e1k6cixp"}, {name: "y9W5d_c0w4mj5h"}, {name: "y9W5d_e2j7p95s"}, {name: "y9W5d_p8g6dgtv"}, {name: "borderColorFNg8X9v5zcbB1tQrxHR3"}, {name: "bumGRTJ0c8p4v5D6eHZa"}, {name: "hZ5wXofebmTlzKB1jNcP"}, {name: "5fgqjSBwTPG7KUV3it6O"}, {name: "oCjnFLbIs4Uxwek9rBpu"}, {name: "X3wF8QlTyi4mZkDp9Kae"}, {name: "xqlJkmRaP0otZcX4fK3W"}, {name: "YWXHr4G6Cl7bEm9iF2kQ"}, {name: "lU2wvHSZq7m43xiVroBc"}, {name: "4nHcauCQ0Y6Pm8DgKlLo"}, {name: "6RQj2gF3OeK5AmDvThUV"}, {name: "h7pXNg80nJbw1C4kAPRm"}, {name: "n2BTxIGw1Mc3Zo6RLdUe"}, {name: "NixCn84GdK2tySa5rB1V"}, {name: "pVKXjZn0BkSwYcsa7C31"}, {name: "QRm48lXxzdP7Tn1WgNOf"}, {name: "TmKaGvfNoXYq4FZ2JrBu"}, {name: "Jr4Wz5jLqmN01KUwHa7g"}, {name: "7NJzCXUPcvQF4Mkfh9Wr"}, {name: "ZTbD7mxr2OUp8Fz6iNjy"}, {name: "q7OpB2zCMmW9wS8uNt3H"}, {name: "VgKw8PjY1FR6cm2QI9XW"}, {name: "BW0ItEaymH3TkD6S15JF"}, {name: "fZrP3FJ4ebUogW9V7taS"}, {name: "rvB9mVE6Kbd8jAY4NwPx"}, {name: "x2Fy7rZ3SwYl9jMQkpOD"}, {name: "3MwAFlmNO8EKrpY5zjUd"}, {name: "3oPyUzDmQtcMfLpGZ0jW"}, {name: "s6VmP1G4UbEQWRYHK9Fd"}, {name: "tgOjrpZLw4RdVzQx85h6"}, {name: "x2L7AqbMuTjCwPFy6vNr"}, {name: "62XbhBvJ8NUSnApgDL94"}, {name: "Ej5mBw9rsOUKkFycGvz2"}, {name: "Mh4CZIsrEfxkP1wXtOYV"}, {name: "UXqN1F7G3Sbldz02vZne"}, {name: "EhVPdmlB31M8WKGqL0wc"}, {name: "Az73sM0rHfWVKuc4X2kL"}, {name: "Ou3f2Wt9BqExm5DpN7Zk"}],
+            links: [{ source: "FNg8X9v5zcbB1tQrxHR3", target: "b3C9s_j0v1yls8", value: 1 }, { source: "bumGRTJ0c8p4v5D6eHZa", target: "b3C9s_l4z6od7y", value: 1 }, { source: "hZ5wXofebmTlzKB1jNcP", target: "b3C9s_l4z6od7y", value: 1 }, { source: "5fgqjSBwTPG7KUV3it6O", target: "g7R2j_e0v1yls8", value: 1 }, { source: "oCjnFLbIs4Uxwek9rBpu", target: "g7R2j_e0v1yls8", value: 1 }, { source: "X3wF8QlTyi4mZkDp9Kae", target: "g7R2j_e0v1yls8", value: 1 }, { source: "xqlJkmRaP0otZcX4fK3W", target: "g7R2j_e0v1yls8", value: 1 }, { source: "YWXHr4G6Cl7bEm9iF2kQ", target: "g7R2j_j1g8gd3v", value: 1 }, { source: "lU2wvHSZq7m43xiVroBc", target: "k4W1c_h5r6nux7", value: 1 }, { source: "4nHcauCQ0Y6Pm8DgKlLo", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "6RQj2gF3OeK5AmDvThUV", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "h7pXNg80nJbw1C4kAPRm", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "n2BTxIGw1Mc3Zo6RLdUe", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "NixCn84GdK2tySa5rB1V", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "oCjnFLbIs4Uxwek9rBpu", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "pVKXjZn0BkSwYcsa7C31", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "QRm48lXxzdP7Tn1WgNOf", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "TmKaGvfNoXYq4FZ2JrBu", target: "m3D1v_r1d7fr3l", value: 1 }, { source: "Jr4Wz5jLqmN01KUwHa7g", target: "m3D1v_t0v5ts9h", value: 1 }, { source: "7NJzCXUPcvQF4Mkfh9Wr", target: "m3D1v_v3d9is1x", value: 1 }, { source: "ZTbD7mxr2OUp8Fz6iNjy", target: "m3D1v_v3d9is1x", value: 1 }, { source: "q7OpB2zCMmW9wS8uNt3H", target: "r8S3g_l0p5viby", value: 1 }, { source: "VgKw8PjY1FR6cm2QI9XW", target: "r8S3g_l0p5viby", value: 1 }, { source: "BW0ItEaymH3TkD6S15JF", target: "r8S3g_n0m9rsw4", value: 1 }, { source: "fZrP3FJ4ebUogW9V7taS", target: "r8S3g_n0m9rsw4", value: 1 }, { source: "q7OpB2zCMmW9wS8uNt3H", target: "r8S3g_n0m9rsw4", value: 1 }, { source: "rvB9mVE6Kbd8jAY4NwPx", target: "r8S3g_n0m9rsw4", value: 1 }, { source: "x2Fy7rZ3SwYl9jMQkpOD", target: "s8Y2f_v4x8by9j", value: 1 }, { source: "3MwAFlmNO8EKrpY5zjUd", target: "t5V9e_e1k6cixp", value: 1 }, { source: "3oPyUzDmQtcMfLpGZ0jW", target: "t5V9e_e1k6cixp", value: 1 }, { source: "s6VmP1G4UbEQWRYHK9Fd", target: "t5V9e_e1k6cixp", value: 1 }, { source: "tgOjrpZLw4RdVzQx85h6", target: "t5V9e_e1k6cixp", value: 1 }, { source: "x2L7AqbMuTjCwPFy6vNr", target: "t5V9e_e1k6cixp", value: 1 }, { source: "62XbhBvJ8NUSnApgDL94", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "Ej5mBw9rsOUKkFycGvz2", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "lU2wvHSZq7m43xiVroBc", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "Mh4CZIsrEfxkP1wXtOYV", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "pVKXjZn0BkSwYcsa7C31", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "QRm48lXxzdP7Tn1WgNOf", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "UXqN1F7G3Sbldz02vZne", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "x2Fy7rZ3SwYl9jMQkpOD", target: "y9W5d_c0w4mj5h", value: 1 }, { source: "EhVPdmlB31M8WKGqL0wc", target: "y9W5d_e2j7p95s", value: 1 }, { source: "Az73sM0rHfWVKuc4X2kL", target: "y9W5d_p8g6dgtv", value: 1 }, { source: "Ou3f2Wt9BqExm5DpN7Zk", target: "y9W5d_p8g6dgtv", value: 1 }, { source: "b3C9s_j0v1yls8", target: "b3C9s", value: 1 }, { source: "b3C9s_l4z6od7y", target: "b3C9s", value: 1 }, { source: "b3C9s_l4z6od7y", target: "b3C9s", value: 1 }, { source: "g7R2j_e0v1yls8", target: "g7R2j", value: 1 }, { source: "g7R2j_e0v1yls8", target: "g7R2j", value: 1 }, { source: "g7R2j_e0v1yls8", target: "g7R2j", value: 1 }, { source: "g7R2j_e0v1yls8", target: "g7R2j", value: 1 }, { source: "g7R2j_j1g8gd3v", target: "g7R2j", value: 1 }, { source: "k4W1c_h5r6nux7", target: "k4W1c", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_r1d7fr3l", target: "m3D1v", value: 1 }, { source: "m3D1v_t0v5ts9h", target: "m3D1v", value: 1 }, { source: "m3D1v_v3d9is1x", target: "m3D1v", value: 1 }, { source: "m3D1v_v3d9is1x", target: "m3D1v", value: 1 }, { source: "r8S3g_l0p5viby", target: "r8S3g", value: 1 }, { source: "r8S3g_l0p5viby", target: "r8S3g", value: 1 }, { source: "r8S3g_n0m9rsw4", target: "r8S3g", value: 1 }, { source: "r8S3g_n0m9rsw4", target: "r8S3g", value: 1 }, { source: "r8S3g_n0m9rsw4", target: "r8S3g", value: 1 }, { source: "r8S3g_n0m9rsw4", target: "r8S3g", value: 1 }, { source: "s8Y2f_v4x8by9j", target: "s8Y2f", value: 1 }, { source: "t5V9e_e1k6cixp", target: "t5V9e", value: 1 }, { source: "t5V9e_e1k6cixp", target: "t5V9e", value: 1 }, { source: "t5V9e_e1k6cixp", target: "t5V9e", value: 1 }, { source: "t5V9e_e1k6cixp", target: "t5V9e", value: 1 }, { source: "t5V9e_e1k6cixp", target: "t5V9e", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_c0w4mj5h", target: "y9W5d", value: 1 }, { source: "y9W5d_e2j7p95s", target: "y9W5d", value: 1 }, { source: "y9W5d_p8g6dgtv", target: "y9W5d", value: 1 }, { source: "y9W5d_p8g6dgtv", target: "y9W5d", value: 1 }],
+            lineStyle: {
+              color: 'target',
+              curveness: 0.5
+            },
+            itemStyle: {
+              color: '#1f77b4',
+              borderColor: '#1f77b4'
+            },
+            label: {
+              show: false
+              // color: 'rgba(0,0,0,0.7)',
+              // fontFamily: 'Arial',
+              // fontSize: 2
+            }
+
+          }
+        ],
+        tooltip: {
+          trigger: 'item'
+        }
+      };
+
+      option && myChart.setOption(option);
+      this.myChart = myChart;
+    },
+    
+    resizeChart() {
+      if (this.myChart) {
+        this.myChart.resize();
+      }
+    }
+  }
+};
+
+</script>
+
+<style scoped>
+.chart-container-right {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#main-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+</style>

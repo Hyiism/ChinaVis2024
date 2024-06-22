@@ -111,10 +111,4 @@ export default {
   /* white-space: pre-wrap;  */
   font-family: Arial, sans-serif;
 }
-
-/* 调整标题与正文之间的间距 */
-.chat-box h1, .chat-box h2, .chat-box h3, .chat-box h4, .chat-box h5, .chat-box h6 {
-  margin-top: 0.01em; /* 根据需要调整上边距 */
-  margin-bottom: 0.01em; /* 根据需要调整下边距 */
-}
 </style> -->

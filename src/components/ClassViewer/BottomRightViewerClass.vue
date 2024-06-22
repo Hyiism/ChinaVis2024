@@ -5,7 +5,7 @@
       <el-option v-for="item in allcolumns" :key="item.value" :label="item.label" :value="item.value">
       </el-option>
     </el-select>
-    <el-select v-model="selectedcolumns_detail" multiple placeholder="请选择x y轴" class="feat-select" v-if="state_detail" 
+    <el-select v-model="selectedcolumns_detail" multiple placeholder="请选择x y轴" class="feat-select" v-if="state_detail"
       @change="handleSelectChangeDetail">
       <el-option v-for="item in allcolumns" :key="item.value" :label="item.label" :value="item.value">
       </el-option>
@@ -19,7 +19,7 @@ import * as d3 from 'd3';
 import * as Plot from '@observablehq/plot';
 import { data } from 'jquery';
 import EventBus from '@/eventBus'; // 导入事件总线
-
+import { mapGetters } from 'vuex';
 export default {
   name: 'ClusterPlotChart',
   data() {
@@ -50,7 +50,10 @@ export default {
       selectedcolumns_detail: ["submit_times_avg", "time_split_2_percentage"]
     };
   },
+
   computed: {
+    ...mapGetters(['classId']),
+
     clusters() {
       return [...new Set(this.data.map(d => d.cluster_label_tsne))];
     },
@@ -115,11 +118,10 @@ export default {
   beforeDestroy() {
     EventBus.$off('clusterSelected');
   },
-
   methods: {
     fetchStudentScores() {
       this.$axios
-        .get(`http://10.12.44.190:8000/boxplot/?cluster_id=${this.clusterSelected}&class_id=Class1`) // Replace with actual API endpoint
+        .get(`http://10.12.44.190:8000/boxplot/?cluster_id=${this.clusterSelected}&class_id=${this.classId}`) // Replace with actual API endpoint
         .then((response) => {
           this.data = JSON.parse(response.data);
           // 如果是整体视图，就显示每个类别的数据，集中比较用户选的变量的统计情况
