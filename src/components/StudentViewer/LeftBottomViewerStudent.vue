@@ -135,18 +135,18 @@ export default{
         .attr("fill", "#bbbdbd");
 
       const stateColors = {
-        'ac': "#038863",
+        'ac': "#138863",
         'pc': "#f0d945",
         'e': "#f38833",
-        'ae': "#e82829"
+        'ae': "#e84839"
       };
 
       const methodColors = {
-        'Method_m8vwGkEZc3TSW2xqYUoR': "#6090b8",
-        'Method_BXr9AIsPQhwNvyGdZL57': "#d19ba9",
-        'Method_gj1NLb4Jn7URf9K2kQPd': "#9de1ac",
-        'Method_Cj9Ya2R7fZd6xs1q5mNQ': "#003c72",
-        'Method_5Q4KoXthUuYz3bvrTDFm': "#c055ac"
+        'Method_m8vwGkEZc3TSW2xqYUoR': "#E76254",
+        'Method_BXr9AIsPQhwNvyGdZL57': "#f7aa58",
+        'Method_gj1NLb4Jn7URf9K2kQPd': "#1e466e",
+        'Method_Cj9Ya2R7fZd6xs1q5mNQ': "#Aadce0",
+        'Method_5Q4KoXthUuYz3bvrTDFm': "#528fad"
       };
 
       const tooltip = d3.select(this.$refs.chartContainer)

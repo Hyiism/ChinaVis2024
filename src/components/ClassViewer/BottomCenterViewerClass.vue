@@ -73,6 +73,13 @@ export default {
       const data = this.data;
       const columns = this.selectedcolumns.concat('total_score');
 
+      const clusterColors = {
+        0: "#1e466e",
+        1: "#72bcd5",
+        2: "#Ffd06f",
+        3: "#E76254",
+      };
+
       const width = 470;
       const height = width;
       const padding = 28;
@@ -147,7 +154,7 @@ export default {
       const circle = cell.selectAll("circle")
         .attr("r", 3.5)
         .attr("fill-opacity", 0.7)
-        .attr("fill", d => color(d.cluster_label_tsne));
+        .attr("fill", d => clusterColors[d.cluster_label_tsne]);
 
       cell.call(this.brush, circle, svg, { padding, size, x, y, columns, data });
 

@@ -96,15 +96,15 @@ export default {
       //   .domain([50, 1]);
       // Compute color scale domain
       const valueExtent = d3.extent(this.heatmapData, d => d.value);
-      // const myColor = d3.scaleLinear()
-      //   .domain([valueExtent[0], valueExtent[1]])
-      //   .interpolate(d3.interpolateRgb)
-      //   .range(["#dfdadf", "#3e468e"]);
-      const myColor = d3.scaleSequential()
-        // .interpolator(d3.interpolateBlues) //颜色从浅蓝色到深蓝色
-        .interpolator(d3.interpolateRdBu)
+      const myColor = d3.scaleLinear()
+        .domain([valueExtent[0], valueExtent[1]])
+        .interpolate(d3.interpolateRgb)
+        .range(["#e0eaf3", "#306ab4"]);
+      // const myColor = d3.scaleSequential()
+      //   .interpolator(d3.interpolateBlues) //颜色从浅蓝色到深蓝色
+      //   // .interpolator(d3.interpolateRdBu)
 
-        .domain([valueExtent[1], valueExtent[0]]); //把颜色反一下，让较深的颜色来代表较大的数据
+      //   .domain([valueExtent[0], valueExtent[1]]); //把颜色反一下，让较深的颜色来代表较大的数据
 
       // Create a tooltip
       const tooltip = d3.select(this.$refs.chart)

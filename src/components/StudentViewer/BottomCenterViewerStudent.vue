@@ -122,7 +122,8 @@ export default{
         .append('rect')
         .attr('x', d => x(d[0]))
         .attr('width', x.bandwidth())
-        .attr('fill', d => d[0] === highlightedColumn ? 'orange' : 'steelblue')
+        // .attr('fill', d => d[0] === highlightedColumn ? 'orange' : 'steelblue')
+        .attr('fill', d => d[0] === highlightedColumn ? '#f7aa58' : '#528fad')
         .attr('y', height)               //添加直方图生长的动态效果
         .attr('height', 0)
         .attr('rx', 8)               // 设置圆角半径（可以根据需要调整）
