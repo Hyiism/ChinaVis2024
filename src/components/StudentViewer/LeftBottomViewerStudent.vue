@@ -9,7 +9,6 @@
 <script>
 import * as d3 from 'd3';
 import EventBus from '@/eventBus'; // 导入事件总线
-import EventBus from '@/eventBus'; // 导入事件总线
 
 export default{
   name:'CoordinateGraph',
@@ -18,9 +17,6 @@ export default{
       originalData: [],
       filtered: false,
       student_id: '0088dc183f73c83f763e',
-      // 用来更新请求！
-      title_id: 'Question_q7OpB2zCMmW9wS8uNt3H',
-      title: [],
       // 用来更新请求！
       title_id: 'Question_q7OpB2zCMmW9wS8uNt3H',
       // title:[
