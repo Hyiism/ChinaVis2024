@@ -1,5 +1,5 @@
 <template>
-  <div ref="sceneContainer" class="scene-container" @click="onClick">
+  <div ref="sceneContainer" class="scene-container" @click="onClick" @wheel="onMouseWheel">
     <div class="view-controls">
       <!-- <button @click="setTopView">俯视图</button>
       <button @click="setSideView">侧视图</button> -->
@@ -34,7 +34,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
-// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from '@tweenjs/tween.js';
 import PubSub from 'pubsub-js';
 import moment from 'moment';
@@ -98,6 +98,518 @@ export default {
       'Rectangle014': 'Class14',
       'Rectangle015': 'Class15',
     };
+    const targetCameraPosition = [
+      // 0-9
+      {
+        "x": 260.9451318010503,
+        "y": 121.01175547922786,
+        "z": 264.5779856424498
+      },
+      {
+        "x": 256.4460598448812,
+        "y": 112.47649131153608,
+        "z": 201.24921595617516
+      },
+      {
+        "x": 253.24984916171297,
+        "y": 115.33130385468333,
+        "z": 103.4213792856595
+      },
+      {
+        "x": 262.6042916397912,
+        "y": 115.33130385468343,
+        "z": 32.64788755665819
+      },
+      {
+        "x": 256.8089188369539,
+        "y": 115.3313038546834,
+        "z": -62.013572156377165
+      },
+      {
+        "x": 267.3592589608598,
+        "y": 117.27152236292184,
+        "z": -141.14634731640814
+      },
+      {
+        "x": 262.7376158609089,
+        "y": 117.27152236292184,
+        "z": -232.90845042666302
+      },
+      {
+        "x": 264.62503259881066,
+        "y": 117.27144298965285,
+        "z": -292.7377617354548
+      },
+      {
+        "x": 256.95053856957196,
+        "y": 117.27144298965287,
+        "z": -379.6126188666117
+      },
+      {
+        "x": 260.9226517313524,
+        "y": 117.27144298965287,
+        "z": -449.1206805005736
+      },
+      // 10-19
+      {
+        "x": 152.98611230951792,
+        "y": 118.90037354596092,
+        "z": 262.1855245780209
+      },
+      {
+        "x": 154.02540931548788,
+        "y": 118.90037354596092,
+        "z": 200.40102397278156
+      },
+      {
+        "x": 156.7386338221866,
+        "y": 118.90037354596092,
+        "z": 94.90402157009014
+      },
+      {
+        "x": 163.4844668753403,
+        "y": 123.47967173265597,
+        "z": 33.6269263864331
+      },
+      {
+        "x": 160.28630096161305,
+        "y": 123.47967173265599,
+        "z": -64.66739581278003
+      },
+      {
+        "x": 159.72733166663193,
+        "y": 130.65322527551234,
+        "z": -134.86999613637897
+      },
+      {
+        "x": 157.14464097499797,
+        "y": 130.65322527551234,
+        "z": -233.00940471501502
+      },
+      {
+        "x": 158.18272989565392,
+        "y": 130.65322527551234,
+        "z": -292.91684038728994
+      },
+      {
+        "x": 159.64892049591404,
+        "y": 130.65322527551206,
+        "z": -398.4906391487441
+      },
+      {
+        "x": 159.08819451329137,
+        "y": 130.65322527551206,
+        "z": -458.5304688656554
+      },
+      // 20-29
+      {
+        "x": 57.27983254750367,
+        "y": 115.89866956207285,
+        "z": 259.10003942948316
+      },
+      {
+        "x": 59.133682161220634,
+        "y": 115.89866956207285,
+        "z": 200.82476858987545
+      },
+      {
+        "x": 57.701326946518776,
+        "y": 115.89866956207285,
+        "z": 96.53327360959247
+      },
+      {
+        "x": 57.04998443610913,
+        "y": 115.89866956207285,
+        "z": 36.26840865281525
+      },
+      {
+        "x": 58.12285001518501,
+        "y": 115.89866956207285,
+        "z": -66.03346944120048
+      },
+      {
+        "x": 59.332202120203874,
+        "y": 115.89866956207285,
+        "z": -129.92722308243125
+      },
+      {
+        "x": 58.9037931748166,
+        "y": 115.89866956207285,
+        "z": -232.91079503541286
+      },
+      {
+        "x": 58.694508738210914,
+        "y": 115.89866956207287,
+        "z": -291.8032565775213
+      },
+      {
+        "x": 58.256969695194016,
+        "y": 115.89866956207285,
+        "z": -397.34733244047027
+      },
+      {
+        "x": 55.80028258138873,
+        "y": 115.89866956207285,
+        "z": -455.98200256879625
+      },
+      // 30-39
+      {
+        "x": -49.88330732925738,
+        "y": 110.97626450816873,
+        "z": 260.1900896223399
+      },
+      {
+        "x": -49.375862685577204,
+        "y": 110.97626450816873,
+        "z": 99.83183431072771
+      },
+      {
+        "x": -48.92910941283492,
+        "y": 110.97626450816873,
+        "z": 96.09646254052126
+      },
+      {
+        "x": -49.66563988389299,
+        "y": 110.97626450816873,
+        "z": 35.01957684221435
+      },
+      {
+        "x": -50.49513512045729,
+        "y": 110.97626450816873,
+        "z": -64.69469944555442
+      },
+      {
+        "x": -49.988878345267494,
+        "y": 110.97626450816873,
+        "z": -125.34576435458206
+      },
+      {
+        "x": -49.547821094837616,
+        "y": 110.97626450816873,
+        "z": -227.95754030872627
+      },
+      {
+        "x": -47.77803570570586,
+        "y": 110.97626450816873,
+        "z": -290.6752564417088
+      },
+      {
+        "x": -50.653376881629754,
+        "y": 110.97626450816873,
+        "z": -394.14559621534545
+      },
+      {
+        "x": -49.74898828091739,
+        "y": 110.97626450816873,
+        "z": -452.7161526351621
+      },
+      // 40-49
+      {
+        "x": -149.31189273631213,
+        "y": 110.97602833463263,
+        "z": 262.81487265574646
+      },
+      {
+        "x": -149.51520603367408,
+        "y": 110.97602833463263,
+        "z": 198.8331222912944
+      },
+      {
+        "x": -149.8874345023413,
+        "y": 110.97602833463263,
+        "z": 98.70675837238971
+      },
+      {
+        "x": -149.6552737899442,
+        "y": 110.97602833463263,
+        "z": 35.96447972834005
+      },
+      {
+        "x": -149.19668259541254,
+        "y": 110.97602833463263,
+        "z": -64.1753535424383
+      },
+      {
+        "x": -149.41350183917228,
+        "y": 110.97602833463263,
+        "z": -128.98783422088735
+      },
+      {
+        "x": -149.4173450220934,
+        "y": 110.97602833463263,
+        "z": -232.02854995440794
+      },
+      {
+        "x": -149.4173450220934,
+        "y": 110.97602833463263,
+        "z": -232.02854995440794
+      },
+      {
+        "x": -150.41501738973557,
+        "y": 110.97602833463263,
+        "z": -396.5452635402859
+      },
+      {
+        "x": -153.96756084843798,
+        "y": 110.97602833463263,
+        "z": -456.8136039559413
+      },
+      // 50-59
+      {
+        "x": -254.75101066309526,
+        "y": 110.73892057060502,
+        "z": 255.1000557997839
+      },
+      {
+        "x": -253.21716536850045,
+        "y": 110.73892057060502,
+        "z": 198.99282689743956
+      },
+      {
+        "x": -254.14794738718183,
+        "y": 110.73892057060502,
+        "z": 90.46149848221205
+      },
+      {
+        "x": -254.57170515155065,
+        "y": 110.73892057060502,
+        "z": 25.80990441728295
+      },
+      {
+        "x": -253.67099891859584,
+        "y": 110.73892057060502,
+        "z": -71.10439363169087
+      },
+      {
+        "x": -254.28403775292634,
+        "y": 110.73892057060502,
+        "z": -131.14691217333052
+      },
+      {
+        "x": -253.93077394686054,
+        "y": 110.73892057060502,
+        "z": -233.46989034701426
+      },
+      {
+        "x": -253.99631769541486,
+        "y": 110.73892057060502,
+        "z": -288.1038674935746
+      },
+      {
+        "x": -254.12730757355814,
+        "y": 110.73892057060502,
+        "z": -397.37191170684287
+      },
+      {
+        "x": -254.12978267843266,
+        "y": 110.73892057060502,
+        "z": -453.54220925286654
+      },
+      // 60-69
+      {
+        "x": -355.3483725861065,
+        "y": 114.73892057060502,
+        "z": 250.20099705797873
+      },
+      {
+        "x": -354.67729045676776,
+        "y": 114.73892057060502,
+        "z": 196.36671443299178
+      },
+      {
+        "x": -354.26095800703115,
+        "y": 114.73892057060502,
+        "z": 92.50741585984065
+      },
+      {
+        "x": -354.87401932140153,
+        "y": 114.73892057060502,
+        "z": 32.46487291345545
+      },
+      {
+        "x": -355.2572837742689,
+        "y": 114.73892057060502,
+        "z": -70.6578897019549
+      },
+      {
+        "x": -356.6068733475639,
+        "y": 114.73892057060502,
+        "z": -131.50021709006398
+      },
+      {
+        "x": -354.8434264293903,
+        "y": 114.73892057060502,
+        "z": -230.68748582114097
+      },
+      {
+        "x": -356.2560846463705,
+        "y": 114.73892057060502,
+        "z": -289.9934928097854
+      },
+      {
+        "x": -355.10312631872887,
+        "y": 114.73892057060502,
+        "z": -393.05309686136525
+      },
+      {
+        "x": -354.7902582052078,
+        "y": 114.73892057060502,
+        "z": -456.90499640472353
+      },
+      // 70-79
+      {
+        "x": -454.240495945044,
+        "y": 114.73892057060502,
+        "z": 259.99148745761374
+      },
+      {
+        "x": -454.72732235309275,
+        "y": 114.73892057060502,
+        "z": 196.87621379215182
+      },
+      {
+        "x": -455.29979273699985,
+        "y": 114.73892057060502,
+        "z": 98.36241237514139
+      },
+      {
+        "x": -454.31341234933745,
+        "y": 114.73892057060502,
+        "z": 36.84647894334296
+      },
+      {
+        "x": -456.35923210799103,
+        "y": 114.73892057060502,
+        "z": -63.26662159666148
+      },
+      {
+        "x": -455.92022670710537,
+        "y": 114.73892057060502,
+        "z": -130.19116193894865
+      },
+      {
+        "x": -454.156779788936,
+        "y": 114.73892057060502,
+        "z": -229.3784306700203
+      },
+      {
+        "x": -454.5805150732666,
+        "y": 114.73892057060502,
+        "z": -294.0300003302074
+      },
+      {
+        "x": -455.76347404771,
+        "y": 114.73892057060502,
+        "z": -396.41613706772114
+      },
+      {
+        "x": -455.63971424626754,
+        "y": 114.73892057060502,
+        "z": -455.6591653328335
+      },
+      // 80-89
+      {
+        "x": -556.2479581424446,
+        "y": 94.73892057060502,
+        "z": 251.95641740918018
+      },
+      {
+        "x": -557.0502253878516,
+        "y": 114.73892057060502,
+        "z": 196.52283566119286
+      },
+      {
+        "x": -557.244283909681,
+        "y": 114.73892057060502,
+        "z": 88.79111184738747
+      },
+      {
+        "x": -557.7311103177248,
+        "y": 114.73892057060502,
+        "z": 25.675838181924405
+      },
+      {
+        "x": -557.3777938527768,
+        "y": 114.73892057060502,
+        "z": -76.64727872138826
+      },
+      {
+        "x": -556.0331544892266,
+        "y": 114.73892057060502,
+        "z": -128.14554642533562
+      },
+      {
+        "x": -557.0270051515832,
+        "y": 114.73892057060502,
+        "z": -235.14055444109363
+      },
+      {
+        "x": -555.4299935943496,
+        "y": 114.73892057060502,
+        "z": -292.78419366305764
+      },
+      {
+        "x": -555.876424309855,
+        "y": 114.73892057060502,
+        "z": -394.3705459588475
+      },
+      {
+        "x": -556.3632507178978,
+        "y": 114.73892057060502,
+        "z": -457.48581962430853
+      },
+      // 90-99
+      {
+        "x": -656.0026494286934,
+        "y": 114.73892057060502,
+        "z": 264.01967424591106
+      },
+      {
+        "x": -657.710453017805,
+        "y": 114.73892057060502,
+        "z": 193.15972993943774
+      },
+      {
+        "x": -657.4833264991024,
+        "y": 114.73892057060502,
+        "z": 93.90939256468357
+      },
+      {
+        "x": -657.170480865614,
+        "y": 114.73892057060502,
+        "z": 30.057468616590654
+      },
+      {
+        "x": -652.5977226938215,
+        "y": 114.73892057060473,
+        "z": -71.62283842810973
+      },
+      {
+        "x": -653.3070813669209,
+        "y": 114.73892057060473,
+        "z": -132.35947175768354
+      },
+      {
+        "x": -652.6274677550392,
+        "y": 114.73892057060473,
+        "z": -230.8124860448296
+      },
+      {
+        "x": -651.9494279378076,
+        "y": 114.73892057060473,
+        "z": -297.7350767635012
+      },
+      {
+        "x": -651.9448507106241,
+        "y": 114.73892057060473,
+        "z": -392.3264847743686
+      },
+      {
+        "x": -652.8413391579687,
+        "y": 114.73892057060473,
+        "z": -460.7487715255779
+      }
+    ];
     return {
       // 状态码
       stateCode: this.getSavedState(),
@@ -120,6 +632,7 @@ export default {
       raycaster: new THREE.Raycaster(),
       mouse: new THREE.Vector2(),
       studentsPositions,
+      targetCameraPosition,
       rectangleToClassMap,
       allStudent: [],
       appearStudent: [],
@@ -128,7 +641,10 @@ export default {
       classId: null,
       db: null,
       modelLoaded: false,
-      isClass: false
+      isClass: false,
+      flashing: false,
+      flashStartTime: null,
+      flashDuration: 1000, // 闪烁持续时间（毫秒）
     };
   },
   async mounted() {
@@ -232,25 +748,23 @@ export default {
       const aspect = this.$refs.sceneContainer.clientWidth / this.$refs.sceneContainer.clientHeight;
 
       // 初始化透视相机
-      this.camera = new THREE.PerspectiveCamera(80, aspect, 0.1, 3000);
-      // this.camera = new THREE.PerspectiveCamera(80, aspect, 10, 1000);
+      // this.camera = new THREE.PerspectiveCamera(80, aspect, 0.1, 3000);
+      this.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 3000);
 
       const axesHelper = new THREE.AxesHelper(20000);
       this.scene.add(axesHelper);
-
       // 创建渲染器
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(this.$refs.sceneContainer.clientWidth, this.$refs.sceneContainer.clientHeight);
       this.renderer.setClearColor(0xffffff);
       this.$refs.sceneContainer.appendChild(this.renderer.domElement);
-
       // 窗口调整大小处理
       // window.addEventListener('resize', this.onWindowResize);
 
       // 添加光源
       this.addLights();
 
-      // 添加轨道控制
+      // // 添加轨道控制
       // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
       // this.controls.enableDamping = true; // 启用阻尼效果
       // this.controls.dampingFactor = 0.25; // 阻尼系数
@@ -270,7 +784,6 @@ export default {
       } else {
         this.loadClassModel()
       }
-
       this.animate();
       this.initialView();
     },
@@ -362,89 +875,167 @@ export default {
     loadClassModel() {
       const loadModelPromise = () => {
         return new Promise((resolve, reject) => {
-          const loader = new GLTFLoader();
-          loader.load('/models/classroom.glb', (gltf) => {
-            this.classModel = gltf.scene;
-            this.classModel.scale.set(2, 2, 2);
-            // const currentPosition = this.camera.position.clone();
-            // const targetPosition = new THREE.Vector3(251.0974656502318, 153.83576291656343, 247.37127012156563);
+          const mtlLoader = new MTLLoader();
+          mtlLoader.load(
+            '/models/classroom.mtl', // 替换为你的MTL文件路径
+            (materials) => {
+              materials.preload();
+              // 使用OBJLoader加载OBJ文件
+              const objLoader = new OBJLoader();
+              objLoader.setMaterials(materials);
+              objLoader.load(
+                '/models/classroom.obj', // 替换为你的OBJ文件路径
+                (object) => {
+                  console.log("obj", object)
 
-            // new TWEEN.Tween(currentPosition)
-            //   .to(targetPosition, 1000)
-            //   .easing(TWEEN.Easing.Quadratic.Out)
-            //   .onUpdate(() => {
-            //     this.camera.position.copy(currentPosition);
-            //     this.camera.lookAt(0, 0, 0);
-            //   })
-            //   .start();
-            this.scene.add(this.classModel);
-            console.log("classModel", this.classModel)
-            // // Set initial opacity to 0
-            // this.classModel.traverse((child) => {
-            //   if (child.isMesh) {
-            //     child.material.transparent = true;
-            //     child.material.opacity = 0;
-            //   }
-            // });
+                  const ambientLight = new THREE.AmbientLight(0xffffff, 1);// 增加环境光强度，可以减少阴影
+                  this.scene.add(ambientLight);
 
-            // // Fade-in effect
-            // const fadeInDuration = 2000;
-            // new TWEEN.Tween({ opacity: 0 })
-            //   .to({ opacity: 1 }, fadeInDuration)
-            //   .easing(TWEEN.Easing.Linear.None)
-            //   .onUpdate((tween) => {
-            //     this.classModel.traverse((child) => {
-            //       if (child.isMesh) {
-            //         child.material.opacity = tween.opacity;
-            //       }
-            //     });
-            //   })
-            //   .start();
+                  const directionalLight = new THREE.DirectionalLight(0xffffff, 3);// 平行光，即太阳光，会生成阴影。
+                  directionalLight.position.set(5, 10, 7.5);
+                  this.scene.add(directionalLight);
 
-            // Camera position animation
-            const currentPosition = this.camera.position.clone();
-            const targetPosition = new THREE.Vector3(608.3748006602943, 246.87681215346672, 507.9700608328807);
+                  this.scene.add(object);
+                  this.classModel = object
+                  this.classModel.scale.set(2, 2, 2);
+                  this.classModel.name = 'class'
+                  this.currentModelType = 'class'; // 标记当前加载的文件类型
+                  this.modelLoaded = true;
+                  const currentPosition = this.camera.position.clone();
+                  const targetPosition = new THREE.Vector3(608.3748006602943, 246.87681215346672, 507.9700608328807);
 
-            new TWEEN.Tween(currentPosition)
-              .to(targetPosition, 1000)
-              .easing(TWEEN.Easing.Linear.None)
-              .onUpdate(() => {
-                this.camera.position.copy(currentPosition);
-                this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
-              })
-              .start();
+                  new TWEEN.Tween(currentPosition)
+                    .to(targetPosition, 1000)
+                    .easing(TWEEN.Easing.Linear.None)
+                    .onUpdate(() => {
+                      this.camera.position.copy(currentPosition);
+                      // this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
+                      this.camera.lookAt(0, 0, 0)
+                    })
+                    .start();
 
-            const objectsToRemove = [];
+                  const objectsToRemove = [];
 
-            for (let i = 0; i <= 99; i++) {
-              const studentName = "student" + i.toString().padStart(3, "0");
-              this.classModel.traverse((child) => {
-                if (child.isMesh && child.name.includes(studentName)) {
-                  objectsToRemove.push(child);
-                  this.allStudent.push(child);
+                  for (let i = 0; i <= 99; i++) {
+                    const studentName = "student" + i.toString().padStart(3, "0");
+                    this.classModel.traverse((child) => {
+                      if (child.isMesh && child.name.includes(studentName)) {
+                        objectsToRemove.push(child);
+                        this.allStudent.push(child);
+                      }
+                    });
+                  }
+                  console.log("初始化视图allStudent", this.allStudent);
+                  objectsToRemove.forEach((child) => {
+                    if (child.parent) {
+                      child.parent.remove(child);
+                    }
+                  });
+                  resolve();
+                },
+                (xhr) => {
+                  console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                },
+                (error) => {
+                  console.log('An error happened', error);
                 }
-              });
+              );
+            },
+            (xhr) => {
+              console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            (error) => {
+              console.log('An error happened', error);
             }
-            console.log("初始化视图allStudent", this.allStudent);
-            objectsToRemove.forEach((child) => {
-              if (child.parent) {
-                child.parent.remove(child);
-              }
-            });
-            resolve(); // 模型加载完成后，resolve Promise
-          }, undefined, (error) => {
-            console.error('An error happened while loading the model', error);
-            reject(error); // 如果模型加载失败，reject Promise
-          });
+          );
+
+
+
+
+
+          //   const loader = new GLTFLoader();
+          //   loader.load('/models/classroom.glb', (gltf) => {
+          //     this.classModel = gltf.scene;
+          //     this.classModel.scale.set(2, 2, 2);
+          //     // const currentPosition = this.camera.position.clone();
+          //     // const targetPosition = new THREE.Vector3(251.0974656502318, 153.83576291656343, 247.37127012156563);
+
+          //     // new TWEEN.Tween(currentPosition)
+          //     //   .to(targetPosition, 1000)
+          //     //   .easing(TWEEN.Easing.Quadratic.Out)
+          //     //   .onUpdate(() => {
+          //     //     this.camera.position.copy(currentPosition);
+          //     //     this.camera.lookAt(0, 0, 0);
+          //     //   })
+          //     //   .start();
+          //     this.scene.add(this.classModel);
+          //     console.log("classModel", this.classModel)
+          //     // // Set initial opacity to 0
+          //     // this.classModel.traverse((child) => {
+          //     //   if (child.isMesh) {
+          //     //     child.material.transparent = true;
+          //     //     child.material.opacity = 0;
+          //     //   }
+          //     // });
+
+          //     // // Fade-in effect
+          //     // const fadeInDuration = 2000;
+          //     // new TWEEN.Tween({ opacity: 0 })
+          //     //   .to({ opacity: 1 }, fadeInDuration)
+          //     //   .easing(TWEEN.Easing.Linear.None)
+          //     //   .onUpdate((tween) => {
+          //     //     this.classModel.traverse((child) => {
+          //     //       if (child.isMesh) {
+          //     //         child.material.opacity = tween.opacity;
+          //     //       }
+          //     //     });
+          //     //   })
+          //     //   .start();
+
+          //     // Camera position animation
+          //     const currentPosition = this.camera.position.clone();
+          //     const targetPosition = new THREE.Vector3(608.3748006602943, 246.87681215346672, 507.9700608328807);
+
+          //     new TWEEN.Tween(currentPosition)
+          //       .to(targetPosition, 1000)
+          //       .easing(TWEEN.Easing.Linear.None)
+          //       .onUpdate(() => {
+          //         this.camera.position.copy(currentPosition);
+          //         this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
+          //       })
+          //       .start();
+
+          //     const objectsToRemove = [];
+
+          //     for (let i = 0; i <= 99; i++) {
+          //       const studentName = "student" + i.toString().padStart(3, "0");
+          //       this.classModel.traverse((child) => {
+          //         if (child.isMesh && child.name.includes(studentName)) {
+          //           objectsToRemove.push(child);
+          //           this.allStudent.push(child);
+          //         }
+          //       });
+          //     }
+          //     console.log("初始化视图allStudent", this.allStudent);
+          //     objectsToRemove.forEach((child) => {
+          //       if (child.parent) {
+          //         child.parent.remove(child);
+          //       }
+          //     });
+          //     resolve(); // 模型加载完成后，resolve Promise
+          //   }, undefined, (error) => {
+          //     console.error('An error happened while loading the model', error);
+          //     reject(error); // 如果模型加载失败，reject Promise
+          //   });
         });
       };
 
       loadModelPromise().then(() => {
         // 模型加载完成后执行axios.get请求
-        this.$axios.get('http://10.12.44.205:8000/getStudent4Class', {
-          params: {
-            className: this.classId,
-          }
+        this.$axios.get(`http://10.12.44.190:8000/getStudentByClass/?className=${this.classId}`, {
+          // params: {
+          //   className: this.classId,
+          // }
         })
           .then(response => {
             console.error('success sending data:', JSON.parse(response.data));
@@ -492,14 +1083,28 @@ export default {
       requestAnimationFrame(this.animate);
       TWEEN.update();
       // this.controls.update();
+
+      // 处理闪烁效果
+      if (this.flashing) {
+        const elapsed = Date.now() - this.flashStartTime;
+        if (elapsed > this.flashDuration) {
+          this.flashing = false;
+          this.student.material.color.set("#8B8878"); // 恢复到原始颜色
+        } else {
+          const colorIntensity = (Math.sin(elapsed * 0.01) + 1) / 2; // 0到1之间的值
+          const outlineColor = new THREE.Color("#F0FFFF"); // 轮廓颜色
+          this.student.material.color.lerp(outlineColor, colorIntensity);
+        }
+      }
+
       this.renderer.render(this.scene, this.camera);
     },
     initialView() {
       //原方案
       // this.camera.position.set(0, 400, 0);
       //初始相机看第一个学生
-      this.camera.position.set(-434.0740788423603, 601.6679527037107, 1345.2141853240598)
-      this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
+      this.camera.position.set(-1091.4201478569894, -36.93155271255154, 1781.8372416770653)
+      this.camera.lookAt(0, 0, 0);
     },
     // initialView() {
     //   //原方案
@@ -638,7 +1243,9 @@ export default {
         console.log(intersects);
         if (intersects.length > 0) {
           this.student = intersects[0].object;
-          this.student.material.color.set(0xff0000);
+          this.flashing = true;
+          this.flashStartTime = Date.now();
+          // this.student.material.color.set("#fdb933");
           // 获取学生的ID
           const studentName = this.student.name;
           const numberMatch = studentName.match(/\d+/);
@@ -648,30 +1255,47 @@ export default {
           this.stateCode = 2
           this.saveState(this.stateCode);
           this.$emit('stateChanged', this.stateCode);
+          console.log(foundStudent.original)
           this.$store.dispatch('updateStudentId', foundStudent.original);
+          PubSub.publish('studentId', foundStudent.original);
           // 从studentsPositions中获取位置信息
+          const studentPosition = new THREE.Vector3(
+            this.student.position.x,
+            this.student.position.y,
+            this.student.position.z
+          );
           const targetPosition = new THREE.Vector3(
-            this.studentsPositions[studentName].x,
-            this.studentsPositions[studentName].y,
-            this.studentsPositions[studentName].z
+            this.targetCameraPosition[number].x,
+            this.targetCameraPosition[number].y,
+            this.targetCameraPosition[number].z
           );
           console.log('目标学生的', this.student)
           console.log('全部学生的坐标信息', this.studentsPositions)
           console.log('targetPosition', targetPosition)
           new TWEEN.Tween(this.camera.position)
             .to({
-              x: targetPosition.x + 301,
-              y: targetPosition.y + 89,
-              z: targetPosition.z + 279
+              x: targetPosition.x,
+              y: targetPosition.y,
+              z: targetPosition.z
             }, 1000)
             .easing(TWEEN.Easing.Quadratic.Out)
+            // .onUpdate(() => {
+            //   // 确保动画完成后相机仍然指向目标位置
+            //   this.camera.lookAt(studentPosition);
+            // })
             .onComplete(() => {
               // 确保动画完成后相机仍然指向目标位置
-              // this.camera.lookAt(targetPosition);
+              // this.camera.lookAt(studentPosition);
             })
             .start();
         }
       }
+    },
+    onMouseWheel(event) {
+      new TWEEN.Tween(this.camera.position)
+        .to({ x: 608.3748006602943, y: 246.87681215346674, z: 507.9700608328807 }, 1000) // 设置相机的新位置和移动时间
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
     },
     onPanelChange(value, mode) {
       console.log(value, mode);
@@ -774,7 +1398,7 @@ export default {
     },
     handleStudentAppear(data) {
       if (this.mappedStudents.length === 0) {
-        console.log(1111111111111111111111111)
+        // console.log(1111111111111111111111111)
         // 随机放置学生
         let studentNumbers = [];
         for (let i = 0; i <= 99; i++) {

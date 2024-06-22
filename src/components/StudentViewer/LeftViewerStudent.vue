@@ -92,22 +92,25 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['studentId'])
+    ...mapGetters(['studnetId'])
   },
   created() {
-    this.fetchStudentScores();
+    console.log(this.studentId)
+    this.fetchStudentScores(this.studentId);
     this.fetchRingData();
     this.fetchRadarData();
   },
   mounted() {
-    // this.renderRingChart(); // 绘制环形图
-    // this.renderRadarChart(); // 绘制雷达图
+    this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
+      this.fetchStudentScores(value);
+    });
   },
 
   methods: {
-    fetchStudentScores() {
-      this.$axios.get(`http://10.12.44.190:8000/get_check_data/?student_id=${this.studentId}`)
-      this.$axios.get('http://10.12.44.190:8000/get_check_data/?student_id=0088dc183f73c83f763e')
+    fetchStudentScores(value) {
+      var stid = value !== undefined ? value : this.studentId;
+      console.log("studentId更新了",stid)
+      this.$axios.get(`http://10.12.44.190:8000/get_check_data/?student_id=${stid}`)
         .then(response => {
           this.infos = JSON.parse(response.data).infos;
           console.log("this.infos");

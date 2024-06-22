@@ -9,6 +9,7 @@ import * as echarts from 'echarts';
 import { min } from 'moment';
 import EventBus from '@/eventBus'; // 导入事件总线
 
+
 export default {
   name: 'BottomViewer',
   // props: {
