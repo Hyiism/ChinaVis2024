@@ -991,7 +991,7 @@ export default {
 
             this.container = new THREE.Object3D();
             this.appearStudent.forEach(index => {
-              const mesh = this.allStudent[index - 1];
+              const mesh = this.allStudent[index];
               if (mesh) { // 确保mesh存在
                 this.container.add(mesh);
                 // 将容器添加到场景中
@@ -1228,7 +1228,8 @@ export default {
         console.log(intersects);
         if (intersects.length > 0) {
           this.student = intersects[0].object;
-          this.flashing = true;
+          if(this.student.name != 'Box001'){
+            this.flashing = true;
           this.flashStartTime = Date.now();
           // this.student.material.color.set("#fdb933");
           // 获取学生的ID
@@ -1273,6 +1274,7 @@ export default {
               // this.camera.lookAt(studentPosition);
             })
             .start();
+          }
         }
       }
     },
@@ -1305,6 +1307,7 @@ export default {
       console.log('Formatted Date:', formattedDate);
 
       // 发布事件，将格式化后的日期传递出去
+      console.log("我一直在发")
       PubSub.publish('dateSelected', formattedDate);
       // 在这里可以对获取到的时间进行其他处理
     },
@@ -1412,8 +1415,8 @@ export default {
         this.animate();
       } else {
         console.log(222222222222222222222222)
-        // console.log("allStudent", this.allStudent)
         const changedStudent = data.students
+        console.log("changedStudent",data)
         const newMappedStudents = [];
         console.log("旧的mapped：", this.mappedStudents)
         const disappearStudent = [];
@@ -1428,7 +1431,6 @@ export default {
             disappearStudent.push(student.mapped);
           }
         });
-        // 更新 this.mappedStudents 数组为新的保留元素数组
         this.mappedStudents = newMappedStudents;
         console.log("新的mapped", this.mappedStudents)
         const objectsToRemove = [];
@@ -1437,10 +1439,10 @@ export default {
           return "student" + studentNumber;
         });
         console.log("disappear", disappearStudentNames)
+        console.log("container",this.container)
         for (let i = 0; i <= disappearStudentNames.length - 1; i++) {
           const studentName = disappearStudentNames[i]
           this.container.traverse((child) => {
-            console.log(child.name)
             if (child.name.includes(studentName)) {
               objectsToRemove.push(child);
             }
@@ -1456,7 +1458,7 @@ export default {
         this.animate();
         this.appearStudent = this.mappedStudents.map(student => student.mapped);
         this.appearStudent.forEach(index => {
-          const mesh = this.allStudent[index - 1]; // 因为appearStudent中的值是1到100的数，需要减1以匹配allStudent的索引
+          const mesh = this.allStudent[index]; // 因为appearStudent中的值是1到100的数，需要减1以匹配allStudent的索引
           if (mesh) { // 确保mesh存在
             this.container.add(mesh);
             // 将容器添加到场景中
