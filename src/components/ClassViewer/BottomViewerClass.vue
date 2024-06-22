@@ -27,9 +27,10 @@ export default {
   methods: {
     async fetchHeatmapData() {
       try {
-        const response = await axios.get('http://localhost:5000/get_class_knowledge_data');
-        const data = response.data;
-        this.processData(data);
+        const response = await axios.get(`http://10.12.44.190:8000/heatmap/?class_id=${this.classId}`);
+        const jsondata = JSON.parse(response.data);
+        // 在processData中处理后 赋值给heatmapData绘图
+        this.processData(jsondata);
         this.createChart();
       } catch (error) {
         console.error('Error fetching heatmap data:', error);
@@ -70,20 +71,6 @@ export default {
         .attr("transform", `translate(${margin.left}, ${margin.top})`)
         .attr("id", "heatmap-svg"); // 给 SVG 元素添加一个 ID，以便其他视图中可以通过此 ID 定位该元素
 
-      // Sample data
-      // const data = [
-      //   {group: 'A', variable: 'v1', value: 30},
-      //   {group: 'A', variable: 'v2', value: 70},
-      //   {group: 'B', variable: 'v1', value: 50},
-      //   {group: 'B', variable: 'v2', value: 90},
-      //   {group: 'C', variable: 'v1', value: 20},
-      //   {group: 'C', variable: 'v2', value: 10},
-      //   {group: 'D', variable: 'v1', value: 60},
-      //   {group: 'D', variable: 'v2', value: 80},
-      // ];
-
-      // const myGroups = Array.from(new Set(data.map(d => d.group)));
-      // const myVars = Array.from(new Set(data.map(d => d.variable)));
       const myGroups = Array.from(new Set(this.heatmapData.map(d => d.group)));
       const myVars = Array.from(new Set(this.heatmapData.map(d => d.variable)));
 
@@ -92,11 +79,6 @@ export default {
         .range([0, width])
         .domain(myGroups)
         .padding(0.05);
-      // svg.append("g")
-      //   .style("font-size", 15)
-      //   .attr("transform", `translate(0, ${height})`)
-      //   .call(d3.axisBottom(x).tickSize(0))
-      //   .select(".domain").remove();
 
       // Build Y scales and axis
       const y = d3.scaleBand()
@@ -107,33 +89,26 @@ export default {
         .style("font-size", 15)
         .call(d3.axisLeft(y).tickSize(0))
         .select(".domain").remove();
-
-      // Build color scale
+         // Build color scale
       // const myColor = d3.scaleSequential()
       //   .interpolator(d3.interpolateInferno)
       //   .domain([50, 1]);
       // Compute color scale domain
       const valueExtent = d3.extent(this.heatmapData, d => d.value);
-      const myColor = d3.scaleSequential()
-        // .interpolator(d3.interpolateInferno) //颜色从黄到紫
-        // .interpolator(d3.interpolateViridis) //颜色从深紫色到黄绿色
-        .interpolator(d3.interpolateMagma)  //颜色从深紫色到黄色
-        // .interpolator(d3.interpolatePlasma) //颜色从紫色到黄色，过渡较为平滑
-        // .interpolator(d3.interpolateCividis) //颜色从蓝色到黄色，适合色盲人士
-        // .interpolator(d3.interpolateWarm) //颜色从红色到黄色，模拟温暖的颜色渐变
-        // .interpolator(d3.interpolateCool) //颜色从蓝色到红色，模拟凉爽的颜色渐变
-        // .interpolator(d3.interpolateCubehelixDefault) //基于立方螺旋算法的颜色渐变，默认从黑色到白色
-        // .interpolator(d3.interpolateRainbow) //颜色从红色到紫色的彩虹渐变
-        // .interpolator(d3.interpolateSinebow) //类似于d3.interpolateRainbow，但使用正弦波生成渐变
-        // .interpolator(d3.interpolateBlues) //颜色从浅蓝色到深蓝色
-        // .interpolator(d3.interpolateGreens) //颜色从浅绿色到深绿色
-        // .interpolator(d3.interpolateGreys) //颜色从白色到黑色
-        // .interpolator(d3.interpolateBuGn) //颜色从浅蓝绿色到深蓝绿色
-        // .interpolator(d3.interpolateBuPu) //颜色从浅蓝色到深紫色
-        // .interpolator(d3.interpolateOrRd) //颜色从浅橙色到深红色
-        // .interpolator(d3.interpolatePuRd) //颜色从浅紫色到深红色
-        // .interpolator(d3.interpolateYlOrBr) //颜色从浅黄色到深橙棕色
-        .domain([valueExtent[1], valueExtent[0]]); //把颜色反一下，让较深的颜色来代表较大的数据
+      const myColor = d3.scaleLinear()
+        .domain([valueExtent[0], valueExtent[1]])
+        .interpolate(d3.interpolateRgb)
+        .range(["#f1f0ec", "#e07563"]);
+      // const myColor = d3.scaleSequential()
+      //   // .interpolator(d3.interpolateInferno) //颜色从黄到紫
+      //   // .interpolator(d3.interpolateViridis) //颜色从深紫色到黄绿色
+      //   // .interpolator(d3.interpolateCubehelixDefault) //基于立方螺旋算法的颜色渐变，默认从黑色到白色
+      //   .interpolator(d3.interpolateBlues) //颜色从浅蓝色到深蓝色
+      //   // .interpolator(d3.interpolateGreens) //颜色从浅绿色到深绿色
+      //   // .interpolator(d3.interpolateGreys) //颜色从白色到黑色
+      //   // .interpolator(d3.interpolateBuGn) //颜色从浅蓝绿色到深蓝绿色
+
+      //   .domain([valueExtent[0], valueExtent[1]]); //把颜色反一下，让较深的颜色来代表较大的数据
 
       // Create a tooltip
       const tooltip = d3.select(this.$refs.chart)
@@ -181,24 +156,6 @@ export default {
         .on("mousemove", mousemove)
         .on("mouseleave", mouseleave);
 
-      // Add title to graph
-      // svg.append("text")
-      //   .attr("x", 0)
-      //   .attr("y", -50)
-      //   .attr("text-anchor", "left")
-      //   .style("font-size", "22px")
-      //   .text("A d3.js heatmap");
-
-      // Add subtitle to graph
-      // svg.append("text")
-      //   .attr("x", 0)
-      //   .attr("y", -20)
-      //   .attr("text-anchor", "left")
-      //   .style("font-size", "14px")
-      //   .style("fill", "grey")
-      //   .style("max-width", 400)
-      //   .text("A short description of the take-away message of this chart.");
-
       // Add legend
       const legendHeight = height;
       const legendWidth = 20;
@@ -227,13 +184,6 @@ export default {
         .attr("x2", "0%")
         .attr("y2", "0%");
 
-      // Create color stops for the gradient based on the color scale
-      // const colorRange = d3.range(1, 101, 1); // Range of values from 1 to 100
-      // colorRange.forEach(value => {
-      //   gradient.append("stop")
-      //     .attr("offset", `${(value - 1) / 99 * 100}%`)
-      //     .attr("stop-color", myColor(value));
-      // });
       const colorRange = d3.range(valueExtent[0], valueExtent[1], (valueExtent[1] - valueExtent[0]) / 100);
       colorRange.forEach((value, index) => {
         gradient.append("stop")
