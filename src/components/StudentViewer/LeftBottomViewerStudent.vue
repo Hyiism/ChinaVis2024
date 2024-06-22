@@ -9,7 +9,6 @@
 <script>
 import * as d3 from 'd3';
 import EventBus from '@/eventBus'; // 导入事件总线
-import EventBus from '@/eventBus'; // 导入事件总线
 
 export default{
   name:'CoordinateGraph',

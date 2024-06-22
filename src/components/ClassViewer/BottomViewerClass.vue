@@ -9,6 +9,7 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 import { mapGetters } from 'vuex';
+import EventBus from '@/eventBus'; // 导入事件总线
 
 
 export default {
@@ -154,7 +155,12 @@ export default {
         .style("opacity", 0.8)
         .on("mouseover", mouseover)
         .on("mousemove", mousemove)
-        .on("mouseleave", mouseleave);
+        .on("mouseleave", mouseleave)
+        .on("click", (event, d) => {
+          // d.group为学生id
+          console.log(d.group);
+          EventBus.$emit('heatmapStudentIdSelected', d.group); // 发送学生id 主视图响应动画
+        })
 
       // Add legend
       const legendHeight = height;

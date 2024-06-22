@@ -649,10 +649,13 @@ export default {
   created() {
     EventBus.$on('studentSelected', this.handleStudentSelected);
     EventBus.$on('checkSelected', this.handleCheckSelected);
+    EventBus.$on('heatmapStudentIdSelected', this.handleHeatmapSelected);
+    
   },
   beforeDestroy() {
     EventBus.$off('studentSelected', this.handleStudentSelected);
     EventBus.$off('checkSelected', this.handleCheckSelected);
+    EventBus.$off('heatmapStudentIdSelected', this.handleHeatmapSelected);
     this.controls.dispose(); // 清理轨道控制
   },
   methods: {
@@ -714,6 +717,11 @@ export default {
     // data:{student_id:" ",year:" ",month:" ",date:" "}
     handleCheckSelected(data) {
       console.log('modelview dataselect:', data)
+
+    },
+    // 处理热力图传过来的学生id
+    handleHeatmapSelected(student_id){
+      this.handleStudentSelected(student_id)
 
     },
 
