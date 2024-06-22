@@ -14,17 +14,6 @@
       <a-calendar :fullscreen="false" @panelChange="onPanelChange" @select="onSelect" :defaultValue="defaultValue"
         :header-render="headerRender" />
     </div>
-
-    <div class="menu">
-      <div class="menu-item" style="--i:0;">1</div>
-      <div class="menu-item" style="--i:1;">2</div>
-      <div class="menu-item" style="--i:2;">3</div>
-      <div class="menu-item" style="--i:3;">4</div>
-      <div class="menu-item" style="--i:4;">5</div>
-      <div class="menu-item" style="--i:5;">6</div>
-      <div class="menu-item" style="--i:6;">7</div>
-      <div class="menu-item" style="--i:7;">8</div>
-    </div>
   </div>
 </template>
 
@@ -40,6 +29,8 @@ import PubSub from 'pubsub-js';
 import moment from 'moment';
 import EventBus from '@/eventBus'; // 导入事件总线
 import { openDB } from 'idb';
+import Dexie from 'dexie';
+
 
 export default {
   name: 'ModelViewer',
@@ -692,23 +683,21 @@ export default {
       this.selectedStudentId = studentId;
       this.appearStudent = this.mappedStudents.map(student => student.original);
       const foundStudent = this.mappedStudents.find(student => student.original == this.selectedStudentId);
-      console.log(foundStudent.mapped)
-      this.student = this.allStudent[foundStudent.mapped - 1]
+      console.log("handle foundStudent", foundStudent)
+      this.student = this.allStudent[foundStudent.mapped]
+      console.log("handleStudentSelected", this.student)
 
-      this.student.material.color.set(0xff0000);
-      // // 获取学生的ID
+      // this.student.material.color.set(0xff0000);
       const studentName = this.student.name;
-
+      const numberMatch = studentName.match(/\d+/);
+      // console.log("this.mappedStudents", this.mappedStudents)
+      const number = numberMatch ? parseInt(numberMatch[0], 10) : null; // 将匹配到的数字字符串转换为整数
       // 从studentsPositions中获取位置信息
       const targetPosition = new THREE.Vector3(
-        this.studentsPositions[studentName].x,
-        this.studentsPositions[studentName].y,
-        this.studentsPositions[studentName].z
+        this.targetCameraPosition[number].x,
+        this.targetCameraPosition[number].y,
+        this.targetCameraPosition[number].z
       );
-
-      // const targetPosition = new THREE.Vector3().copy(this.student.position);
-      console.log(targetPosition, this.student);
-
       new TWEEN.Tween(this.camera.position)
         .to({
           x: targetPosition.x,
@@ -716,8 +705,9 @@ export default {
           z: targetPosition.z
         }, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
+        .onComplete(() => {
+        })
         .start();
-      console.log("studentId-modelview", studentId);
 
     },
     // TODO: 点击github打卡图，主视图跳转日期且显示对应学生，由此可以再拖拽查看其他人情况
@@ -744,40 +734,35 @@ export default {
       // 创建场景
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0xffffff);
-
       const aspect = this.$refs.sceneContainer.clientWidth / this.$refs.sceneContainer.clientHeight;
-
-      // 初始化透视相机
-      // this.camera = new THREE.PerspectiveCamera(80, aspect, 0.1, 3000);
       this.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 3000);
 
-      const axesHelper = new THREE.AxesHelper(20000);
-      this.scene.add(axesHelper);
+      // const axesHelper = new THREE.AxesHelper(20000);
+      // this.scene.add(axesHelper);
       // 创建渲染器
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(this.$refs.sceneContainer.clientWidth, this.$refs.sceneContainer.clientHeight);
       this.renderer.setClearColor(0xffffff);
       this.$refs.sceneContainer.appendChild(this.renderer.domElement);
-      // 窗口调整大小处理
-      // window.addEventListener('resize', this.onWindowResize);
-
       // 添加光源
       this.addLights();
-
       // // 添加轨道控制
       // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
       // this.controls.enableDamping = true; // 启用阻尼效果
       // this.controls.dampingFactor = 0.25; // 阻尼系数
       // this.controls.screenSpacePanning = false; // 禁用屏幕空间平移
-      // const click = await this.getModelDataFromIndexedDB('schoolModel');
-      // if (savedModelData) {
-      //   console.log("Loading model from IndexedDB...");
-      //   this.loadModelFromBuffer(savedModelData, 'school');
-      //   this.modelLoaded = true;
-      // } else {
-      //   console.log("Loading model from network...");
-      //   this.loadSchoolModel();
-      // }
+
+      this.db = new Dexie('threemodel')
+      this.db.version(0.1).stores(
+        {
+          localVersions: 'matadataid, content, lastversionid, date, time',
+          users: '++id, name, &username, *email, address.city',
+          relations: '++rid, userId1, userId2, [userId1+userId2], relation',
+          books: 'id, author, name, *categories',
+          model: 'id, name, type, file'
+        }
+      )
+      this.blobChange()
       const savedState = this.getSavedState()
       if (savedState == 0) {
         this.loadSchoolModel();
@@ -786,6 +771,42 @@ export default {
       }
       this.animate();
       this.initialView();
+    },
+    // 修改model表里的数据
+    putDataToIndexDB(blob) {
+      // 一定要处理成二进制 this.blobChange()返回的是一个blob对象
+      console.log(blob)
+      this.db.model.put({
+        id: 'classRoom',
+        name: '教室模型',
+        type: blob.type,
+        file: blob
+      })
+    },
+    blobChange() {
+      this.$axios({
+        method: 'get',
+        url: '/models/student101_4.glb',
+        responseType: 'blob',
+        crossOrigin: true,
+        withCredentials: true
+      }).then(res => {
+        console.log(res.data)
+        // 写入indexDB数据库
+        this.putDataToIndexDB(res.data)
+      })
+    },
+    addDataDB(obj) {
+      this.db.model.add(obj)
+    },
+    updateDataDB(obj) {
+      this.db.model.put(obj)
+    },
+    delDataDB(key) {
+      this.db.model.delete(key)
+    },
+    getDataDB(key) {
+      return this.db.model.get(key)
     },
     async getModelDataFromIndexedDB(modelName) {
       const db = await this.openDB();
@@ -857,21 +878,6 @@ export default {
         }
       );
     },
-    // async saveModelToIndexedDB(modelName, modelObject) {
-    //   const gltfExporter = new GLTFExporter();
-    //   gltfExporter.parse(
-    //     modelObject,
-    //     async (gltf) => {
-    //       const db = await this.openDB();
-    //       const tx = db.transaction('models', 'readwrite');
-    //       const store = tx.objectStore('models');
-    //       await store.put(gltf, modelName);
-    //       await tx.done;
-    //       console.log('Model saved to IndexedDB');
-    //     },
-    //     { binary: true }
-    //   );
-    // },
     loadClassModel() {
       const loadModelPromise = () => {
         return new Promise((resolve, reject) => {
@@ -880,7 +886,6 @@ export default {
             '/models/classroom.mtl', // 替换为你的MTL文件路径
             (materials) => {
               materials.preload();
-              // 使用OBJLoader加载OBJ文件
               const objLoader = new OBJLoader();
               objLoader.setMaterials(materials);
               objLoader.load(
@@ -905,8 +910,8 @@ export default {
                   const targetPosition = new THREE.Vector3(608.3748006602943, 246.87681215346672, 507.9700608328807);
 
                   new TWEEN.Tween(currentPosition)
-                    .to(targetPosition, 1000)
-                    .easing(TWEEN.Easing.Linear.None)
+                    .to(targetPosition, 1500)
+                    .easing(TWEEN.Easing.Quadratic.Out)
                     .onUpdate(() => {
                       this.camera.position.copy(currentPosition);
                       // this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
@@ -948,85 +953,6 @@ export default {
               console.log('An error happened', error);
             }
           );
-
-
-
-
-
-          //   const loader = new GLTFLoader();
-          //   loader.load('/models/classroom.glb', (gltf) => {
-          //     this.classModel = gltf.scene;
-          //     this.classModel.scale.set(2, 2, 2);
-          //     // const currentPosition = this.camera.position.clone();
-          //     // const targetPosition = new THREE.Vector3(251.0974656502318, 153.83576291656343, 247.37127012156563);
-
-          //     // new TWEEN.Tween(currentPosition)
-          //     //   .to(targetPosition, 1000)
-          //     //   .easing(TWEEN.Easing.Quadratic.Out)
-          //     //   .onUpdate(() => {
-          //     //     this.camera.position.copy(currentPosition);
-          //     //     this.camera.lookAt(0, 0, 0);
-          //     //   })
-          //     //   .start();
-          //     this.scene.add(this.classModel);
-          //     console.log("classModel", this.classModel)
-          //     // // Set initial opacity to 0
-          //     // this.classModel.traverse((child) => {
-          //     //   if (child.isMesh) {
-          //     //     child.material.transparent = true;
-          //     //     child.material.opacity = 0;
-          //     //   }
-          //     // });
-
-          //     // // Fade-in effect
-          //     // const fadeInDuration = 2000;
-          //     // new TWEEN.Tween({ opacity: 0 })
-          //     //   .to({ opacity: 1 }, fadeInDuration)
-          //     //   .easing(TWEEN.Easing.Linear.None)
-          //     //   .onUpdate((tween) => {
-          //     //     this.classModel.traverse((child) => {
-          //     //       if (child.isMesh) {
-          //     //         child.material.opacity = tween.opacity;
-          //     //       }
-          //     //     });
-          //     //   })
-          //     //   .start();
-
-          //     // Camera position animation
-          //     const currentPosition = this.camera.position.clone();
-          //     const targetPosition = new THREE.Vector3(608.3748006602943, 246.87681215346672, 507.9700608328807);
-
-          //     new TWEEN.Tween(currentPosition)
-          //       .to(targetPosition, 1000)
-          //       .easing(TWEEN.Easing.Linear.None)
-          //       .onUpdate(() => {
-          //         this.camera.position.copy(currentPosition);
-          //         this.camera.lookAt(227.77032470703125, 52.10075378417969, 211.2912139892578);
-          //       })
-          //       .start();
-
-          //     const objectsToRemove = [];
-
-          //     for (let i = 0; i <= 99; i++) {
-          //       const studentName = "student" + i.toString().padStart(3, "0");
-          //       this.classModel.traverse((child) => {
-          //         if (child.isMesh && child.name.includes(studentName)) {
-          //           objectsToRemove.push(child);
-          //           this.allStudent.push(child);
-          //         }
-          //       });
-          //     }
-          //     console.log("初始化视图allStudent", this.allStudent);
-          //     objectsToRemove.forEach((child) => {
-          //       if (child.parent) {
-          //         child.parent.remove(child);
-          //       }
-          //     });
-          //     resolve(); // 模型加载完成后，resolve Promise
-          //   }, undefined, (error) => {
-          //     console.error('An error happened while loading the model', error);
-          //     reject(error); // 如果模型加载失败，reject Promise
-          //   });
         });
       };
 
@@ -1071,19 +997,76 @@ export default {
           });
       });
     },
-    // onWindowResize() {
-    //   const aspect = this.$refs.sceneContainer.clientWidth / this.$refs.sceneContainer.clientHeight;
-    //   this.camera.aspect = aspect;
-    //   this.camera.updateProjectionMatrix();
-    //   this.renderer.setSize(this.$refs.sceneContainer.clientWidth, this.$refs.sceneContainer.clientHeight);
-    //   this.camera.aspect = aspect;
-    //   this.camera.updateProjectionMatrix();
+    //   const loadModelPromise = () => {
+    //     return new Promise((resolve, reject) => {
+    //       const modeldata = this.getDataDB('classRoom')
+    //       console.log("modeldata", modeldata)
+    //       const modelUrl = URL.createObjectURL(new Blob([modeldata.file]))
+    //       var loader = new GLTFLoader();
+    //       loader.load(modelUrl, (gltf) => {
+    //         console.log(gltf)
+    //         this.scene.add(gltf.scene)
+
+
+
+
+
+
+
+
+    //       });
+    //         (error) => {
+    //           console.log('An error happened', error);
+    //         }
+
+    //     });
+    //   };
+
+    //   loadModelPromise().then(() => {
+    //     // 模型加载完成后执行axios.get请求
+    //     this.$axios.get(`http://10.12.44.190:8000/getStudentByClass/?className=${this.classId}`, {
+    //       // params: {
+    //       //   className: this.classId,
+    //       // }
+    //     })
+    //       .then(response => {
+    //         console.error('success sending data:', JSON.parse(response.data));
+
+    //         let studentNumbers = [];
+    //         for (let i = 0; i <= 99; i++) {
+    //           studentNumbers.push(i);
+    //         }
+    //         studentNumbers = this.shuffleArray(studentNumbers);
+    //         this.receivedStudent = JSON.parse(response.data).students;
+    //         // 创建映射
+    //         this.mappedStudents = this.receivedStudent.map((student, index) => {
+    //           return { original: student, mapped: studentNumbers[index] };
+    //         });
+    //         this.appearStudent = this.mappedStudents.map(student => student.mapped);
+    //         console.log("appearStudent", this.appearStudent);
+
+    //         this.container = new THREE.Object3D();
+    //         this.appearStudent.forEach(index => {
+    //           const mesh = this.allStudent[index - 1];
+    //           if (mesh) { // 确保mesh存在
+    //             this.container.add(mesh);
+    //             // 将容器添加到场景中
+    //             this.scene.add(this.container);
+    //             // 对容器进行放大操作，而不是对模型直接进行放大
+    //             this.container.scale.set(2, 2, 2); // 重新应用缩放设置
+    //           }
+    //         });
+    //         this.animate();
+    //       })
+    //       .catch(error => {
+    //         console.error('Error sending data:', error);
+    //       });
+    //   });
     // },
     animate() {
       requestAnimationFrame(this.animate);
       TWEEN.update();
       // this.controls.update();
-
       // 处理闪烁效果
       if (this.flashing) {
         const elapsed = Date.now() - this.flashStartTime;
@@ -1106,13 +1089,6 @@ export default {
       this.camera.position.set(-1091.4201478569894, -36.93155271255154, 1781.8372416770653)
       this.camera.lookAt(0, 0, 0);
     },
-    // initialView() {
-    //   //原方案
-    //   // this.camera.position.set(0, 400, 0);
-    //   //初始相机看第一个学生
-    //   this.camera.position.set(178.434532168853, 113.66997527109939, 164.5923843414466)
-    //   this.camera.lookAt(97.55521392822266, 32.887508392333984, 75.55369567871094);
-    // },
     setTopView() {
       const currentPosition = this.camera.position.clone();
       const targetPosition = new THREE.Vector3(0, 400, 0);
@@ -1211,7 +1187,6 @@ export default {
         })
         .start();
     },
-    // const vm = this,
     onClick(event) {
       const rect = this.$refs.sceneContainer.getBoundingClientRect();
 

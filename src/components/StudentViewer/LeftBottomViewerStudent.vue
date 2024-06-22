@@ -9,6 +9,7 @@
 <script>
 import * as d3 from 'd3';
 import EventBus from '@/eventBus'; // 导入事件总线
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default{
   name:'CoordinateGraph',
@@ -31,8 +32,30 @@ export default{
   },
   beforeDestroy() {
     EventBus.$off('bubTitleIdSelected', this.handleBubSelected);
+    // 监听从气泡图传来的题目id
+    EventBus.$on('bubTitleIdSelected', this.handleBubSelected);
+    // this.originalData = this.title.map(t => t.titlestate);
+    // this.drawChart(this.originalData);
+    this.fetchStudentScores();
+  },
+  beforeDestroy() {
+    EventBus.$off('bubTitleIdSelected', this.handleBubSelected);
   },
   methods: {
+    fetchStudentScores() {
+      this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.student_id}&title_id=${this.title_id}`) // Replace with actual API endpoint
+        .then(response => {
+            this.title = JSON.parse(response.data);
+            // 分数正确显示！！
+            // console.log('rawdata!!!', this.score_list);
+            // 拿到数据后加载表格
+            this.originalData = this.title.map(t => t.titlestate);
+            this.drawChart(this.originalData);
+          })
+          .catch(error => {
+            console.error("There was an error!", error);
+          });
+      },
     fetchStudentScores() {
       this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.student_id}&title_id=${this.title_id}`) // Replace with actual API endpoint
         .then(response => {
