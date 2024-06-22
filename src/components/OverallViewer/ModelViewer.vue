@@ -1133,6 +1133,7 @@ export default {
       this.stateCode = 0
       this.saveState(this.stateCode);
       this.currentModelType = 'school'
+      localStorage.clear()
       window.location.reload();
       // this.stateCode = 0
       // this.saveState(this.stateCode);

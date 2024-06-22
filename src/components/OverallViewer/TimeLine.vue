@@ -114,7 +114,7 @@ export default {
                 .data(data)
                 .enter().append('rect')
                 .attr('class', 'bar')
-                .style("fill", "#AAFAAA")
+                .style("fill", "#BBE3A5")
                 .attr('x', d => x(d.date))
                 .attr('width', width / data.length)
                 .attr('y', d => y(d.value))
