@@ -92,11 +92,10 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['studnetId'])
+    ...mapGetters(['studentId'])
   },
   created() {
-    console.log(this.studentId)
-    this.fetchStudentScores(this.studentId);
+    this.fetchStudentScores();
     this.fetchRingData();
     this.fetchRadarData();
   },

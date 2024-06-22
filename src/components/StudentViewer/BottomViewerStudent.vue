@@ -17,8 +17,13 @@ export default {
   computed: {
     ...mapGetters(['studentId'])
   },
-  mounted() {
+  created(){
     this.fetchStudentScores();
+  },
+  mounted() {
+    this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
+      this.fetchStudentScores(value);
+    });
     window.addEventListener('resize', this.createBubbleChart); // Recreate chart on window resize
     // this.$nextTick(() => {
     //   this.createBubbleChart();
@@ -30,8 +35,8 @@ export default {
   },
   methods: {
     fetchStudentScores() {
-    // this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=${this.studentId}`) // Replace with actual API endpoint
-    this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=bd8eb49a6b08f5e66a70`)
+    this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=${this.studentId}`) // Replace with actual API endpoint
+    // this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=bd8eb49a6b08f5e66a70`)
       .then(response => {
           this.rawdata = JSON.parse(response.data).data;
           // 分数正确显示！！

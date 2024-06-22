@@ -14,17 +14,6 @@
       <a-calendar :fullscreen="false" @panelChange="onPanelChange" @select="onSelect" :defaultValue="defaultValue"
         :header-render="headerRender" />
     </div>
-
-    <div class="menu">
-      <div class="menu-item" style="--i:0;">1</div>
-      <div class="menu-item" style="--i:1;">2</div>
-      <div class="menu-item" style="--i:2;">3</div>
-      <div class="menu-item" style="--i:3;">4</div>
-      <div class="menu-item" style="--i:4;">5</div>
-      <div class="menu-item" style="--i:5;">6</div>
-      <div class="menu-item" style="--i:6;">7</div>
-      <div class="menu-item" style="--i:7;">8</div>
-    </div>
   </div>
 </template>
 
@@ -692,23 +681,21 @@ export default {
       this.selectedStudentId = studentId;
       this.appearStudent = this.mappedStudents.map(student => student.original);
       const foundStudent = this.mappedStudents.find(student => student.original == this.selectedStudentId);
-      console.log(foundStudent.mapped)
-      this.student = this.allStudent[foundStudent.mapped - 1]
+      console.log("handle foundStudent", foundStudent)
+      this.student = this.allStudent[foundStudent.mapped]
+      console.log("handleStudentSelected", this.student)
 
-      this.student.material.color.set(0xff0000);
-      // // 获取学生的ID
+      // this.student.material.color.set(0xff0000);
       const studentName = this.student.name;
-
+      const numberMatch = studentName.match(/\d+/);
+      // console.log("this.mappedStudents", this.mappedStudents)
+      const number = numberMatch ? parseInt(numberMatch[0], 10) : null; // 将匹配到的数字字符串转换为整数
       // 从studentsPositions中获取位置信息
       const targetPosition = new THREE.Vector3(
-        this.studentsPositions[studentName].x,
-        this.studentsPositions[studentName].y,
-        this.studentsPositions[studentName].z
+        this.targetCameraPosition[number].x,
+        this.targetCameraPosition[number].y,
+        this.targetCameraPosition[number].z
       );
-
-      // const targetPosition = new THREE.Vector3().copy(this.student.position);
-      console.log(targetPosition, this.student);
-
       new TWEEN.Tween(this.camera.position)
         .to({
           x: targetPosition.x,
@@ -716,8 +703,9 @@ export default {
           z: targetPosition.z
         }, 1000)
         .easing(TWEEN.Easing.Quadratic.Out)
+        .onComplete(() => {
+        })
         .start();
-      console.log("studentId-modelview", studentId);
 
     },
     // TODO: 点击github打卡图，主视图跳转日期且显示对应学生，由此可以再拖拽查看其他人情况
