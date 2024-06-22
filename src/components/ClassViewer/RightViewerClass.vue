@@ -87,6 +87,12 @@ export default {
         );
 
       var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+      const clusterColors = {
+        0: "#6090b8",
+        1: "#d19ba9",
+        2: "#9de1ac",
+        3: "#003c72",
+      }; 
       // 创建渐变颜色比例
       const colors = d3.scaleSequential(d3.interpolateMagma);
       
@@ -125,12 +131,13 @@ export default {
         .attr('cx', d => xScale(d.x))
         .attr('cy', d => yScale(d.y))
         .attr('r', radius)
-        .attr('fill', d => colorScale(d.cluster_label))
+        .attr('fill', d => clusterColors[d.cluster_label])
         .attr("stroke", "grey")
         .attr("class", "eachnode")
         .on('mouseover', (event, d) => {
           d.showRings = true;
           this.updateRings();
+          console.log("hhhhhhh",d.cluster_label)
         })
         .on('mouseout', (event, d) => {
           d.showRings = false;
@@ -162,10 +169,9 @@ export default {
             .endAngle(endAngle);
           g.append("path")
             .attr("d", arcGenerator)
-            .attr("fill", d => colorScale(d.cluster_label))
+            .attr("fill", d => clusterColors[d.cluster_label])
             .attr("stroke", "grey")
             .attr("transform", `translate(${xScale(node.x)},${yScale(node.y)})`);
-          
           
           const scoreingData = node.state_data;     //做题正确程度的占比，按顺时针依次是全错、基本错、基本对、全对
           const totalScore = d3.sum(Object.values(scoreingData).map(Number));
@@ -227,7 +233,8 @@ export default {
 
       // Add legend
       const legend = svg.selectAll(".legend")
-        .data(colorScale.domain())
+        // .data(colorScale.domain())
+        .data(Object.keys(clusterColors))
         .enter().append("g")
         .attr("class", "legend")
         .attr("transform", (d, i) => `translate(0,${i * 20})`);
@@ -236,7 +243,8 @@ export default {
         .attr("x", width - 18)
         .attr("width", 18)
         .attr("height", 18)
-        .style("fill", colorScale)
+        // .style("fill", colorScale)
+        .style("fill", d => clusterColors[d])
         .on('click', (event, d) => {
           console.log("click legend");
           console.log(d);

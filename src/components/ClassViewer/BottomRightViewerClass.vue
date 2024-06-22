@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <div class="bottomright-chart">
     <el-select v-model="selectedcolumns" multiple placeholder="请选择y轴" class="feat-select" v-if="state_all"
       @change="handleSelectChange">
@@ -124,6 +124,7 @@ export default {
         .get(`http://10.12.44.190:8000/boxplot/?cluster_id=${this.clusterSelected}&class_id=${this.classId}`) // Replace with actual API endpoint
         .then((response) => {
           this.data = JSON.parse(response.data);
+          console.log("this.data!!!", this.data)
           // 如果是整体视图，就显示每个类别的数据，集中比较用户选的变量的统计情况
           if (this.clusterSelected === 'all') {
             this.state_all = true;
@@ -166,6 +167,12 @@ export default {
     },
     renderChart() {
       const colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(this.clusters);
+      const clusterColors = {
+        0: "#6090b8",
+        1: "#d19ba9",
+        2: "#9de1ac",
+        3: "#003c72",
+      }; 
 
       const dotPlot = Plot.plot({
         width: this.width - this.boxWidth,
@@ -208,7 +215,7 @@ export default {
           domain: this.clusters
         },
         marks: [
-          Plot.dot(this.data, { x: 'cluster_label_tsne', y: d => d[this.selectedcolumns[0]], fill: d => colorScale(d.cluster_label_tsne), size: 50, title: d => `Cluster: ${d.cluster_label_tsne}\n ${this.selectedcolumns[0]}: ${d[this.selectedcolumns[0]]}` })
+          Plot.dot(this.data, { x: 'cluster_label_tsne', y: d => d[this.selectedcolumns[0]], fill: d => clusterColors[d.cluster_label_tsne], size: 50, title: d => `Cluster: ${d.cluster_label_tsne}\n ${this.selectedcolumns[0]}: ${d[this.selectedcolumns[0]]}` })
         ]
       });
 
@@ -253,6 +260,12 @@ export default {
 
     renderChartDetail() {
       const colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(this.clusters);
+      const clusterColors = {
+        0: "#6090b8",
+        1: "#d19ba9",
+        2: "#9de1ac",
+        3: "#003c72",
+      }; 
 
       const dotPlot = Plot.plot({
         width: this.width - this.boxWidth,
@@ -293,7 +306,7 @@ export default {
           domain: this.clusters
         },
         marks: [
-          Plot.dot(this.data, { x: d => d[this.selectedcolumns_detail[0]], y: d => d[this.selectedcolumns_detail[1]], fill: d => colorScale(d.cluster_label_tsne), size: 150, title: d => `${this.selectedcolumns_detail[0]}: ${d[this.selectedcolumns_detail[0]]}\n ${this.selectedcolumns_detail[1]}: ${d[this.selectedcolumns_detail[1]]}` })
+          Plot.dot(this.data, { x: d => d[this.selectedcolumns_detail[0]], y: d => d[this.selectedcolumns_detail[1]], fill: d => clusterColors[d.cluster_label_tsne], size: 150, title: d => `${this.selectedcolumns_detail[0]}: ${d[this.selectedcolumns_detail[0]]}\n ${this.selectedcolumns_detail[1]}: ${d[this.selectedcolumns_detail[1]]}` })
         ]
       });
 
@@ -369,4 +382,4 @@ export default {
   z-index: 10;
   background-color: white;
 }
-</style> -->
+</style>
