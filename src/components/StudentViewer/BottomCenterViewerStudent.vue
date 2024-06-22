@@ -3,11 +3,11 @@
     <div class="button-container">
       <button :class="{'selected': selectedDistribution === 'time_distribution'}" @click="selectDistribution('time_distribution')">
         <div>执行用时分布</div>
-        <div>用时 {{ time_consume }} ms&nbsp;&nbsp;&nbsp;击败 {{ (time_beat * 100).toFixed(2) }}%</div>
+        <div>用时 {{ rawData.time_consume }} ms&nbsp;&nbsp;&nbsp;击败 {{ (rawData.time_beat * 100).toFixed(2) }}%</div>
       </button>
       <button :class="{'selected': selectedDistribution === 'memory_distribution'}" @click="selectDistribution('memory_distribution')">
         <div>内存占用分布</div>
-        <div>占用 {{ memory_consume }} MB&nbsp;击败 {{ (memory_beat * 100).toFixed(2) }}%</div>
+        <div>占用 {{ rawData.memory_consume }} MB&nbsp;击败 {{ (rawData.memory_beat * 100).toFixed(2) }}%</div>
       </button>
     </div>
     <div class="barchart-container"></div>
@@ -18,61 +18,25 @@
 <script>
 import * as d3 from 'd3';
 import EventBus from '@/eventBus'; // 导入事件总线
+import { data } from 'jquery';
 
 export default{
   name:'BarChart',
   data(){
     return{
-      student_id: '0088dc183f73c83f763e',
-      title_id: 'Question_q7OpB2zCMmW9wS8uNt3H',
-      time_consume: 4,
-      memory_consume: 327,
-      time_beat: 0.67,
-      memory_beat: 0.59,
-      // 时间复杂度横轴 需要计算此题目 所有时间复杂度的占比情况 击败率只需要计算 比其大的学生数量 除以所有做过此题的学生数量
-      time_distribution:{
-        "1":0.01,
-        "2":0.03,
-        "3":0.08,
-        "4":0.13,
-        "5":0.26,
-        "6":0.29,
-        "7":0.12,
-        "8":0.05,
-        "9":0.02,
-        "10":0.01,
-        "11":0.05,
-        "12":0.02,
-        "13":0.01,
-      },
-      // 空间复杂度横轴 需要计算此题目 所有空间复杂度范围的占比情况 击败率只需要计算 比其大的学生数量 除以所有做过此题的学生数量
-      memory_distribution:{
-        "1~50":0.005,
-        "51~100":0.01,
-        "101~150":0.02,
-        "151~200":0.03,
-        "201~250":0.055,
-        "251~300":0.095,
-        "301~350":0.15,
-        "351~400":0.215,
-        "401~450":0.18,
-        "451~500":0.11,
-        "501~550":0.075,
-        "551~600":0.03,
-        "601~650":0.015,
-        "651~700":0.005,
-      },
+      rawData:{},
       selectedDistribution: 'time_distribution',
-      titleId: ''
+      title_id_req: 'Question_q7OpB2zCMmW9wS8uNt3H'
     }
   },
   mounted() {
     // 监听从气泡图传来的题目id
-    EventBus.$on('titleIdSelected', this.handleBubSelected);
-    this.drawChart();
+    EventBus.$on('bubTitleIdSelected', this.handleBubSelected);
+    this.fetchStudentScores();
+    // this.drawChart();
   },
   beforeDestroy() {
-    EventBus.$off('titleIdSelected', this.handleBubSelected);
+    EventBus.$off('bubTitleIdSelected', this.handleBubSelected);
   },
   watch: {
     selectedDistribution() {  //选择时间复杂度或者空间复杂度
@@ -80,6 +44,16 @@ export default{
     }
   },
   methods: {
+    fetchStudentScores() {
+      this.$axios.get(`http://10.12.44.190:8000/titleperf/?student_id=0088dc183f73c83f763e&title_id=${this.title_id_req}`)
+        .then(response => {
+          this.rawData = JSON.parse(response.data).data;
+          this.drawChart();
+        })
+        .catch(error => {
+          console.error("There was an error!", error);
+        });
+    },
     selectDistribution(distribution) {
       this.selectedDistribution = distribution;
     },
@@ -88,7 +62,7 @@ export default{
         return String(value); // time_distribution keys are exact values
       } else if (distribution === 'memory_distribution') {
         // Find the range key that includes the value
-        for (const key of Object.keys(this.memory_distribution)) {
+        for (const key of Object.keys(this.rawData.memory_distribution)) {
           const [min, max] = key.split('~').map(Number);
           if (value >= min && value <= max) {
             return key;
@@ -98,7 +72,10 @@ export default{
       return null;
     },
     drawChart() {
-      const data = this[this.selectedDistribution];
+      // Remove any existing SVG before creating a new one
+      d3.select(this.$refs.chartContainer).selectAll('svg').remove();
+
+      const data = this.rawData[this.selectedDistribution];
       const container = this.$refs.chartContainer;
       const svgWidth = container.clientWidth;
       const svgHeight = container.clientHeight;
@@ -109,7 +86,7 @@ export default{
 
       const highlightedColumn = this.findHighlightedColumn(
         this.selectedDistribution,
-        this.selectedDistribution === 'time_distribution' ? this.time_consume : this.memory_consume
+        this.selectedDistribution === 'time_distribution' ? this.rawData.time_consume : this.rawData.memory_consume
       );
 
       const svg = d3.select('.barchart-container')
@@ -174,9 +151,14 @@ export default{
       d3.select('.barchart-container').select('svg').remove();
       this.drawChart();
     },
+
     // 接收从气泡图传来的题目id 使用此id请求数据
     handleBubSelected(titleId) {
-      this.titleId = titleId;
+      // console.log('titleId:', titleId);
+      // this.rawData.title_id = titleId;
+      this.title_id_req = titleId;
+      // console.log('this.title_id_req:', this.title_id_req);
+      this.fetchStudentScores();
     }
   }
 }

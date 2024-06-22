@@ -30,8 +30,9 @@ export default {
   },
   methods: {
     fetchStudentScores() {
-    this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=${this.studentId}`) // Replace with actual API endpoint
-        .then(response => {
+    // this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=${this.studentId}`) // Replace with actual API endpoint
+    this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=bd8eb49a6b08f5e66a70`)
+      .then(response => {
           this.rawdata = JSON.parse(response.data).data;
           // 分数正确显示！！
           // console.log('rawdata!!!', this.score_list);
@@ -130,8 +131,8 @@ export default {
         .on('click', function(event, d) { // 添加点击事件监听器
           // 这里的d是当前点击的气泡的数据 有问题 d是index值
           // 点击气泡 传出去当前气泡的title名称 为隔壁的做题视图提供数据
-          // console.log('Bubble clicked:', bubbleData[d]['title']);
-          EventBus.$on('titleIdSelected', bubbleData[d]['title']);
+          console.log('Bubble clicked:', bubbleData[d]['title']);
+          EventBus.$emit('bubTitleIdSelected', bubbleData[d]['title']);
         });
 
       const textLabels = bubble

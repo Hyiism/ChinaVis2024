@@ -107,7 +107,6 @@ export default {
   methods: {
     fetchStudentScores() {
       this.$axios.get(`http://10.12.44.190:8000/get_check_data/?student_id=${this.studentId}`)
-      this.$axios.get('http://10.12.44.190:8000/get_check_data/?student_id=0088dc183f73c83f763e')
         .then(response => {
           this.infos = JSON.parse(response.data).infos;
           console.log("this.infos");
