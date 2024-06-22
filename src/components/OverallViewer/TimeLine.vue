@@ -10,6 +10,7 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 import PubSub from 'pubsub-js';
+import { mapGetters } from 'vuex';
 
 export default {
     name: 'TimeSelectionChart',
@@ -61,20 +62,38 @@ export default {
                 borderRadius: '8px',
                 zIndex: 1
             },
-            selectedDate: "Thu Aug 31 2023",
-            className : 'Class1'
+            selectedDate: "Thu Sep 14 2023",
+            stvalue: [],
         };
     },
+    computed: {
+        ...mapGetters(['classId'])
+    },
     mounted() {
-        this.drawChart();
         this.token = PubSub.subscribe('dateSelected', (msg, value) => {
             this.selectedDate = value;
             console.log(this.selectedDate);
             this.redrawChart();
         });
+        this.drawChart()
     },
     methods: {
+        formatDate(dateStr) {
+            const dateObj = new Date(dateStr);
+            const year = dateObj.getFullYear();
+            const month = dateObj.getMonth() + 1;
+            const day = dateObj.getDate();
+            return `${year}.${month}.${day}`;
+        },
         drawChart() {
+            const dayTime = this.formatDate(this.selectedDate);
+            this.$axios.get(`http://10.12.44.238:8000/getStudentByTime/?dayTime=${dayTime}&classId=${this.classId}`)
+                .then((response) => {
+                    this.stvalue = response.data
+                    console.log("🚀 ~ .then ~ this.stvalue:", this.stvalue)
+                }).catch(error => {
+                    console.error('Error fetching data:', error);
+                });
             const margin = { top: 0, right: 0, bottom: 0, left: 0 };
             // const chartContainerWidth = this.$refs.chartContainer.clientWidth;
             const chartContainerWidth = 1268;
@@ -90,7 +109,7 @@ export default {
 
             svg.append('rect')
                 .attr('class', 'background')
-                .style("fill", "#F29897")
+                .style("fill", "#E59C8E")
                 .attr('x', 0)
                 .attr('y', 0)
                 .attr('width', chartContainerWidth)
@@ -99,8 +118,9 @@ export default {
             const baseDate = new Date(this.selectedDate);
             const data = d3.range(1440).map((d, i) => ({
                 date: new Date(baseDate.getTime() + i * 60000), // 每分钟增加一次
-                value: Math.random()
+                value: this.stvalue[i]
             }));
+            console.log("🚀 ~ data ~ data:", data.value)
 
             const x = d3.scaleTime()
                 .domain(d3.extent(data, d => d.date))
@@ -114,7 +134,7 @@ export default {
                 .data(data)
                 .enter().append('rect')
                 .attr('class', 'bar')
-                .style("fill", "#AAFAAA")
+                .style("fill", "#2C9F2C")
                 .attr('x', d => x(d.date))
                 .attr('width', width / data.length)
                 .attr('y', d => y(d.value))
@@ -164,8 +184,8 @@ export default {
                         const start = this.selectedDate + ' ' + x0.toLocaleTimeString();
                         const end = this.selectedDate + ' ' + x1.toLocaleTimeString();
                         // 调用发送数据到后端的方法
-                        this.sendDataToBackend(start,end,this.className);
-                        console.log("发送",x0, x1)
+                        this.sendDataToBackend(start, end, this.classId);
+                        console.log("发送", x0, x1)
                         this.tooltipVisibleStart = false;
                         this.tooltipVisibleEnd = false;
                     }
@@ -187,15 +207,9 @@ export default {
             d3.select(this.$refs.chartContainer).select('svg').remove(); // 移除旧的图表
             this.drawChart(); // 重新调用绘图方法
         },
-        sendDataToBackend(startTime, endTime, className) {
+        sendDataToBackend(startTime, endTime, classId) {
             // 使用axios发送数据到后端
-            this.$axios.get(`http://10.12.44.190:8000/getStudentByTime/?startTime=${startTime}&endTime=${endTime}&className=${className}`, {
-                // params: {
-                //     startTime: startTime, // 使用toISOString()将日期转换为ISO格式
-                //     endTime: endTime,
-                //     className: className
-                // }
-            })
+            this.$axios.get(`http://10.12.44.190:8000/getStudentByTime/?startTime=${startTime}&endTime=${endTime}&className=${classId}`)
                 .then(response => {
                     PubSub.publish('studentAppear', JSON.parse(response.data));
 
@@ -203,7 +217,10 @@ export default {
                 .catch(error => {
                     console.error('Error sending data:', error);
                 });
-        }
+        },
+        // fetchStudentByTime(dayTime, classId) {
+        //     return axios.get(`http://10.12.44.190:8000/getStudentByTime/?dayTime=${dayTime}&classId=${classId}`);
+        // },
 
 
     }
