@@ -9,6 +9,8 @@
 <script>
 import * as d3 from 'd3';
 import EventBus from '@/eventBus'; // 导入事件总线
+import { mapGetters } from 'vuex';
+
 
 export default{
   name:'CoordinateGraph',
@@ -170,19 +172,27 @@ export default{
       title: [],
     };
   },
+  computed: {
+    ...mapGetters(['studentId'])
+  },
+  created(){
+    this.fetchStudentScores();
+  },
   mounted() {
     // 监听从气泡图传来的题目id
     EventBus.$on('bubTitleIdSelected', this.handleBubSelected);
     // this.originalData = this.title.map(t => t.titlestate);
     // this.drawChart(this.originalData);
-    this.fetchStudentScores();
+    this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
+      this.fetchStudentScores(value);
+    });
   },
   beforeDestroy() {
     EventBus.$off('bubTitleIdSelected', this.handleBubSelected);
   },
   methods: {
     fetchStudentScores() {
-      this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.student_id}&title_id=${this.title_id}`) // Replace with actual API endpoint
+      this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.studentId}&title_id=${this.title_id}`) // Replace with actual API endpoint
         .then(response => {
             this.title = JSON.parse(response.data);
             // 分数正确显示！！

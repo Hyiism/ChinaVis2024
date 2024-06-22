@@ -644,7 +644,9 @@ export default {
     this.subscriptionToken = PubSub.subscribe('studentAppear', (msg, value) => {
       this.handleStudentAppear(value);
     });
-
+    this.subscriptionTokenClass = PubSub.subscribe('classChange', (msg, value) => {
+      this.handleClassClick(value);
+    });
   },
   created() {
     EventBus.$on('studentSelected', this.handleStudentSelected);
@@ -910,7 +912,7 @@ export default {
                   const targetPosition = new THREE.Vector3(608.3748006602943, 246.87681215346672, 507.9700608328807);
 
                   new TWEEN.Tween(currentPosition)
-                    .to(targetPosition, 1500)
+                    .to(targetPosition, 5000)
                     .easing(TWEEN.Easing.Quadratic.Out)
                     .onUpdate(() => {
                       this.camera.position.copy(currentPosition);
@@ -1457,6 +1459,35 @@ export default {
         });
         this.animate();
       }
+    },
+    handleClassClick(data) {
+      const meshName = Object.keys(this.rectangleToClassMap).find(k => this.rectangleToClassMap[k] === data);
+      console.log(meshName)
+      this.schoolModel.traverse((child) => {
+        if (child.isMesh && child.name.includes(meshName)) {
+          console.log(child);
+
+          // 保存原始材质
+          const originalMaterial = child.material;
+
+          // 创建一个新的材质来实现闪烁效果
+          const flashMaterial = originalMaterial.clone();
+          flashMaterial.color.set("BE5454"); // 设置为红色，您可以根据需要调整颜色
+          flashMaterial.transparent = true; // 确保新材质是透明的
+          flashMaterial.opacity = 0.3; // 设置不透明度为完全不透明
+
+          // 应用新的闪烁材质
+          child.material = flashMaterial;
+
+          // 设置闪烁持续时间
+          const duration = 500; // 500毫秒，您可以根据需要调整时间
+
+          // 闪烁后恢复原始材质
+          setTimeout(() => {
+            child.material = originalMaterial;
+          }, duration);
+        }
+      });
     },
     shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
