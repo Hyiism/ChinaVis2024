@@ -19,6 +19,7 @@
 import * as d3 from 'd3';
 import EventBus from '@/eventBus'; // 导入事件总线
 import { data } from 'jquery';
+import { mapGetters } from 'vuex';
 
 export default{
   name:'BarChart',
@@ -29,10 +30,18 @@ export default{
       title_id_req: 'Question_q7OpB2zCMmW9wS8uNt3H'
     }
   },
+  computed: {
+    ...mapGetters(['studentId'])
+  },
+  created(){
+    this.fetchStudentScores();
+  },
   mounted() {
     // 监听从气泡图传来的题目id
     EventBus.$on('bubTitleIdSelected', this.handleBubSelected);
-    this.fetchStudentScores();
+    this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
+      this.fetchStudentScores(value);
+    });
     // this.drawChart();
   },
   beforeDestroy() {
@@ -45,7 +54,7 @@ export default{
   },
   methods: {
     fetchStudentScores() {
-      this.$axios.get(`http://10.12.44.190:8000/titleperf/?student_id=0088dc183f73c83f763e&title_id=${this.title_id_req}`)
+      this.$axios.get(`http://10.12.44.190:8000/titleperf/?student_id=${this.studentId}&title_id=${this.title_id_req}`)
         .then(response => {
           this.rawData = JSON.parse(response.data).data;
           this.drawChart();
