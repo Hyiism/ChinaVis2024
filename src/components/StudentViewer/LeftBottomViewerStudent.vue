@@ -8,6 +8,8 @@
 
 <script>
 import * as d3 from 'd3';
+import EventBus from '@/eventBus'; // 导入事件总线
+import EventBus from '@/eventBus'; // 导入事件总线
 
 export default{
   name:'CoordinateGraph',
@@ -16,161 +18,187 @@ export default{
       originalData: [],
       filtered: false,
       student_id: '0088dc183f73c83f763e',
-      title:[
-        {
-          title_id: 'Question_q7OpB2zCMmW9wS8uNt3H',
-          titlestate:[
-            {
-              state: 'e',
-              time: '0:00',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype:'error1',
-              method:'Method_m8vwGkEZc3TSW2xqYUoR',
-            },
-            {
-              state: 'e',
-              time: '0:12',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: 'error5',
-              method: 'Method_BXr9AIsPQhwNvyGdZL57',
-            },
-            {
-              state: 'ae',
-              time: '0:50',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: null,
-              method: 'Method_gj1NLb4Jn7URf9K2kQPd',
-            },
-            {
-              state: 'e',
-              time: '1:08',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: 'error3',
-              method: 'Method_BXr9AIsPQhwNvyGdZL57',
-            },
-            {
-              state: 'pc',
-              time: '1:32',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: null,
-              method:'Method_Cj9Ya2R7fZd6xs1q5mNQ',
-            },
-            {
-              state: 'e',
-              time: '1:45',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: 'error9',
-              method: 'Method_5Q4KoXthUuYz3bvrTDFm',
-            },
-            {
-              state: 'ac',
-              time: '2:20',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: null,
-              method:'Method_5Q4KoXthUuYz3bvrTDFm',
-            },
-            {
-              state: 'ac',
-              time: '2:42',
-              time_consume: 4,
-              memory_consume: 268,
-              errortype: null,
-              method:'Method_5Q4KoXthUuYz3bvrTDFm',
-            },
-          ]
-        },
-        {
-          title_id: 'Question_q7OpB2zCMmW9wS8uNt3b',
-          titlestate:[
-            {
-              state: 'ae',
-              time: '0:00',
-              time_consume: 6,
-              memory_consume: 652,
-              errortype: null,
-              method:'Method_gj1NLb4Jn7URf9K2kQPd',
-            },
-            {
-              state: 'e',
-              time: '0:38',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: 'error3',
-              method: 'Method_BXr9AIsPQhwNvyGdZL57',
-            },
-            {
-              state: 'e',
-              time: '0:52',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: 'error5',
-              method: 'Method_BXr9AIsPQhwNvyGdZL57',
-            },
-            {
-              state: 'ae',
-              time: '1:00',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: null,
-              method: 'Method_gj1NLb4Jn7URf9K2kQPd',
-            },
-            {
-              state: 'pc',
-              time: '1:15',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: null,
-              method:'Method_Cj9Ya2R7fZd6xs1q5mNQ',
-            },
-            {
-              state: 'e',
-              time: '1:56',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: 'error9',
-              method: 'Method_5Q4KoXthUuYz3bvrTDFm',
-            },
-            {
-              state: 'pc',
-              time: '2:49',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: null,
-              method:'Method_5Q4KoXthUuYz3bvrTDFm',
-            },
-            {
-              state: 'ae',
-              time: '3:11',
-              time_consume: 4,
-              memory_consume: 327,
-              errortype: null,
-              method:'Method_5Q4KoXthUuYz3bvrTDFm',
-            },
-            {
-              state: 'ac',
-              time: '3:23',
-              time_consume: 4,
-              memory_consume: 268,
-              errortype: null,
-              method:'Method_5Q4KoXthUuYz3bvrTDFm',
-            },
-          ]
-        } 
-      ], 
+      // 用来更新请求！
+      title_id: 'Question_q7OpB2zCMmW9wS8uNt3H',
+      title: [],
+      // 用来更新请求！
+      title_id: 'Question_q7OpB2zCMmW9wS8uNt3H',
+      // title:[
+      //   {
+      //     title_id: 'Question_q7OpB2zCMmW9wS8uNt3H',
+      //     titlestate:[
+      //       {
+      //         state: 'e',
+      //         time: '0:00',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype:'error1',
+      //         method:'Method_m8vwGkEZc3TSW2xqYUoR',
+      //       },
+      //       {
+      //         state: 'e',
+      //         time: '0:12',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: 'error5',
+      //         method: 'Method_BXr9AIsPQhwNvyGdZL57',
+      //       },
+      //       {
+      //         state: 'ae',
+      //         time: '0:50',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: null,
+      //         method: 'Method_gj1NLb4Jn7URf9K2kQPd',
+      //       },
+      //       {
+      //         state: 'e',
+      //         time: '1:08',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: 'error3',
+      //         method: 'Method_BXr9AIsPQhwNvyGdZL57',
+      //       },
+      //       {
+      //         state: 'pc',
+      //         time: '1:32',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: null,
+      //         method:'Method_Cj9Ya2R7fZd6xs1q5mNQ',
+      //       },
+      //       {
+      //         state: 'e',
+      //         time: '1:45',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: 'error9',
+      //         method: 'Method_5Q4KoXthUuYz3bvrTDFm',
+      //       },
+      //       {
+      //         state: 'ac',
+      //         time: '2:20',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: null,
+      //         method:'Method_5Q4KoXthUuYz3bvrTDFm',
+      //       },
+      //       {
+      //         state: 'ac',
+      //         time: '2:42',
+      //         time_consume: 4,
+      //         memory_consume: 268,
+      //         errortype: null,
+      //         method:'Method_5Q4KoXthUuYz3bvrTDFm',
+      //       },
+      //     ]
+      //   },
+      //   {
+      //     title_id: 'Question_q7OpB2zCMmW9wS8uNt3b',
+      //     titlestate:[
+      //       {
+      //         state: 'ae',
+      //         time: '0:00',
+      //         time_consume: 6,
+      //         memory_consume: 652,
+      //         errortype: null,
+      //         method:'Method_gj1NLb4Jn7URf9K2kQPd',
+      //       },
+      //       {
+      //         state: 'e',
+      //         time: '0:38',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: 'error3',
+      //         method: 'Method_BXr9AIsPQhwNvyGdZL57',
+      //       },
+      //       {
+      //         state: 'e',
+      //         time: '0:52',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: 'error5',
+      //         method: 'Method_BXr9AIsPQhwNvyGdZL57',
+      //       },
+      //       {
+      //         state: 'ae',
+      //         time: '1:00',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: null,
+      //         method: 'Method_gj1NLb4Jn7URf9K2kQPd',
+      //       },
+      //       {
+      //         state: 'pc',
+      //         time: '1:15',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: null,
+      //         method:'Method_Cj9Ya2R7fZd6xs1q5mNQ',
+      //       },
+      //       {
+      //         state: 'e',
+      //         time: '1:56',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: 'error9',
+      //         method: 'Method_5Q4KoXthUuYz3bvrTDFm',
+      //       },
+      //       {
+      //         state: 'pc',
+      //         time: '2:49',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: null,
+      //         method:'Method_5Q4KoXthUuYz3bvrTDFm',
+      //       },
+      //       {
+      //         state: 'ae',
+      //         time: '3:11',
+      //         time_consume: 4,
+      //         memory_consume: 327,
+      //         errortype: null,
+      //         method:'Method_5Q4KoXthUuYz3bvrTDFm',
+      //       },
+      //       {
+      //         state: 'ac',
+      //         time: '3:23',
+      //         time_consume: 4,
+      //         memory_consume: 268,
+      //         errortype: null,
+      //         method:'Method_5Q4KoXthUuYz3bvrTDFm',
+      //       },
+      //     ]
+      //   } 
+      // ], 
+      title: [],
     };
   },
   mounted() {
-    this.originalData = this.title.map(t => t.titlestate);
-    this.drawChart(this.originalData);
+    // 监听从气泡图传来的题目id
+    EventBus.$on('bubTitleIdSelected', this.handleBubSelected);
+    // this.originalData = this.title.map(t => t.titlestate);
+    // this.drawChart(this.originalData);
+    this.fetchStudentScores();
+  },
+  beforeDestroy() {
+    EventBus.$off('bubTitleIdSelected', this.handleBubSelected);
   },
   methods: {
+    fetchStudentScores() {
+      this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.student_id}&title_id=${this.title_id}`) // Replace with actual API endpoint
+        .then(response => {
+            this.title = JSON.parse(response.data);
+            // 分数正确显示！！
+            // console.log('rawdata!!!', this.score_list);
+            // 拿到数据后加载表格
+            this.originalData = this.title.map(t => t.titlestate);
+            this.drawChart(this.originalData);
+          })
+          .catch(error => {
+            console.error("There was an error!", error);
+          });
+      },
     drawChart(dataGroups) {
       d3.select(this.$refs.chartContainer).selectAll("*").remove();
 
@@ -364,6 +392,12 @@ export default{
       this.filtered = false;
       this.drawChart(this.originalData);
     },
+    // 接收从气泡图传来的题目id 使用此id请求数据
+    handleBubSelected(titleId) {
+      this.title_id = titleId;
+      // console.log('this.title_id_req:', this.title_id_req);
+      this.fetchStudentScores();
+    }
   }
 }
 </script>
