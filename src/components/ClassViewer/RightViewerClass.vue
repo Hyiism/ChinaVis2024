@@ -56,7 +56,8 @@ export default {
         .then(res => {
           console.log("projection data");
           _this.nodes = JSON.parse(res.data).nodes;
-          console.log(_this.nodes, typeof(_this.nodes));
+          // console.log(_this.nodes, typeof(_this.nodes));
+          console.log("this.nodes:", _this.nodes);
         })
         .catch(error => {
           console.error("There was an error!", error);

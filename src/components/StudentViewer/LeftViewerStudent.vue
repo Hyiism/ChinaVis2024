@@ -49,10 +49,10 @@ export default {
     return {
       infos: [],
       piedata:{
-        "state_ae_percentage":20,
-        "state_e_percentage":40,
-        "state_pc_percentage":25,
-        "state_ac_percentage":15,
+        "ae":20,
+        "e":40,
+        "pc":25,
+        "ac":15,
       },
       timedata:
       {
