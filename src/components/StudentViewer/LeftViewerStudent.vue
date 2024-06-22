@@ -92,16 +92,18 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['studentId'])
+    ...mapGetters(['studnetId'])
   },
   created() {
-    this.fetchStudentScores();
+    console.log(this.studentId)
+    this.fetchStudentScores(this.studentId);
     this.fetchRingData();
     this.fetchRadarData();
   },
   mounted() {
-    // this.renderRingChart(); // 绘制环形图
-    // this.renderRadarChart(); // 绘制雷达图
+    this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
+      this.fetchStudentScores(value);
+    });
   },
 
   methods: {

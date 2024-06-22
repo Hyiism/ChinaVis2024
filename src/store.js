@@ -14,6 +14,7 @@ export default new Vuex.Store({
     },
     setStudentId(state, studentId) {
       state.studentId = studentId;
+      console.log("state.studentId",state.studentId)
     }
   },
   actions: {
@@ -21,6 +22,7 @@ export default new Vuex.Store({
       commit('setClassId', classId);
     },
     updateStudentId({ commit }, studentId) {
+      console.log('Payload received:', studentId); // 确保正确接收到数据
       commit('setStudentId', studentId);
     }
   },
