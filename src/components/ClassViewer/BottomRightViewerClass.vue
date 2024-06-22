@@ -168,10 +168,10 @@ export default {
     renderChart() {
       const colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(this.clusters);
       const clusterColors = {
-        0: "#6090b8",
-        1: "#d19ba9",
-        2: "#9de1ac",
-        3: "#003c72",
+        0: "#1e466e",
+        1: "#72bcd5",
+        2: "#Ffd06f",
+        3: "#E76254",
       }; 
 
       const dotPlot = Plot.plot({
@@ -261,11 +261,11 @@ export default {
     renderChartDetail() {
       const colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(this.clusters);
       const clusterColors = {
-        0: "#6090b8",
-        1: "#d19ba9",
-        2: "#9de1ac",
-        3: "#003c72",
-      }; 
+        0: "#1e466e",
+        1: "#72bcd5",
+        2: "#Ffd06f",
+        3: "#E76254",
+      };
 
       const dotPlot = Plot.plot({
         width: this.width - this.boxWidth,

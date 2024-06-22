@@ -92,6 +92,7 @@ export default {
         Group1: chartData_label, Group2: chartData_time, Group3: chartData_gender
         , Group4: chartData_major, Group5: chartData_method,Group6: chartData_state
       },
+      customColors: ["#f7aa58", "#528fad", "#Ffd06f", "#Aadce0", "#Ef8a47", "#1e466e"], // 自定义的RGB十六进制颜色
 
 
       territoryGroups: {
@@ -130,7 +131,7 @@ export default {
     drawChart() {
 
       console.log('data_dic_drawChart', this.data_dic)
-      const { chartData, territoryGroups, selectedTerritoryGroup, classes, width, height, margin, color } = this;
+      const { chartData, territoryGroups, selectedTerritoryGroup, classes, width, height, margin, customColors } = this;
       const territories = territoryGroups[selectedTerritoryGroup];
 
       const svg = d3.select(this.$refs.chart)
@@ -140,6 +141,8 @@ export default {
         .attr("viewBox", [0, 0, width, height])
         .attr("width", width)
         .attr("height", height);
+
+      const colors = ["#E76254","#f7aa58","#Aadce0","#376795","#E76254",]
 
       const x = d3.scaleBand()
         .domain(classes)
@@ -200,7 +203,8 @@ export default {
       this.slice = pg.append("path")
         .attr("d", d => pie(d)())
         .attr("opacity", 1)
-        .attr("fill", (d, i) => color(territories[i]));
+        // .attr("fill", (d, i) => color(territories[i]));
+        .attr("fill", (d, i) => customColors[i % customColors.length]); // 使用自定义颜色
 
       this.pct = pg.append("text")
         .attr("text-anchor", "middle")
@@ -237,7 +241,8 @@ export default {
         .call(g => g.append("rect")
           .attr("rx", 3).attr("ry", 3)
           .attr("width", 20).attr("height", 15)
-          .attr("fill", d => color(d)))
+          // .attr("fill", d => color(d)))
+          .attr("fill", (d, i) => customColors[i % customColors.length])) // 使用自定义颜色
         .call(g => g.append("text").attr("dx", 25).attr("alignment-baseline", "hanging").text(d => d))
         .on("mouseover", this.highlight)
         .on("mouseout", () => this.highlight());

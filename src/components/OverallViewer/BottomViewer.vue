@@ -180,19 +180,28 @@ export default {
           {
             name: '0-5',
             type: 'parallel',
-            lineStyle: lineStyle,
+            lineStyle: {
+              ...lineStyle,
+              color: '#Ef8a47' // 自定义颜色
+            },
             data: top5,
           },
           {
             name: '5-10',
             type: 'parallel',
-            lineStyle: lineStyle,
+            lineStyle: {
+              ...lineStyle,
+              color: '#Ffd06f' // 自定义颜色
+            },
             data: top10,
           },
           {
             name: '10-15',
             type: 'parallel',
-            lineStyle: lineStyle,
+            lineStyle: {
+              ...lineStyle,
+              color: '#528fad' // 自定义颜色
+            },
             data: top15,
           },
         ],

@@ -116,10 +116,23 @@ export default {
 
       const yAxis = svg.append("g");
 
+      // const color = d3.scaleOrdinal()
+      //   .domain(top_10_states)
+      //   .range(d3.schemeTableau10)
+      //   .unknown("#ccc");
       const color = d3.scaleOrdinal()
-        .domain(top_10_states)
-        .range(d3.schemeTableau10)
-        .unknown("#ccc");
+    .domain(top_10_states)
+    .range([
+      "#E76254", // b3C9s_score 颜色
+      "#Ef8a47", // g7R2j_score 颜色
+      "#f7aa58", // k4W1c_score 颜色
+      "#Ffd06f", // m3D1v_score 颜色
+      "#Aadce0", // r8S3g_score 颜色
+      "#72bcd5", // s8Y2f_score 颜色
+      "#528fad", // t5V9e_score 颜色
+      "#1e466e"  // y9W5d_score 颜色
+    ])
+    .unknown("#ccc");
 
       this.createLegend(svg, color, top_10_states, chartContainerWidth, margin); // Call createLegend here
 

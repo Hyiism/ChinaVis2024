@@ -96,20 +96,15 @@ export default {
       //   .domain([50, 1]);
       // Compute color scale domain
       const valueExtent = d3.extent(this.heatmapData, d => d.value);
-      const myColor = d3.scaleLinear()
-        .domain([valueExtent[0], valueExtent[1]])
-        .interpolate(d3.interpolateRgb)
-        .range(["#f1f0ec", "#e07563"]);
-      // const myColor = d3.scaleSequential()
-      //   // .interpolator(d3.interpolateInferno) //颜色从黄到紫
-      //   // .interpolator(d3.interpolateViridis) //颜色从深紫色到黄绿色
-      //   // .interpolator(d3.interpolateCubehelixDefault) //基于立方螺旋算法的颜色渐变，默认从黑色到白色
-      //   .interpolator(d3.interpolateBlues) //颜色从浅蓝色到深蓝色
-      //   // .interpolator(d3.interpolateGreens) //颜色从浅绿色到深绿色
-      //   // .interpolator(d3.interpolateGreys) //颜色从白色到黑色
-      //   // .interpolator(d3.interpolateBuGn) //颜色从浅蓝绿色到深蓝绿色
+      // const myColor = d3.scaleLinear()
+      //   .domain([valueExtent[0], valueExtent[1]])
+      //   .interpolate(d3.interpolateRgb)
+      //   .range(["#dfdadf", "#3e468e"]);
+      const myColor = d3.scaleSequential()
+        // .interpolator(d3.interpolateBlues) //颜色从浅蓝色到深蓝色
+        .interpolator(d3.interpolateRdBu)
 
-      //   .domain([valueExtent[0], valueExtent[1]]); //把颜色反一下，让较深的颜色来代表较大的数据
+        .domain([valueExtent[1], valueExtent[0]]); //把颜色反一下，让较深的颜色来代表较大的数据
 
       // Create a tooltip
       const tooltip = d3.select(this.$refs.chart)

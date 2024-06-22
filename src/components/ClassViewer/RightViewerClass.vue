@@ -88,13 +88,19 @@ export default {
 
       var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
       const clusterColors = {
-        0: "#6090b8",
-        1: "#d19ba9",
-        2: "#9de1ac",
-        3: "#003c72",
+        0: "#376795",
+        1: "#72bcd5",
+        2: "#Ffd06f",
+        3: "#E76254",
       }; 
+      const Colors1 = {
+        1: "#72bcd5",
+        2: "#Ffd06f",
+        3: "#E76254",
+        4: "#376795",
+      };
       // 创建渐变颜色比例
-      const colors = d3.scaleSequential(d3.interpolateMagma);
+      const colors = d3.scaleSequential(d3.interpolateRdBu);
       
       // var colorScale = d3.scaleOrdinal()
       //   .domain([0, 1, 2, 3])  // Ensure the domain covers all four clusters
@@ -198,7 +204,7 @@ export default {
               .attr("d", arcGenerator02)
               // .attr("fill", colorScale(key))
               // .attr("fill", colors(value / totalScore*1.5))
-              .attr("fill", colors(keyMapping[key]/8))
+              .attr("fill", Colors1[keyMapping[key]])
               .attr("stroke", "grey")
               .attr("transform", `translate(${xScale(node.x)},${yScale(node.y)})`);
             startAngle02 = endAngle02 + gapAngle;

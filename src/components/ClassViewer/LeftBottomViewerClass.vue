@@ -93,6 +93,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#E76254' // 使用自定义颜色
+            },
               // barWidth: 15, // 调整柱状图的宽度
               // barGap: '30%', // 调整柱状图之间的间隔
               // data: [320, 302, 301, 334, 390, 330, 320]
@@ -108,6 +111,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#Ef8a47' // 使用自定义颜色
+            },
               // data: [120, 132, 101, 134, 90, 230, 210]
               data: this.top_students.subject_6.reverse()
             },
@@ -121,6 +127,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#f7aa58' // 使用自定义颜色
+            },
               // data: [220, 182, 191, 234, 290, 330, 310]
               data: this.top_students.subject_1.reverse()
             },
@@ -134,6 +143,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#Ffd06f' // 使用自定义颜色
+            },
               // data: [150, 212, 201, 154, 190, 330, 410]
               data: this.top_students.subject_5.reverse()
             },
@@ -147,6 +159,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#Aadce0' // 使用自定义颜色
+            },
               // data: [820, 832, 901, 934, 1290, 1330, 1320]
               data: this.top_students.subject_7.reverse()
             },
@@ -160,6 +175,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#72bcd5' // 使用自定义颜色
+            },
               // data: [820, 832, 901, 934, 1290, 1330, 1320]
               data: this.top_students.subject_2.reverse()
             },
@@ -173,6 +191,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#528fad' // 使用自定义颜色
+            },
               // data: [820, 832, 901, 934, 1290, 1330, 1320]
               data: this.top_students.subject_8.reverse()
             },
@@ -186,6 +207,9 @@
               emphasis: {
                 focus: 'series'
               },
+              itemStyle: {
+              color: '#376795' // 使用自定义颜色
+            },
               // data: [820, 832, 901, 934, 1290, 1330, 1320]
               data: this.top_students.subject_4.reverse()
             }
