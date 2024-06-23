@@ -488,6 +488,7 @@ export default {
 
 #LeftBottomViewerStudent {
   width: calc(25% - 4px);
+  /* width: calc(50% - 4px); */
   height: calc(30% - 4px);
   position: absolute;
   top: 33%;
