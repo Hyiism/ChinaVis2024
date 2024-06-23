@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <div class="chat-container">
     <img class="avatar" :src="avatar" alt="Avatar" />
     <div class="chat-box" ref="chatBox" v-html="renderedText"></div>
@@ -7,6 +7,7 @@
 <script>
 import { html } from 'd3';
 import MarkdownIt from 'markdown-it';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'ChatBox',
@@ -22,7 +23,14 @@ export default {
     };
   },
   mounted() {
-    // this.fetchText();
+    this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
+      this.fetchTextStream(value);
+    });
+  },
+  computed: {
+    ...mapGetters(['studentId'])
+  },
+  created() {
     this.fetchTextStream();
   },
   methods: {
@@ -30,7 +38,7 @@ export default {
     fetchTextStream() {
       let _this = this;
 
-      fetch('http://10.12.44.190:8000/getComments_stream/?student_id=00cbf05221bb479e66c3', {
+      fetch(`http://10.12.44.190:8000/getComments_stream/?student_id=${this.studentId}`, {
         method: 'GET',
       }).then(response => {
         const reader = response.body.getReader();
@@ -111,4 +119,4 @@ export default {
   /* white-space: pre-wrap;  */
   font-family: Arial, sans-serif;
 }
-</style> -->
+</style>

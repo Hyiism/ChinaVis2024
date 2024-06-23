@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <div class="bottomright-chart">
     <el-select v-model="selectedcolumns" multiple placeholder="请选择y轴" class="feat-select" v-if="state_all"
       @change="handleSelectChange">
@@ -369,4 +369,4 @@ export default {
   z-index: 10;
   background-color: white;
 }
-</style> -->
+</style>

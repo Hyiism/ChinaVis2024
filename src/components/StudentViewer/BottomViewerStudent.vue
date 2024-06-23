@@ -17,7 +17,7 @@ export default {
   computed: {
     ...mapGetters(['studentId'])
   },
-  created(){
+  created() {
     this.fetchStudentScores();
   },
   mounted() {
@@ -35,8 +35,8 @@ export default {
   },
   methods: {
     fetchStudentScores() {
-    this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=${this.studentId}`) // Replace with actual API endpoint
-      .then(response => {
+      this.$axios.get(`http://10.12.44.190:8000/bubpie/?student_id=${this.studentId}`) // Replace with actual API endpoint
+        .then(response => {
           this.rawdata = JSON.parse(response.data).data;
           // 分数正确显示！！
           // console.log('rawdata!!!', this.score_list);
@@ -66,6 +66,7 @@ export default {
       console.log('width', width);
       const margin = { t: 0, l: 50, r: 20, b: 0 };
       const padding = 2;
+      const knowledge_list = ['k4W1c', 'b3C9s', 'r8S3g', 'm3D1v', 'y9W5d', 't5V9e', 'g7R2j', 's8Y2f']
 
       if (xAxis === undefined) {
         bubbleData.map(d => (d.xAxis = 0));
@@ -87,7 +88,13 @@ export default {
       const xaxis = svg
         .append("g")
         .attr("transform", `translate(0,${height - 50})`)
-        .call(d3v5.axisBottom(x));
+        .call(d3v5.axisBottom(x)).selectAll(".tick")
+        .on('click', (event, d) => {
+          // 这里的d是index值
+          console.log('X Axis Tick Clicked:', knowledge_list[d]);
+          // 在这里可以处理点击事件的逻辑，例如发送事件或者执行其他操作
+          EventBus.$emit('bubKnowledgeIdSelected', knowledge_list[d]);
+        });
 
       const colorScale = d3v5.scaleOrdinal(d3v5.schemeCategory10);
 
@@ -97,7 +104,7 @@ export default {
         .range(["#fff", "#000"])
         .domain([0, luminance, 100]);
 
-        // 设置圆圈大小
+      // 设置圆圈大小
       const r = d3v5
         .scaleSqrt()
         .domain([0, d3v5.max(bubbleData, d => d[frequency])])
@@ -132,7 +139,7 @@ export default {
         .attr('fill-opacity', 0.4)
         .attr('stroke', d => d3v5.rgb(colorScale(d[word])).darker(1))
         .attr('stroke-width', 1)
-        .on('click', function(event, d) { // 添加点击事件监听器
+        .on('click', function (event, d) { // 添加点击事件监听器
           // 这里的d是当前点击的气泡的数据 有问题 d是index值
           // 点击气泡 传出去当前气泡的title名称 为隔壁的做题视图提供数据
           console.log('Bubble clicked:', bubbleData[d]['title']);
@@ -149,6 +156,12 @@ export default {
         .attr('font-weight', 'normal')
         .style('stroke', 'white')
         .style('stroke-width', 2);
+      // .on('click', function(event, d) { // 添加点击事件监听器
+      //   // 这里的d是当前点击的气泡的数据 有问题 d是index值
+      //   // 点击气泡 传出去当前气泡的title名称 为隔壁的做题视图提供数据
+      //   console.log('Bubble clicked:', d);
+      //   // EventBus.$emit('bubTitleIdSelected', bubbleData[d]['title']);
+      // });
 
       const textBck = bubble
         .append('text')
