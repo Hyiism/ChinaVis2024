@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="titleAll">
-      <h2>XXX可视化系统</h2>
+      <h2><strong>全方位学习分析与知识洞察可视分析系统</strong></h2>
     </div>
 
 
