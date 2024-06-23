@@ -6,7 +6,7 @@
       <!-- <button @click="lookCameraPosition">查看相机位置</button>
       <button @click="changeState">Change State</button>
       <button @click="changeToOverview">返回主视图</button> -->
-      <a-button type="dashed" @click="lookCameraPosition">Look Camera Position</a-button>
+      <!-- <a-button type="dashed" @click="lookCameraPosition">Look Camera Position</a-button> -->
       <a-button type="dashed" @click="changeToOverview">Switch OverView</a-button>
     </div>
 
@@ -1126,9 +1126,9 @@ export default {
         })
         .start();
     },
-    lookCameraPosition() {
-      console.log(this.camera.position.clone());
-    },
+    // lookCameraPosition() {
+    //   console.log(this.camera.position.clone());
+    // },
     changeToOverview() {
       this.stateCode = 0
       this.saveState(this.stateCode);

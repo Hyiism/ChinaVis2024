@@ -106,7 +106,7 @@ export default {
 
       var option = {
         title: {
-          text: '异常题目检测表',
+          // text: '异常题目检测表',
           left: 'center',
           textStyle: {
             color: '#000',
@@ -231,7 +231,7 @@ export default {
         label.innerText = item.text;
         // label.innerText.style = 'font-size: 10px';
         label.style.position = 'absolute';
-        label.style.top = `${chartRect.top + 40}px`; // 根据需要调整位置
+        label.style.top = `${chartRect.top + 10}px`; // 根据需要调整位置
         label.style.left = `${chartRect.left + (index + 1) * (chartRect.width / schema.length) - 20}px`; // 此处调整标签名和坐标轴对齐情况
         label.style.cursor = 'pointer';
         label.addEventListener('click', () => {
