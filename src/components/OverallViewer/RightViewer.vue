@@ -12,7 +12,7 @@
           <a-menu-item key="Group4">专业占比</a-menu-item>
           <a-menu-item key="Group5">编程语言使用占比</a-menu-item>
           <a-menu-item key="Group6">做题状态占比</a-menu-item>
-         
+
         </a-menu>
       </a-dropdown>
     </div>
@@ -21,14 +21,15 @@
 
 <script>
 import * as d3 from "d3";
+import PubSub from 'pubsub-js';
 
 export default {
   name: "BubblePieChart",
   data() {
 
     // 将最开始的状态设置为 学生标签占比
-    const chartData  = [{ 'class': 'Class1', 'values': [31, 31, 34], 'total': 96 }, { 'class': 'Class10', 'values': [32, 20, 32], 'total': 84 }, { 'class': 'Class11', 'values': [27, 41, 28], 'total': 96 }, { 'class': 'Class12', 'values': [38, 33, 24], 'total': 95 }, { 'class': 'Class13', 'values': [17, 41, 33], 'total': 91 }, { 'class': 'Class14', 'values': [23, 24, 33], 'total': 80 }, { 'class': 'Class15', 'values': [31, 22, 28], 'total': 81 }, { 'class': 'Class2', 'values': [47, 27, 18], 'total': 92 }, { 'class': 'Class3', 'values': [47, 36, 26], 'total': 109 }, { 'class': 'Class4', 'values': [32, 27, 27], 'total': 86 }, { 'class': 'Class5', 'values': [32, 16, 36], 'total': 84 }, { 'class': 'Class6', 'values': [14, 42, 42], 'total': 98 }, { 'class': 'Class7', 'values': [37, 32, 29], 'total': 98 }, { 'class': 'Class8', 'values': [25, 40, 35], 'total': 100 }, { 'class': 'Class9', 'values': [22, 23, 29], 'total': 74 }]
-    
+    const chartData = [{ 'class': 'Class1', 'values': [31, 31, 34], 'total': 96 }, { 'class': 'Class10', 'values': [32, 20, 32], 'total': 84 }, { 'class': 'Class11', 'values': [27, 41, 28], 'total': 96 }, { 'class': 'Class12', 'values': [38, 33, 24], 'total': 95 }, { 'class': 'Class13', 'values': [17, 41, 33], 'total': 91 }, { 'class': 'Class14', 'values': [23, 24, 33], 'total': 80 }, { 'class': 'Class15', 'values': [31, 22, 28], 'total': 81 }, { 'class': 'Class2', 'values': [47, 27, 18], 'total': 92 }, { 'class': 'Class3', 'values': [47, 36, 26], 'total': 109 }, { 'class': 'Class4', 'values': [32, 27, 27], 'total': 86 }, { 'class': 'Class5', 'values': [32, 16, 36], 'total': 84 }, { 'class': 'Class6', 'values': [14, 42, 42], 'total': 98 }, { 'class': 'Class7', 'values': [37, 32, 29], 'total': 98 }, { 'class': 'Class8', 'values': [25, 40, 35], 'total': 100 }, { 'class': 'Class9', 'values': [22, 23, 29], 'total': 74 }]
+
     // 男女占比数据
     const chartData_gender = [
       { 'class': 'Class1', 'values': [48.0, 48.0], 'total': 96.0 },
@@ -47,7 +48,7 @@ export default {
       { 'class': 'Class14', 'values': [44.0, 36.0], 'total': 80.0 },
       { 'class': 'Class15', 'values': [31.0, 50.0], 'total': 81.0 }
     ]
-    
+
     // 学习时间段与总分
     const chartData_time = [{ 'class': 'Class2', 'values': [50.5092125972618, 40.416048834183606, 1.0747385685545796], 'total': 117.37276660541328 },
     { 'class': 'Class10', 'values': [49.63848867871629, 33.584480848102025, 0.7770304731816867], 'total': 109.36225103008965 },
@@ -64,18 +65,18 @@ export default {
     { 'class': 'Class7', 'values': [55.30878566577731, 41.12611131190798, 1.5651030223147082], 'total': 112.90257982235623 },
     { 'class': 'Class8', 'values': [65.84829522056421, 32.80805515736088, 1.3436496220748886], 'total': 107.43093319298745 },
     { 'class': 'Class12', 'values': [51.15072065526562, 42.677268047275795, 1.172011297458573], 'total': 114.56477952341316 }]
-   
+
     // 标签
     const chartData_label = chartData
-    
+
     // 专业
     const chartData_major = [{ 'class': 'Class1', 'values': [16, 18, 26, 17, 19], 'total': 96 }, { 'class': 'Class10', 'values': [15, 22, 12, 19, 16], 'total': 84 }, { 'class': 'Class11', 'values': [22, 18, 20, 18, 18], 'total': 96 }, { 'class': 'Class12', 'values': [18, 14, 20, 23, 20], 'total': 95 }, { 'class': 'Class13', 'values': [19, 15, 23, 15, 19], 'total': 91 }, { 'class': 'Class14', 'values': [14, 16, 13, 16, 21], 'total': 80 }, { 'class': 'Class15', 'values': [3, 23, 21, 20, 14], 'total': 81 }, { 'class': 'Class2', 'values': [21, 13, 26, 20, 12], 'total': 92 }, { 'class': 'Class3', 'values': [16, 27, 22, 22, 22], 'total': 109 }, { 'class': 'Class4', 'values': [17, 19, 21, 15, 14], 'total': 86 }, { 'class': 'Class5', 'values': [25, 17, 9, 17, 16], 'total': 84 }, { 'class': 'Class6', 'values': [18, 16, 19, 22, 23], 'total': 98 }, { 'class': 'Class7', 'values': [14, 23, 21, 21, 19], 'total': 98 }, { 'class': 'Class8', 'values': [24, 19, 22, 24, 11], 'total': 100 }, { 'class': 'Class9', 'values': [16, 17, 16, 11, 14], 'total': 74 }]
-    
+
     // 编程语言使用
-    const chartData_method = [{'class': 'Class1', 'values': [3854, 4059, 3814, 3899, 3887], 'total': 110.16180021557204}, {'class': 'Class10', 'values': [2702, 2801, 2575, 2675, 2692], 'total': 109.36225103008965}, {'class': 'Class11', 'values': [2960, 3042, 3140, 2943, 2857], 'total': 111.48708467019877}, {'class': 'Class12', 'values': [2707, 2923, 2776, 2767, 2827], 'total': 114.56477952341316}, {'class': 'Class13', 'values': [3221, 3082, 3309, 3248, 3243], 'total': 107.17844379546719}, {'class': 'Class14', 'values': [2405, 2492, 2299, 2418, 2516], 'total': 107.76076696942259}, {'class': 'Class15', 'values': [2519, 2401, 2449, 2550, 2492], 'total': 111.14506949773266}, {'class': 'Class2', 'values': [2803, 2721, 2697, 2797, 2827], 'total': 117.37276660541328}, {'class': 'Class3', 'values': [3443, 3236, 3252, 3333, 3451], 'total': 115.66433047580146}, {'class': 'Class4', 'values': [2951, 2710, 2815, 2958, 2849], 'total': 112.29337309706447}, {'class': 'Class5', 'values': [2780, 2948, 2795, 2840, 2715], 'total': 107.42989181358148}, {'class': 'Class6', 'values': [4146, 4011, 4011, 4003, 4031], 'total': 100.33066852293989}, {'class': 'Class7', 'values': [3490, 3388, 3447, 3516, 3432], 'total': 112.90257982235623}, {'class': 'Class8', 'values': [4018, 3968, 3962, 3958, 3779], 'total': 107.43093319298745}, {'class': 'Class9', 'values': [2848, 2799, 2852, 2857, 2825], 'total': 109.22016824892405}]
-    
+    const chartData_method = [{ 'class': 'Class1', 'values': [3854, 4059, 3814, 3899, 3887], 'total': 110.16180021557204 }, { 'class': 'Class10', 'values': [2702, 2801, 2575, 2675, 2692], 'total': 109.36225103008965 }, { 'class': 'Class11', 'values': [2960, 3042, 3140, 2943, 2857], 'total': 111.48708467019877 }, { 'class': 'Class12', 'values': [2707, 2923, 2776, 2767, 2827], 'total': 114.56477952341316 }, { 'class': 'Class13', 'values': [3221, 3082, 3309, 3248, 3243], 'total': 107.17844379546719 }, { 'class': 'Class14', 'values': [2405, 2492, 2299, 2418, 2516], 'total': 107.76076696942259 }, { 'class': 'Class15', 'values': [2519, 2401, 2449, 2550, 2492], 'total': 111.14506949773266 }, { 'class': 'Class2', 'values': [2803, 2721, 2697, 2797, 2827], 'total': 117.37276660541328 }, { 'class': 'Class3', 'values': [3443, 3236, 3252, 3333, 3451], 'total': 115.66433047580146 }, { 'class': 'Class4', 'values': [2951, 2710, 2815, 2958, 2849], 'total': 112.29337309706447 }, { 'class': 'Class5', 'values': [2780, 2948, 2795, 2840, 2715], 'total': 107.42989181358148 }, { 'class': 'Class6', 'values': [4146, 4011, 4011, 4003, 4031], 'total': 100.33066852293989 }, { 'class': 'Class7', 'values': [3490, 3388, 3447, 3516, 3432], 'total': 112.90257982235623 }, { 'class': 'Class8', 'values': [4018, 3968, 3962, 3958, 3779], 'total': 107.43093319298745 }, { 'class': 'Class9', 'values': [2848, 2799, 2852, 2857, 2825], 'total': 109.22016824892405 }]
+
     // 四中状态占比
-    const chartData_state = [{'class': 'Class1', 'values': [4248.0, 7771.0, 3197.0, 4297.0], 'total': 110.16180021557204}, {'class': 'Class10', 'values': [2853.0, 4690.0, 2532.0, 3370.0], 'total': 109.36225103008965}, {'class': 'Class11', 'values': [2649.0, 5826.0, 2247.0, 4220.0], 'total': 111.48708467019877}, {'class': 'Class12', 'values': [2547.0, 4304.0, 2760.0, 4389.0], 'total': 114.56477952341316}, {'class': 'Class13', 'values': [3154.0, 6323.0, 2848.0, 3778.0], 'total': 107.17844379546719}, {'class': 'Class14', 'values': [2225.0, 4619.0, 2146.0, 3140.0], 'total': 107.76076696942259}, {'class': 'Class15', 'values': [2422.0, 4572.0, 1972.0, 3445.0], 'total': 111.14506949773266}, {'class': 'Class2', 'values': [2519.0, 4093.0, 3134.0, 4099.0], 'total': 117.37276660541328}, {'class': 'Class3', 'values': [3374.0, 6256.0, 2464.0, 4621.0], 'total': 115.66433047580146}, {'class': 'Class4', 'values': [3198.0, 5276.0, 2185.0, 3624.0], 'total': 112.29337309706447}, {'class': 'Class5', 'values': [2954.0, 5366.0, 2590.0, 3168.0], 'total': 107.42989181358148}, {'class': 'Class6', 'values': [4423.0, 8780.0, 3143.0, 3856.0], 'total': 100.33066852293989}, {'class': 'Class7', 'values': [3535.0, 5987.0, 3337.0, 4414.0], 'total': 112.90257982235623}, {'class': 'Class8', 'values': [3818.0, 8621.0, 3192.0, 4054.0], 'total': 107.43093319298745}, {'class': 'Class9', 'values': [2590.0, 5634.0, 2192.0, 3765.0], 'total': 109.22016824892405}]
+    const chartData_state = [{ 'class': 'Class1', 'values': [4248.0, 7771.0, 3197.0, 4297.0], 'total': 110.16180021557204 }, { 'class': 'Class10', 'values': [2853.0, 4690.0, 2532.0, 3370.0], 'total': 109.36225103008965 }, { 'class': 'Class11', 'values': [2649.0, 5826.0, 2247.0, 4220.0], 'total': 111.48708467019877 }, { 'class': 'Class12', 'values': [2547.0, 4304.0, 2760.0, 4389.0], 'total': 114.56477952341316 }, { 'class': 'Class13', 'values': [3154.0, 6323.0, 2848.0, 3778.0], 'total': 107.17844379546719 }, { 'class': 'Class14', 'values': [2225.0, 4619.0, 2146.0, 3140.0], 'total': 107.76076696942259 }, { 'class': 'Class15', 'values': [2422.0, 4572.0, 1972.0, 3445.0], 'total': 111.14506949773266 }, { 'class': 'Class2', 'values': [2519.0, 4093.0, 3134.0, 4099.0], 'total': 117.37276660541328 }, { 'class': 'Class3', 'values': [3374.0, 6256.0, 2464.0, 4621.0], 'total': 115.66433047580146 }, { 'class': 'Class4', 'values': [3198.0, 5276.0, 2185.0, 3624.0], 'total': 112.29337309706447 }, { 'class': 'Class5', 'values': [2954.0, 5366.0, 2590.0, 3168.0], 'total': 107.42989181358148 }, { 'class': 'Class6', 'values': [4423.0, 8780.0, 3143.0, 3856.0], 'total': 100.33066852293989 }, { 'class': 'Class7', 'values': [3535.0, 5987.0, 3337.0, 4414.0], 'total': 112.90257982235623 }, { 'class': 'Class8', 'values': [3818.0, 8621.0, 3192.0, 4054.0], 'total': 107.43093319298745 }, { 'class': 'Class9', 'values': [2590.0, 5634.0, 2192.0, 3765.0], 'total': 109.22016824892405 }]
 
 
     return {
@@ -90,13 +91,13 @@ export default {
       // 字典用于映射Group --> Data
       data_dic: {
         Group1: chartData_label, Group2: chartData_time, Group3: chartData_gender
-        , Group4: chartData_major, Group5: chartData_method,Group6: chartData_state
+        , Group4: chartData_major, Group5: chartData_method, Group6: chartData_state
       },
       customColors: ["#f7aa58", "#528fad", "#Ffd06f", "#Aadce0", "#Ef8a47", "#1e466e"], // 自定义的RGB十六进制颜色
 
 
       territoryGroups: {
-        Group1: ["top1/3", "top2/3", "top3/3"],       
+        Group1: ["top1/3", "top2/3", "top3/3"],
         Group2: ['morning', 'afternoon', 'evening'],
         Group3: ["male", "female"],
         Group4: ['J23517', 'J87654', 'J78901', 'J40192', 'J57489'],
@@ -128,6 +129,9 @@ export default {
 
       this.updateChart();
     },
+    handlePieClick(event, d) {
+      PubSub.publish('classChange', d.class);
+    },
     drawChart() {
 
       console.log('data_dic_drawChart', this.data_dic)
@@ -142,7 +146,7 @@ export default {
         .attr("width", width)
         .attr("height", height);
 
-      const colors = ["#E76254","#f7aa58","#Aadce0","#376795","#E76254",]
+      const colors = ["#E76254", "#f7aa58", "#Aadce0", "#376795", "#E76254",]
 
       const x = d3.scaleBand()
         .domain(classes)
@@ -189,7 +193,7 @@ export default {
           .text(d => toCurrency(d.total)));
 
       const pg = g.selectAll("g")
-        .data(d => d3.pie()(d.values).map(p => ({ pie: p, total: d.total })))
+        .data(d => d3.pie()(d.values).map(p => ({ pie: p, total: d.total, class: d.class })))
         .join("g")
         .call(g => g.append("title")
           .text((d, i) => `${territories[i]}\n${toCurrency(d.pie.value)} (${(d.pie.value / d.total * 100).toFixed(1)}%)`));
@@ -205,6 +209,8 @@ export default {
         .attr("opacity", 1)
         // .attr("fill", (d, i) => color(territories[i]));
         .attr("fill", (d, i) => customColors[i % customColors.length]); // 使用自定义颜色
+
+      pg.on('click', this.handlePieClick);
 
       this.pct = pg.append("text")
         .attr("text-anchor", "middle")
