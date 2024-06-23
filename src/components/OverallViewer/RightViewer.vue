@@ -101,7 +101,7 @@ export default {
         Group2: ['morning', 'afternoon', 'evening'],
         Group3: ["male", "female"],
         Group4: ['J23517', 'J87654', 'J78901', 'J40192', 'J57489'],
-        Group5: ['Method_Cj9Ya2R7fZd6xs1q5mNQ', 'Method_m8vwGkEZc3TSW2xqYUoR', 'Method_BXr9AIsPQhwNvyGdZL57', 'Method_gj1NLb4Jn7URf9K2kQPd', 'Method_5Q4KoXthUuYz3bvrTDFm'],
+        Group5: ['Cj9', 'm8v', 'BXr', 'gj1', '5Q4'],
         Group6: ['Absolutely_Error', 'Error', 'Partially_Correct', 'Absolutely_Correct']
       },
       selectedTerritoryGroup: "Group1",
@@ -236,10 +236,10 @@ export default {
     },
 
     drawLegend(g) {
-      const { territoryGroups, selectedTerritoryGroup, color, margin, width } = this;
+      const { territoryGroups, selectedTerritoryGroup, customColors, margin, width } = this;
       const territories = territoryGroups[selectedTerritoryGroup];
 
-      this.legend = g.attr("transform", `translate(${margin.left + 20}, ${margin.top - 60})`)
+      this.legend = g.attr("transform", `translate(${margin.left + 5 }, ${margin.top - 60})`)
         .selectAll("g")
         .data(territories)
         .join("g")
