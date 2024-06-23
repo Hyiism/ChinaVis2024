@@ -67,7 +67,7 @@ export default {
       const kn_values = this.kn_values.slice(1);
       const k0 = 0.5;
       // 颜色设置，每条线对应的实线和虚线颜色
-      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff', '#FFF0F5', '#F0FFF0', '#FAEBD7', '#E6E6FA'];
+      const colors = ['#B2DAB2', '#EFB0B0', '#AECBE1', '#F38833', '#CECECE', '#F0FFF0', '#FAEBD7', '#E6E6FA'];
 
       // 生成数据
       function generateData() {
@@ -94,7 +94,7 @@ export default {
             showSymbol: false,
             lineStyle: {
               normal: {
-                color: '#000000', // 设置实线和虚线颜色
+                color: '#CECECE', // 设置实线和虚线颜色
                 type: 'solid'
               }
             },
@@ -107,7 +107,7 @@ export default {
             showSymbol: false,
             lineStyle: {
               normal: {
-                color: '#000000', // 设置实线和虚线颜色
+                color: '#CECECE', // 设置实线和虚线颜色
                 type: 'dashed'
               }
             },
@@ -172,9 +172,9 @@ export default {
       }
 
       var option = {
-        title: {
-          text: 'Exponential Decay Functions'
-        },
+        // title: {
+        //   text: 'Exponential Decay Functions'
+        // },
         xAxis: {
           name: 't',
           type: 'value',
@@ -182,7 +182,7 @@ export default {
           interval: 1
         },
         yAxis: {
-          name: '记忆剩余',
+          // name: '记忆剩余',
           type: 'value',
           min: 0,
           max: 1,
