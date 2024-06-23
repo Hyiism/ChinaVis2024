@@ -66,7 +66,7 @@ export default{
           });
       },
     fetchStudentScores() {
-      this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.student_id}&title_id=${this.title_id}`) // Replace with actual API endpoint
+      this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.studentId}&title_id=${this.title_id}`) // Replace with actual API endpoint
         .then(response => {
             this.title = JSON.parse(response.data);
             // 分数正确显示！！

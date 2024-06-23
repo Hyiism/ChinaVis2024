@@ -120,7 +120,7 @@ export default {
     },
     fetchRingData() {
       
-      this.$axios.get(`http://10.12.44.190:8000/get_checkring_data/?student_id=0088dc183f73c83f763e&year=${this.dateSelected.year}&month=${this.dateSelected.month}&date=${this.dateSelected.date}`)
+      this.$axios.get(`http://10.12.44.190:8000/get_checkring_data/?student_id=${this.studentId}&year=${this.dateSelected.year}&month=${this.dateSelected.month}&date=${this.dateSelected.date}`)
         .then(response => {
           this.piedata = JSON.parse(response.data).piedata;
           console.log("this.piedata", this.piedata);
@@ -133,7 +133,7 @@ export default {
     },
 
     fetchRadarData() {
-      this.$axios.get(`http://10.12.44.190:8000/get_checkradar_data/?student_id=0088dc183f73c83f763e&year=${this.dateSelected.year}&month=${this.dateSelected.month}&date=${this.dateSelected.date}`)
+      this.$axios.get(`http://10.12.44.190:8000/get_checkradar_data/?student_id=${this.studentId}&year=${this.dateSelected.year}&month=${this.dateSelected.month}&date=${this.dateSelected.date}`)
         .then(response => {
           this.timedata = JSON.parse(response.data).radardata;
           console.log("this.radardata");
