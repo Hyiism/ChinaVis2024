@@ -59,6 +59,7 @@ export default {
       this.$axios.get(`http://10.12.44.190:8000/scatterMatrix/?class_id=${this.classId}`) // Replace with actual API endpoint
         .then((response) => {
           this.data = JSON.parse(response.data);
+          console.log("散点矩阵数据", this.data)
           this.createScatterplotMatrix();
         })
         .catch((error) => {
@@ -92,7 +93,7 @@ export default {
       const y = x.map(x => x.copy().range([size - padding / 2, padding / 2]));
 
       const color = d3.scaleOrdinal()
-        .domain(data.map(d => d.cluster_label_tsne))
+        .domain(data.map(d => d.cluster_label_pca))
         .range(d3.schemeCategory10);
 
       const axisx = d3.axisBottom()
@@ -154,7 +155,7 @@ export default {
       const circle = cell.selectAll("circle")
         .attr("r", 3.5)
         .attr("fill-opacity", 0.7)
-        .attr("fill", d => clusterColors[d.cluster_label_tsne]);
+        .attr("fill", d => clusterColors[d.cluster_label_pca]);
 
       cell.call(this.brush, circle, svg, { padding, size, x, y, columns, data });
 

@@ -87,6 +87,12 @@ export default {
         );
 
       var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+      // const clusterColors = {
+      //   0: "#1e466e",
+      //   1: "#72bcd5",
+      //   2: "#Ffd06f",
+      //   3: "#E76254",
+      // };
       const clusterColors = {
         0: "#376795",
         1: "#72bcd5",

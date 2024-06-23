@@ -183,10 +183,10 @@ export default {
       const arc = d3.arc()
         .innerRadius(radius * 0.4)
         .outerRadius(radius * 0.8);
-
       const color = d3.scaleOrdinal()
-        .domain(data.map(d => d.key))
-        .range(d3.schemeCategory10);
+      .domain(data.map(d => d.key))
+      // .range(d3.schemeCategory10);
+      .range(['#e84839', '#f38833', '#f0d945','#138863']);
 
       const arcs = svg.selectAll(".arc")
         .data(pie(data))
