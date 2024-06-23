@@ -79,6 +79,7 @@ export default {
     },
     methods: {
         formatDate(dateStr) {
+            ///增加了
             const dateObj = new Date(dateStr);
             const year = dateObj.getFullYear();
             const month = dateObj.getMonth() + 1;
