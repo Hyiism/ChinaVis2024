@@ -1,5 +1,5 @@
 <template>
-    <div ref="chartContainer" class="chartContainer">
+    <div ref="chartContainer" style="width: 100%; height: 100%;">
         <div class="tooltip" v-show="tooltipVisible" :style="tooltipStyle">{{ tooltipText }}</div>
         <div class="tooltipStart" v-show="tooltipVisibleStart" :style="tooltipStyleStart">{{ tooltipTextStart }}</div>
         <div class="tooltipEnd" v-show="tooltipVisibleEnd" :style="tooltipStyleEnd">{{ tooltipTextEnd }}</div>
@@ -18,13 +18,50 @@ export default {
         return {
             tooltipVisible: false,
             tooltipText: '',
-            tooltipStyle: this.initTooltipStyle(),
+            tooltipStyle: {
+                position: 'absolute',
+                textAlign: 'center',
+                width: '50px',
+                height: '27px',
+                padding: '2px',
+                font: '12px sans-serif',
+                background: 'white',
+                border: '0px',
+                borderRadius: '8px',
+                pointerEvents: 'none',
+                opacity: 1,
+                left: '0px',
+                top: '0px'
+            },
             tooltipVisibleStart: false,
             tooltipTextStart: '',
-            tooltipStyleStart: this.initTooltipStyle(),
+            tooltipStyleStart: {
+                position: 'absolute',
+                textAlign: 'center',
+                width: '50px',
+                height: '27px',
+                padding: '2px',
+                font: '12px sans-serif',
+                background: 'white',
+                border: '0px',
+                borderRadius: '8px',
+                left: '0px',
+                top: '0px',
+            },
             tooltipVisibleEnd: false,
             tooltipTextEnd: '',
-            tooltipStyleEnd: this.initTooltipStyle(),
+            tooltipStyleEnd: {
+                position: 'absolute',
+                textAlign: 'center',
+                width: '50px',
+                height: '27px',
+                padding: '2px',
+                font: '12px sans-serif',
+                background: 'white',
+                border: '0px',
+                borderRadius: '8px',
+                zIndex: 1
+            },
             selectedDate: "Thu Sep 14 2023",
             stvalue: d3.range(1440).map(Math.random),
             initialLoad: true, // 标识是否是初次加载
@@ -37,6 +74,10 @@ export default {
         this.token = PubSub.subscribe('dateSelected', (msg, value) => {
             this.selectedDate = value;
             this.initialLoad = false; // 设置为非初次加载
+            this.redrawChart();
+        });
+        this.token = PubSub.subscribe('showAll', (msg, value) => {
+            this.stvalue = d3.range(1440).map(Math.random)
             this.redrawChart();
         });
         this.drawChart();
@@ -137,8 +178,16 @@ export default {
                 .attr('width', width / data.length)
                 .attr('y', d => y(d.value))
                 .attr('height', d => height - y(d.value))
-                .on('mouseover', this.showTooltip)
-                .on('mouseout', this.hideTooltip);
+                .on('mouseover', (event, d) => {
+                    this.tooltipVisible = true;
+                    this.tooltipText = d.date.toLocaleTimeString();
+                    this.tooltipStyle.left = (event.pageX + 5) + 'px';
+                    this.tooltipStyle.top = (event.pageY - 28) + 'px';
+                })
+                .on('mouseout', () => {
+                    this.tooltipVisible = false;
+                });
+
         },
         showTooltip(event, d) {
             this.tooltipVisible = true;

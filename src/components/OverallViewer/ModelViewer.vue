@@ -6,7 +6,7 @@
       <!-- <button @click="lookCameraPosition">查看相机位置</button>
       <button @click="changeState">Change State</button>
       <button @click="changeToOverview">返回主视图</button> -->
-      <!-- <a-button type="dashed" @click="lookCameraPosition">Look Camera Position</a-button> -->
+      <a-button type="dashed" @click="viewClass">View Class</a-button>
       <a-button type="dashed" @click="changeToOverview">Switch OverView</a-button>
     </div>
 
@@ -636,6 +636,7 @@ export default {
       flashing: false,
       flashStartTime: null,
       flashDuration: 1000, // 闪烁持续时间（毫秒）
+      showAll: false
     };
   },
   async mounted() {
@@ -682,6 +683,53 @@ export default {
       const data = await store.get(key);
       await tx.done;
       return data;
+    },
+    viewClass(){
+      // this.loadClassModel()
+      // 最简单的方式 全部删除再重新全部防止
+      this.scene.remove(this.container)
+
+      this.$axios.get(`http://10.12.44.190:8000/getStudentByClass/?className=${this.classId}`, {
+          // params: {
+          //   className: this.classId,
+          // }
+        })
+          .then(response => {
+            console.error('success sending data:', JSON.parse(response.data));
+
+            let studentNumbers = [];
+            for (let i = 0; i <= 99; i++) {
+              studentNumbers.push(i);
+            }
+            studentNumbers = this.shuffleArray(studentNumbers);
+            this.receivedStudent = JSON.parse(response.data).students;
+            // 创建映射
+            this.mappedStudents = this.receivedStudent.map((student, index) => {
+              return { original: student, mapped: studentNumbers[index] };
+            });
+            this.appearStudent = this.mappedStudents.map(student => student.mapped);
+            console.log("appearStudent", this.appearStudent);
+
+            this.container = new THREE.Object3D();
+            this.appearStudent.forEach(index => {
+              const mesh = this.allStudent[index];
+              if (mesh) { // 确保mesh存在
+                this.container.add(mesh);
+                // 将容器添加到场景中
+                this.scene.add(this.container);
+                // 对容器进行放大操作，而不是对模型直接进行放大
+                this.container.scale.set(2, 2, 2); // 重新应用缩放设置
+              }
+            });
+            this.animate();
+          })
+          .catch(error => {
+            console.error('Error sending data:', error);
+          });
+          this.showAll = true
+          PubSub.publish('showAll', this.showAll);
+
+
     },
     // TODO: 处理在嵌入中选择学生点的操作
     handleStudentSelected(studentId) {
