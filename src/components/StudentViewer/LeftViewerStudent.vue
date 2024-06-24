@@ -102,6 +102,8 @@ export default {
   mounted() {
     this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
       this.fetchStudentScores(value);
+      this.fetchRingData(value);
+      this.fetchRadarData(value)
     });
   },
 

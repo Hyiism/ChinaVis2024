@@ -762,17 +762,17 @@ export default {
       // this.controls.dampingFactor = 0.25; // 阻尼系数
       // this.controls.screenSpacePanning = false; // 禁用屏幕空间平移
 
-      this.db = new Dexie('threemodel')
-      this.db.version(0.1).stores(
-        {
-          localVersions: 'matadataid, content, lastversionid, date, time',
-          users: '++id, name, &username, *email, address.city',
-          relations: '++rid, userId1, userId2, [userId1+userId2], relation',
-          books: 'id, author, name, *categories',
-          model: 'id, name, type, file'
-        }
-      )
-      this.blobChange()
+      // this.db = new Dexie('threemodel')
+      // this.db.version(0.1).stores(
+      //   {
+      //     localVersions: 'matadataid, content, lastversionid, date, time',
+      //     users: '++id, name, &username, *email, address.city',
+      //     relations: '++rid, userId1, userId2, [userId1+userId2], relation',
+      //     books: 'id, author, name, *categories',
+      //     model: 'id, name, type, file'
+      //   }
+      // )
+      // this.blobChange()
       const savedState = this.getSavedState()
       if (savedState == 0) {
         this.loadSchoolModel();
@@ -781,59 +781,6 @@ export default {
       }
       this.animate();
       this.initialView();
-    },
-    // 修改model表里的数据
-    putDataToIndexDB(blob) {
-      // 一定要处理成二进制 this.blobChange()返回的是一个blob对象
-      console.log(blob)
-      this.db.model.put({
-        id: 'classRoom',
-        name: '教室模型',
-        type: blob.type,
-        file: blob
-      })
-    },
-    blobChange() {
-      this.$axios({
-        method: 'get',
-        url: '/models/student101_4.glb',
-        responseType: 'blob',
-        crossOrigin: true,
-        withCredentials: true
-      }).then(res => {
-        console.log(res.data)
-        // 写入indexDB数据库
-        this.putDataToIndexDB(res.data)
-      })
-    },
-    addDataDB(obj) {
-      this.db.model.add(obj)
-    },
-    updateDataDB(obj) {
-      this.db.model.put(obj)
-    },
-    delDataDB(key) {
-      this.db.model.delete(key)
-    },
-    getDataDB(key) {
-      return this.db.model.get(key)
-    },
-    async getModelDataFromIndexedDB(modelName) {
-      const db = await this.openDB();
-      const tx = db.transaction('models', 'readonly');
-      const store = tx.objectStore('models');
-      const modelData = await store.get(modelName);
-      await tx.done;
-      return modelData;
-    },
-    loadModelFromBuffer(modelData, modelName) {
-      const loader = new GLTFLoader();
-      loader.parse(modelData, '', (gltf) => {
-        this.scene.add(gltf.scene);
-        this[`${modelName}Model`] = gltf.scene;
-        this.currentModelType = modelName;
-        console.log('Model loaded from buffer');
-      });
     },
     addLights() {
       // 添加光源
@@ -1007,72 +954,6 @@ export default {
           });
       });
     },
-    //   const loadModelPromise = () => {
-    //     return new Promise((resolve, reject) => {
-    //       const modeldata = this.getDataDB('classRoom')
-    //       console.log("modeldata", modeldata)
-    //       const modelUrl = URL.createObjectURL(new Blob([modeldata.file]))
-    //       var loader = new GLTFLoader();
-    //       loader.load(modelUrl, (gltf) => {
-    //         console.log(gltf)
-    //         this.scene.add(gltf.scene)
-
-
-
-
-
-
-
-
-    //       });
-    //         (error) => {
-    //           console.log('An error happened', error);
-    //         }
-
-    //     });
-    //   };
-
-    //   loadModelPromise().then(() => {
-    //     // 模型加载完成后执行axios.get请求
-    //     this.$axios.get(`http://10.12.44.190:8000/getStudentByClass/?className=${this.classId}`, {
-    //       // params: {
-    //       //   className: this.classId,
-    //       // }
-    //     })
-    //       .then(response => {
-    //         console.error('success sending data:', JSON.parse(response.data));
-
-    //         let studentNumbers = [];
-    //         for (let i = 0; i <= 99; i++) {
-    //           studentNumbers.push(i);
-    //         }
-    //         studentNumbers = this.shuffleArray(studentNumbers);
-    //         this.receivedStudent = JSON.parse(response.data).students;
-    //         // 创建映射
-    //         this.mappedStudents = this.receivedStudent.map((student, index) => {
-    //           return { original: student, mapped: studentNumbers[index] };
-    //         });
-    //         this.appearStudent = this.mappedStudents.map(student => student.mapped);
-    //         console.log("appearStudent", this.appearStudent);
-
-    //         this.container = new THREE.Object3D();
-    //         this.appearStudent.forEach(index => {
-    //           const mesh = this.allStudent[index - 1];
-    //           if (mesh) { // 确保mesh存在
-    //             this.container.add(mesh);
-    //             // 将容器添加到场景中
-    //             this.scene.add(this.container);
-    //             // 对容器进行放大操作，而不是对模型直接进行放大
-    //             this.container.scale.set(2, 2, 2); // 重新应用缩放设置
-    //           }
-    //         });
-    //         this.animate();
-    //       })
-    //       .catch(error => {
-    //         console.error('Error sending data:', error);
-    //       });
-    //   });
-    // },
     animate() {
       requestAnimationFrame(this.animate);
       TWEEN.update();
@@ -1143,17 +1024,6 @@ export default {
       //   this.loadSchoolModel();
       // });
       // this.$emit('stateChanged', this.stateCode);
-    },
-    calculateItemPosition(index) {
-      const angleStep = (2 * Math.PI) / this.items.length;
-      const radius = 80;
-      const angle = index * angleStep;
-      const x = Math.cos(angle) * radius + 100; // 100 是环形菜单中心点的 x 坐标
-      const y = Math.sin(angle) * radius + 100; // 100 是环形菜单中心点的 y 坐标
-      return {
-        left: `${x}px`,
-        top: `${y}px`,
-      };
     },
     hideCurrentModel(model, callback) {
       new TWEEN.Tween({ opacity: 1 }) // 初始透明度为1
