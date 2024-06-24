@@ -125,9 +125,9 @@ export default {
         d3.select(this).style("stroke", "black").style("opacity", 1);
       };
       const mousemove = function(event, d) {
-        tooltip.html(`Group: ${d.group}<br>Variable: ${d.variable}<br>Value: ${d.value}`)
+        tooltip.html(`Student_id: ${d.group}<br>Knowledge: ${d.variable}<br>Timeconsume: ${d.value}`)
           .style("left",`${event.pageX + 5}px`)
-          .style("top", `${event.pageY - 570}px`);
+          .style("top", `${event.pageY - 800}px`);
       };
       const mouseleave = function(event, d) {
         tooltip.style("opacity", 0);

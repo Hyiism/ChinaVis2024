@@ -42,8 +42,8 @@ export default {
         { label: "平均空间复杂度", value: "all_memory_avg" },
         { label: "平均时间复杂度", value: "all_timeconsume_avg" },
         { label: "AE状态占比", value: "state_ae_percentage" },
-        { label: "AE状态占比", value: "state_e_percentage" },
-        { label: "E状态占比", value: "state_pc_percentage" },
+        { label: "E状态占比", value: "state_e_percentage" },
+        { label: "PC状态占比", value: "state_pc_percentage" },
         { label: "AC状态占比", value: "state_ac_percentage" }
       ],
       selectedcolumns: ["time_split_2_percentage"],
@@ -215,7 +215,7 @@ export default {
           domain: this.clusters
         },
         marks: [
-          Plot.dot(this.data, { x: 'cluster_label_tsne', y: d => d[this.selectedcolumns[0]], fill: d => clusterColors[d.cluster_label_tsne], size: 50, title: d => `Cluster: ${d.cluster_label_tsne}\n ${this.selectedcolumns[0]}: ${d[this.selectedcolumns[0]]}` })
+          Plot.dot(this.data, { x: 'cluster_label_pca', y: d => d[this.selectedcolumns[0]], fill: d => clusterColors[d.cluster_label_pca], size: 50, title: d => `Cluster: ${d.cluster_label_pca}\n ${this.selectedcolumns[0]}: ${d[this.selectedcolumns[0]]}` })
         ]
       });
 
@@ -306,7 +306,7 @@ export default {
           domain: this.clusters
         },
         marks: [
-          Plot.dot(this.data, { x: d => d[this.selectedcolumns_detail[0]], y: d => d[this.selectedcolumns_detail[1]], fill: d => clusterColors[d.cluster_label_tsne], size: 150, title: d => `${this.selectedcolumns_detail[0]}: ${d[this.selectedcolumns_detail[0]]}\n ${this.selectedcolumns_detail[1]}: ${d[this.selectedcolumns_detail[1]]}` })
+          Plot.dot(this.data, { x: d => d[this.selectedcolumns_detail[0]], y: d => d[this.selectedcolumns_detail[1]], fill: d => clusterColors[d.cluster_label_pca], size: 150, title: d => `${this.selectedcolumns_detail[0]}: ${d[this.selectedcolumns_detail[0]]}\n ${this.selectedcolumns_detail[1]}: ${d[this.selectedcolumns_detail[1]]}` })
         ]
       });
 

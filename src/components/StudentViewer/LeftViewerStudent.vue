@@ -87,7 +87,7 @@ export default {
         student_id: '0088dc183f73c83f763e',
         year: 2023,
         month: 12,
-        date: 6
+        date: 14
       },
     };
   },
@@ -102,6 +102,8 @@ export default {
   mounted() {
     this.subscriptionToken = PubSub.subscribe('studentId', (msg, value) => {
       this.fetchStudentScores(value);
+      this.fetchRingData(value);
+      this.fetchRadarData(value);
     });
   },
 
@@ -136,8 +138,8 @@ export default {
       this.$axios.get(`http://10.12.44.190:8000/get_checkradar_data/?student_id=${this.studentId}&year=${this.dateSelected.year}&month=${this.dateSelected.month}&date=${this.dateSelected.date}`)
         .then(response => {
           this.timedata = JSON.parse(response.data).radardata;
-          console.log("this.radardata");
-          console.log(this.timedata);
+          // console.log("this.radardata");
+          // console.log(this.timedata);
           this.renderRadarChart();
           // this.initializeMonthBar();
         })

@@ -40,8 +40,8 @@ export default {
         { label: "平均空间复杂度", value: "all_memory_avg" },
         { label: "平均时间复杂度", value: "all_timeconsume_avg" },
         { label: "AE状态占比", value: "state_ae_percentage" },
-        { label: "AE状态占比", value: "state_e_percentage" },
-        { label: "E状态占比", value: "state_pc_percentage" },
+        { label: "E状态占比", value: "state_e_percentage" },
+        { label: "PC状态占比", value: "state_pc_percentage" },
         { label: "AC状态占比", value: "state_ac_percentage" }
       ],
       data: []

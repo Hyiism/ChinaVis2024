@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="chat-container">
     <img class="avatar" :src="avatar" alt="Avatar" />
     <div class="chat-box" ref="chatBox" v-html="renderedText"></div>
@@ -119,4 +119,4 @@ export default {
   /* white-space: pre-wrap;  */
   font-family: Arial, sans-serif;
 }
-</style>
+</style> -->
