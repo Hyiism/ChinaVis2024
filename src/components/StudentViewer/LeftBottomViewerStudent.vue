@@ -52,6 +52,10 @@ export default{
   },
   methods: {
     fetchStudentScores() {
+      if (this.title_id == 'Question_x2Fy7rZ3SwYl9jMQkpOD'){
+        this.title_id = 'Question_YWXHr4G6Cl7bEm9iF2kQ';
+      }
+
       this.$axios.get(`http://10.12.44.190:8000/titleprocess/?student_id=${this.studentId}&title_id=${this.title_id}`) // Replace with actual API endpoint
         .then(response => {
             this.title = JSON.parse(response.data);
