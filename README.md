@@ -18,4 +18,4 @@ npm install
 npm run serve
 ```
 ## 备注
-建模文件以及sql文件请私信qshhhhxx@gmail.com备注来意
+建模文件以及sql文件由于文件大小原因未能给出
