@@ -108,7 +108,7 @@ export default {
             return `${year}.${month}.${day}`;
         },
         fetchStudentData(dayTime, classId) {
-            return axios.get(`http://10.12.44.238:8000/getStudentByTime/?dayTime=${dayTime}&classId=${classId}`)
+            return axios.get(`http://10.12.44.190:8000/getStudentByTime_1/?dayTime=${dayTime}&classId=${classId}`)
                 .then(response => {
                     this.stvalue = response.data;
                     this.initialLoad = false; // 设置为非初次加载

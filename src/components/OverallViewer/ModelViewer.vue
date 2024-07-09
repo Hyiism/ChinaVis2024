@@ -1323,6 +1323,7 @@ export default {
         this.appearStudent.forEach(index => {
           const mesh = this.allStudent[index]; // 因为appearStudent中的值是1到100的数，需要减1以匹配allStudent的索引
           console.log(mesh)
+          // mesh.material = new THREE.MeshBasicMaterial();
           if (mesh) { // 确保mesh存在
             this.container.add(mesh);
             // 将容器添加到场景中
